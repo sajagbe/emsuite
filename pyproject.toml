@@ -7,5 +7,6 @@ requires-python = ">=3.13"
 dependencies = [
     "geometric>=1.1",
     "pyscf>=2.10.0",
+    "rdkit>=2025.3.5",
     "vdw-surfgen>=0.5.1",
 ]

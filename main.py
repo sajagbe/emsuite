@@ -4,6 +4,8 @@ from pyscf import gto,scf,dft,qmmm,tdscf,hessian
 from pyscf.solvent import smd
 from pyscf.hessian import thermo
 from pyscf.geomopt.geometric_solver import optimize
+from rdkit import Chem
+from rdkit.Chem import AllChem
 
 
 #Constants
@@ -213,6 +215,38 @@ def optimize_and_get_equilibrium(mf):
     atom_list = [(atom, coord) for atom, coord in zip(atoms, coords)]
     return atom_list
 
+def smiles_to_xyz(smiles, filename=None):
+    """Convert SMILES to XYZ file"""
+    mol = Chem.AddHs(Chem.MolFromSmiles(smiles))
+    AllChem.EmbedMolecule(mol)
+    AllChem.MMFFOptimizeMolecule(mol)
+    
+    if not filename:
+        filename = f"mol_{abs(hash(smiles)) % 10000}.xyz"
+    
+    conf = mol.GetConformer()
+    with open(filename, 'w') as f:
+        f.write(f"{mol.GetNumAtoms()}\n{smiles}\n")
+        for i, atom in enumerate(mol.GetAtoms()):
+            pos = conf.GetAtomPosition(i)
+            f.write(f"{atom.GetSymbol()} {pos.x:.6f} {pos.y:.6f} {pos.z:.6f}\n")
+    return filename
+
+def create_optimized_molecule(atom_input, basis_set, method='dft', functional='m06-2x', charge=0, spin=1, optimize=True):
+    """Create molecule with optional geometry optimization"""
+    if optimize:
+        # Create initial molecule for optimization
+        mf_initial = create_molecule_object(atom_input, basis_set, method, functional, charge, spin)
+        mf_initial.kernel()
+        
+        # Optimize geometry using existing function
+        opt_coords = optimize_and_get_equilibrium(mf_initial)
+        
+        # Create new molecule with optimized coordinates
+        return create_molecule_object(opt_coords, basis_set, method, functional, charge, spin)
+    else:
+        return create_molecule_object(atom_input, basis_set, method, functional, charge, spin)
+
 
 def find_homo_lumo_and_gap(mf):
     homo = -float("inf")
@@ -267,7 +301,7 @@ def create_mol2_files(tuning, molecule_name, tuning_names):
 
 #Parameters
 molecule = 'water'
-method = 'hf'
+method = 'dft'
 functional = 'b3lyp'
 basis_set = 'augccpvdz'
 charge = 0
@@ -276,37 +310,53 @@ gfec_functional = 'b3lyp'
 gfec_basis_set = '6-31+G*'
 state_of_interest = 2
 triplet_excitation = False
-solvent = 'benzene'
+solvent = None
 rdx_solvent = 'acetonitrile'
+input_type = 'smiles'  # 'xyz' or 'smiles'
+smiles_input = 'O' 
+optimize_geometry = True 
 
 # User input and setup
-# requested_properties = ['gse', 'homo', 'lumo', 'gap']  # User specifies
-requested_properties = ['all']  # Or everything
+requested_properties = ['gse', 'homo', 'lumo', 'gap']  # User specifies
+# requested_properties = ['all']  # Or everything
 
 properties_to_calculate, required_calculations = setup_calculation(requested_properties)
 print(f"Properties: {properties_to_calculate}")
 print(f"Calculations: {required_calculations}")
 
-# Create base molecule and required calculations
-molecule_object = create_molecule_object(f'{molecule}.xyz', basis_set, method=method, functional=functional, charge=charge, spin=spin)
+# Handle input and create molecule
+if input_type == 'smiles':
+    xyz_file = smiles_to_xyz(smiles_input)
+    molecule_name = xyz_file.replace('.xyz', '')
+else:
+    xyz_file = f'{molecule}.xyz'
+    molecule_name = molecule
 
-# Apply solvation if solvent is specified
+molecule_object = create_molecule_object(xyz_file, basis_set, method=method, functional=functional, charge=charge, spin=spin)
+
 if solvent:
     molecule_object = solvate_molecule(molecule_object, solvent=solvent)
+    molecule_opt = optimize_and_get_equilibrium(molecule_object)
+    molecule_object = create_molecule_object(molecule_opt, basis_set, method=method, functional=functional, charge=charge, spin=spin)
+    molecule_object = solvate_molecule(molecule_object, solvent=solvent)
 
-molecule_object.run()
+
+if optimize_geometry and solvent is None:
+    molecule_object = create_optimized_molecule(molecule_object.mol.atom, basis_set, method=method, functional=functional, charge=charge, spin=spin, optimize=optimize_geometry)
+
+molecule_object.kernel()
 
 # Handle charged species with optional solvation
 anion_mf = None
 if required_calculations.get('anion'):
-    anion_mf = create_charged_molecule_object(f'{molecule}.xyz', basis_set, method=method, functional=functional, original_charge=charge, original_spin=spin, charge_change=-1)[0]
+    anion_mf = create_charged_molecule_object(xyz_file, basis_set, method=method, functional=functional, original_charge=charge, original_spin=spin, charge_change=-1)[0]
     if solvent:
         anion_mf = solvate_molecule(anion_mf, solvent=solvent)
     anion_mf.kernel()
 
 cation_mf = None
 if required_calculations.get('cation'):
-    cation_mf = create_charged_molecule_object(f'{molecule}.xyz', basis_set, method=method, functional=functional, original_charge=charge, original_spin=spin, charge_change=+1)[0]
+    cation_mf = create_charged_molecule_object(xyz_file, basis_set, method=method, functional=functional, original_charge=charge, original_spin=spin, charge_change=+1)[0]
     if solvent:
         cation_mf = solvate_molecule(cation_mf, solvent=solvent)
     cation_mf.kernel()
@@ -323,9 +373,10 @@ if required_calculations.get('td'):
 properties_alone = calculate_all_properties(molecule_object, anion_mf, cation_mf, td_object, properties_to_calculate)
 
 # Surface calculations
-vdw_surface_operation = subprocess.run(['vsg', f'{molecule}.xyz', '--txt'], capture_output=True, text=True)
+vdw_surface_operation = subprocess.run(['vsg', xyz_file, '--txt'], capture_output=True, text=True)
 surface_coords = []
-with open(f'{molecule}_vdw_surface.txt', 'r') as f:
+surface_file = xyz_file.replace('.xyz', '_vdw_surface.txt')
+with open(surface_file, 'r') as f:
     for line in f:
         arr = np.fromstring(line.strip(), sep=' ').reshape(1, 3)
         surface_coords.append(arr)
@@ -358,6 +409,6 @@ for coord in surface_coords:
             delta = (properties_wsc[prop] - properties_alone[prop]) * PROPERTY_CONFIG[prop]['unit']
             tuning[prop].append([coord, delta])
 
-create_mol2_files(tuning, molecule, properties_to_calculate)
-print(f"Created {len(properties_to_calculate)} MOL2 files for {molecule}")
+create_mol2_files(tuning, molecule_name, properties_to_calculate)
+print(f"Created {len(properties_to_calculate)} MOL2 files for {molecule_name}")
 
