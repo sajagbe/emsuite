@@ -1,6 +1,6 @@
 import numpy as np
 import os,subprocess,sys
-from pyscf import gto,scf,dft,qmmm,tdscf,hessian
+from pyscf import gto,scf,dft,qmmm,tdscf
 from pyscf.solvent import smd
 from pyscf.hessian import thermo
 from pyscf.geomopt.geometric_solver import optimize
@@ -312,7 +312,7 @@ state_of_interest = 2
 triplet_excitation = False
 solvent = None
 rdx_solvent = 'acetonitrile'
-input_type = 'smiles'  # 'xyz' or 'smiles'
+input_type = 'xyz'  # 'xyz' or 'smiles'
 smiles_input = 'O' 
 optimize_geometry = True 
 
@@ -340,9 +340,20 @@ if solvent:
     molecule_object = create_molecule_object(molecule_opt, basis_set, method=method, functional=functional, charge=charge, spin=spin)
     molecule_object = solvate_molecule(molecule_object, solvent=solvent)
 
-
 if optimize_geometry and solvent is None:
     molecule_object = create_optimized_molecule(molecule_object.mol.atom, basis_set, method=method, functional=functional, charge=charge, spin=spin, optimize=optimize_geometry)
+
+print(molecule_object.mol.atom)
+
+# Create XYZ file from molecule_object.mol.atom
+atom_data = molecule_object.mol.atom
+xyz_file = f"{molecule_name}_opt.xyz"
+with open(xyz_file, 'w') as f:
+    f.write(f"{len(atom_data)}\n")
+    f.write(f"\n")
+    for element, coords in atom_data:
+        f.write(f"{element} {coords[0]:.6f} {coords[1]:.6f} {coords[2]:.6f}\n")
+print(f"Created XYZ file: {xyz_file}")
 
 molecule_object.kernel()
 
