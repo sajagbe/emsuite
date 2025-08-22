@@ -263,11 +263,12 @@ functional = 'b3lyp'
 basis_set = 'augccpvdz'
 charge = 0
 spin = 1
+solvent = 'benzene'
 gfec_functional = 'b3lyp'
 gfec_basis_set = '6-31+G*'
 state_of_interest = 2
 triplet_excitation = False
-solvent = 'acetonitrile'
+rdx_solvent = 'acetonitrile'
 
 # User input and setup
 # requested_properties = ['gse', 'homo', 'lumo', 'gap']  # User specifies
