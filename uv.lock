@@ -76,7 +76,7 @@ wheels = [
 ]
 
 [[package]]
-name = "emsuitev1"
+name = "emsuite"
 version = "0.1.0"
 source = { virtual = "." }
 dependencies = [

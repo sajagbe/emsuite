@@ -1,8 +1,9 @@
 [project]
-name = "emsuitev1"
+name = "emsuite"
 version = "0.1.0"
-description = "Add your description here"
+description = "Electrostati Map Suite - A suite of calculators for quantified electrostatic interactions."
 readme = "README.md"
+authors = ["Stephen O. Ajagbe <ajagbetobistephen@gmail.com>"]
 requires-python = ">=3.13"
 dependencies = [
     "geometric>=1.1",
