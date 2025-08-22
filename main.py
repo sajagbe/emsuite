@@ -174,13 +174,22 @@ def create_charged_molecule_object(atom_input, basis_set, method='dft', function
     return best_object, optimal_spin, lowest_energy
 
 def create_td_molecule_object(mf, nstates=5, triplet=False):
-
-    if hasattr(mf, 'TDDFT') and mf.TDDFT is not None:
-      td = mf.TDDFT()
-    elif hasattr(mf, 'TDHF') and mf.TDHF is not None:
-        td = mf.TDHF()
+    # Handle solvated molecules
+    if hasattr(mf, 'with_solvent'):
+        # For solvated molecules, use tdscf directly
+        if hasattr(mf, 'xc'):  # DFT case
+            td = tdscf.TDDFT(mf)
+        else:  # HF case
+            td = tdscf.TDHF(mf)
     else:
-        raise ValueError("Unsupported ground state object type")
+        # For non-solvated molecules, use the original method
+        if hasattr(mf, 'TDDFT') and mf.TDDFT is not None:
+            td = mf.TDDFT()
+        elif hasattr(mf, 'TDHF') and mf.TDHF is not None:
+            td = mf.TDHF()
+        else:
+            raise ValueError("Unsupported ground state object type")
+    
     td.singlet = not triplet
     td.nstates = nstates
     return td
@@ -263,11 +272,11 @@ functional = 'b3lyp'
 basis_set = 'augccpvdz'
 charge = 0
 spin = 1
-solvent = 'benzene'
 gfec_functional = 'b3lyp'
 gfec_basis_set = '6-31+G*'
 state_of_interest = 2
 triplet_excitation = False
+solvent = 'benzene'
 rdx_solvent = 'acetonitrile'
 
 # User input and setup
@@ -280,16 +289,35 @@ print(f"Calculations: {required_calculations}")
 
 # Create base molecule and required calculations
 molecule_object = create_molecule_object(f'{molecule}.xyz', basis_set, method=method, functional=functional, charge=charge, spin=spin)
-molecule_object.kernel()
 
-anion_mf = create_charged_molecule_object(f'{molecule}.xyz', basis_set, method=method, functional=functional, original_charge=charge, original_spin=spin, charge_change=-1)[0] if required_calculations.get('anion') else None
-cation_mf = create_charged_molecule_object(f'{molecule}.xyz', basis_set, method=method, functional=functional, original_charge=charge, original_spin=spin, charge_change=+1)[0] if required_calculations.get('cation') else None
+# Apply solvation if solvent is specified
+if solvent:
+    molecule_object = solvate_molecule(molecule_object, solvent=solvent)
 
+molecule_object.run()
+
+# Handle charged species with optional solvation
+anion_mf = None
+if required_calculations.get('anion'):
+    anion_mf = create_charged_molecule_object(f'{molecule}.xyz', basis_set, method=method, functional=functional, original_charge=charge, original_spin=spin, charge_change=-1)[0]
+    if solvent:
+        anion_mf = solvate_molecule(anion_mf, solvent=solvent)
+    anion_mf.kernel()
+
+cation_mf = None
+if required_calculations.get('cation'):
+    cation_mf = create_charged_molecule_object(f'{molecule}.xyz', basis_set, method=method, functional=functional, original_charge=charge, original_spin=spin, charge_change=+1)[0]
+    if solvent:
+        cation_mf = solvate_molecule(cation_mf, solvent=solvent)
+    cation_mf.kernel()
+
+# Handle excited state calculations with optional solvation
+td_object = None
 if required_calculations.get('td'):
     td_object = create_td_molecule_object(molecule_object, triplet=triplet_excitation, nstates=state_of_interest)
+    if solvent:
+        td_object.with_solvent.equilibrium_solvation = True
     td_object.kernel()
-else:
-    td_object = None
 
 # Calculate reference properties
 properties_alone = calculate_all_properties(molecule_object, anion_mf, cation_mf, td_object, properties_to_calculate)
@@ -318,6 +346,8 @@ for coord in surface_coords:
     td_wsc = None
     if td_object:
         td_wsc = create_td_molecule_object(molecule_wsc, triplet=triplet_excitation, nstates=state_of_interest)
+        if solvent:
+            td_wsc.with_solvent.equilibrium_solvation = True
         td_wsc.kernel()
     
     # Calculate perturbed properties and store deltas
