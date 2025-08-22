@@ -1,4 +1,4 @@
-from tuning import TuningCalculator
+from emsuite import TuningCalculator
 
 # Basic usage
 waterTuning = TuningCalculator(
@@ -10,7 +10,7 @@ waterTuning = TuningCalculator(
     optimize_geometry=True,
 )
 
-waterTuning.run_calculation(['all'])
+waterTuning.run_calculation(['gse'])
 
 
 

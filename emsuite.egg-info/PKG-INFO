@@ -1,3 +1,15 @@
+Metadata-Version: 2.4
+Name: emsuite
+Version: 0.1.0
+Summary: Electrostatic Map Suite - A suite of calculators for quantified electrostatic interactions.
+Author-email: "Stephen O. Ajagbe" <ajagbetobistephen@gmail.com>
+Requires-Python: >=3.10
+Description-Content-Type: text/markdown
+Requires-Dist: geometric>=1.1
+Requires-Dist: pyscf>=2.10.0
+Requires-Dist: rdkit>=2025.3.5
+Requires-Dist: vdw-surfgen>=0.5.1
+
 # EMSuite
 
 A suite of calculators for quantified electrostatic interactions.
