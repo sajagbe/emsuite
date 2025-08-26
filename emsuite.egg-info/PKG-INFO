@@ -1,6 +1,6 @@
 Metadata-Version: 2.4
 Name: emsuite
-Version: 0.1.0
+Version: 0.1.2
 Summary: Electrostatic Map Suite - A suite of calculators for quantified electrostatic interactions.
 Author-email: "Stephen O. Ajagbe" <ajagbetobistephen@gmail.com>
 Requires-Python: >=3.10
@@ -14,11 +14,16 @@ Requires-Dist: vdw-surfgen>=0.5.1
 
 A suite of calculators for quantified electrostatic interactions.
 
+The current implementation  consists primarily of a calculator for tuning effects of external charges on intrinsic electronic properties. 
+
+
 ## Installation
 
 ```bash
 pip install emsuite
 ```
+
+From current tests, I advise installing in a python 3.10 environment to avoid conflicts. 
 
 ## Quick Start
 
@@ -27,13 +32,22 @@ from emsuite import TuningCalculator
 
 # Initialize calculator
 calc = TuningCalculator(
-    molecule="water.xyz",
-    basis_set="6-31G*",
-    functional="m06-2x"
+molecule = 'water'       # xyz filename
+method = 'dft'           # Can also be hf, which will not need the functional
+functional = 'b3lyp'     
+basis_set = 'augccpvdz'
+charge = 0
+spin = 1  
+state_of_interest = 2  # Focus is excited state 2.
+triplet_excitation = False # Use for triplet state calculations 
+solvent = None      # Use for solvent based calculations.
+input_type = 'xyz'  # 'xyz' or 'smiles'
+smiles_input = 'O'  # Use with input type = 'smiles'
+optimize_geometry = True # Option to optimize the geometry of the input. Works for both smiles and xyz.
 )
 
 # Run calculations
-calc.run_calculation(['gse', 'homo', 'lumo', 'gap'])
+calc.run_calculation(['gse', 'homo', 'lumo', 'gap', 'exe']) #Calculate the tuning effect of a charge of 1.0 e on the ground state energy, HOMO, LUMO, HOMO-LUMO gap and S2 execitation energy.
 
 
 ## Available Properties
@@ -60,21 +74,14 @@ calc.run_calculation(['gse', 'homo', 'lumo', 'gap'])
 - `exe` - Excitation energies
 - `osc` - Oscillator strengths
 
-
-## Features
-
-- Electronic structure calculations (DFT, HF)
-- Molecular property analysis (HOMO/LUMO, ionization energy, electron affinity)
-- Solvent effects and geometry optimization
-- TD-DFT excited state calculations
-
 ## Requirements
 
-- Python 3.8+
+- Python 3.10+
 - PySCF
 - RDKit
-- NumPy
+- numpy
+- vdw-surfgen
 
 ## License
 
-MIT
+GNU-GPL
