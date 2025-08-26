@@ -1,6 +1,6 @@
 Metadata-Version: 2.4
 Name: emsuite
-Version: 0.1.3
+Version: 0.1.4
 Summary: Electrostatic Map Suite - A suite of calculators for quantified electrostatic interactions.
 Author-email: "Stephen O. Ajagbe" <ajagbetobistephen@gmail.com>
 Requires-Python: >=3.10
@@ -14,7 +14,7 @@ Requires-Dist: vdw-surfgen>=0.5.1
 
 A suite of calculators for quantified electrostatic interactions.
 
-The current implementation  consists primarily of a calculator for tuning effects of external charges on intrinsic electronic properties. 
+The current implementation  consists primarily of a calculator for tuning effects of external charges on intrinsic electronic properties using PySCF as the QM engine.
 
 
 ## Installation
@@ -47,7 +47,8 @@ optimize_geometry = True # Option to optimize the geometry of the input. Works f
 )
 
 # Run calculations
-calc.run_calculation(['gse', 'homo', 'lumo', 'gap', 'exe']) #Calculate the tuning effect of a charge of 1.0 e on the ground state energy, HOMO, LUMO, HOMO-LUMO gap and S2 execitation energy.
+calc.run_calculation(['gse', 'homo', 'lumo', 'gap', 'exe']) #Calculate the tuning effect of a 
+#+1.0e charge on the ground state energy, HOMO, LUMO, HOMO-LUMO gap and S2 execitation energy.
 
 
 ## Available Properties
@@ -70,7 +71,7 @@ calc.run_calculation(['gse', 'homo', 'lumo', 'gap', 'exe']) #Calculate the tunin
 - `efl` - Electrophilicity index
 - `nfl` - Nucleophilicity index
 
-**Excited States (TD-DFT):**
+**Excited States (TD-DFT/TD-HF):**
 - `exe` - Excitation energies
 - `osc` - Oscillator strengths
 

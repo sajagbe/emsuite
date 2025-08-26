@@ -375,8 +375,15 @@ class TuningCalculator:
 
         print(self.molecule_object.mol.atom)
 
-        # Create XYZ file from molecule_object.mol.atom
-        atom_data = self.molecule_object.mol.atom
+        # Create XYZ file from molecule_object.mol atom coordinates and symbols
+        mol = self.molecule_object.mol
+        atom_coords = mol.atom_coords()
+        atom_data = []
+        for i in range(mol.natm):
+            symbol = mol.atom_symbol(i)
+            coords = atom_coords[i]
+            atom_data.append((symbol, coords))
+        
         self.xyz_file = f"{self.molecule_name}_opt.xyz"
         with open(self.xyz_file, 'w') as f:
             f.write(f"{len(atom_data)}\n")
