@@ -2,7 +2,7 @@
 
 A suite of calculators for quantified electrostatic interactions.
 
-The current implementation  consists primarily of a calculator for tuning effects of external charges on intrinsic electronic properties. 
+The current implementation  consists primarily of a calculator for tuning effects of external charges on intrinsic electronic properties using PySCF as the QM engine.
 
 
 ## Installation
@@ -28,14 +28,15 @@ charge = 0
 spin = 1  
 state_of_interest = 2  # Focus is excited state 2.
 triplet_excitation = False # Use for triplet state calculations 
-solvent = None      # Use for solvent based calculations.
+solvent = None      # Use for solvent based calculations. Follow solvent nomenclature of [PySCF SMD Solvent Dictionary](https://pyscf.org/_modules/pyscf/solvent/smd.html#SMD)
 input_type = 'xyz'  # 'xyz' or 'smiles'
 smiles_input = 'O'  # Use with input type = 'smiles'
 optimize_geometry = True # Option to optimize the geometry of the input. Works for both smiles and xyz.
 )
 
 # Run calculations
-calc.run_calculation(['gse', 'homo', 'lumo', 'gap', 'exe']) #Calculate the tuning effect of a charge of 1.0 e on the ground state energy, HOMO, LUMO, HOMO-LUMO gap and S2 execitation energy.
+calc.run_calculation(['gse', 'homo', 'lumo', 'gap', 'exe']) #Calculate the tuning effect of a 
+#+1.0e charge on the ground state energy, HOMO, LUMO, HOMO-LUMO gap and S2 execitation energy.
 
 
 ## Available Properties
@@ -58,7 +59,7 @@ calc.run_calculation(['gse', 'homo', 'lumo', 'gap', 'exe']) #Calculate the tunin
 - `efl` - Electrophilicity index
 - `nfl` - Nucleophilicity index
 
-**Excited States (TD-DFT):**
+**Excited States (TD-DFT/TD-HF):**
 - `exe` - Excitation energies
 - `osc` - Oscillator strengths
 

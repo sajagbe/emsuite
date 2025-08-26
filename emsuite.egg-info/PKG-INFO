@@ -1,6 +1,6 @@
 Metadata-Version: 2.4
 Name: emsuite
-Version: 0.1.2
+Version: 0.1.3
 Summary: Electrostatic Map Suite - A suite of calculators for quantified electrostatic interactions.
 Author-email: "Stephen O. Ajagbe" <ajagbetobistephen@gmail.com>
 Requires-Python: >=3.10
@@ -40,7 +40,7 @@ charge = 0
 spin = 1  
 state_of_interest = 2  # Focus is excited state 2.
 triplet_excitation = False # Use for triplet state calculations 
-solvent = None      # Use for solvent based calculations.
+solvent = None      # Use for solvent based calculations. Follow solvent nomenclature of [PySCF SMD Solvent Dictionary](https://pyscf.org/_modules/pyscf/solvent/smd.html#SMD)
 input_type = 'xyz'  # 'xyz' or 'smiles'
 smiles_input = 'O'  # Use with input type = 'smiles'
 optimize_geometry = True # Option to optimize the geometry of the input. Works for both smiles and xyz.
