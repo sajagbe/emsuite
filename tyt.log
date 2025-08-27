@@ -1,318 +1,0 @@
-Properties: ['lumo', 'dm', 'efl', 'exe', 'gse', 'hard', 'ie', 'osc', 'gap', 'nfl', 'eng', 'ea', 'homo', 'cp']
-Calculations: {'neutral': True, 'td': True, 'cation': True, 'anion': True}
-Created XYZ file: mol_8603_final.xyz
-converged SCF energy = -75.8812281891015
-converged SCF energy = -76.4243969247011  <S^2> = 0.75006564  2S+1 = 2.0000656
-converged SCF energy = -76.4243969246351  <S^2> = 0.75006564  2S+1 = 2.0000656
-converged SCF energy = -75.9753979997692  <S^2> = 0.75243051  2S+1 = 2.002429
-converged SCF energy = -75.9753979997687  <S^2> = 0.75243053  2S+1 = 2.0024291
-Excited State energies (eV)
-[6.49392261]
-Dipole moment(X, Y, Z, Debye): -0.03538, -1.86535,  0.00000
-Starting parallel calculation of 38 surface points using 8 threads...
-converged SCF energy = -75.899495894044
-converged SCF energy = -75.996824958587
-converged SCF energy = -75.9826587061248
-converged SCF energy = -75.9728250180774
-converged SCF energy = -75.9735148049101
-converged SCF energy = -75.9744924213898
-converged SCF energy = -75.9370136486762
-converged SCF energy = -75.9812318513466
-converged SCF energy = -76.776805360199  <S^2> = 0.75042479  2S+1 = 2.0004247
-converged SCF energy = -76.7742966707123  <S^2> = 0.75093453  2S+1 = 2.0009343
-converged SCF energy = -76.7764619399083  <S^2> = 0.75051982  2S+1 = 2.0005198
-converged SCF energy = -76.7743515525829  <S^2> = 0.7505661  2S+1 = 2.000566
-converged SCF energy = -76.7690592487612  <S^2> = 0.75043386  2S+1 = 2.0004338
-converged SCF energy = -76.7526969068824  <S^2> = 0.75100048  2S+1 = 2.0010002
-converged SCF energy = -76.7729558022318  <S^2> = 0.75052637  2S+1 = 2.0005263
-converged SCF energy = -76.7662441407006  <S^2> = 0.75044036  2S+1 = 2.0004403
-converged SCF energy = -75.6225140314287  <S^2> = 0.75242809  2S+1 = 2.0024266
-converged SCF energy = -75.7147127861274  <S^2> = 0.75212615  2S+1 = 2.002125
-converged SCF energy = -75.7492343485023  <S^2> = 0.75248784  2S+1 = 2.0024863
-converged SCF energy = -75.7612366459576  <S^2> = 0.75234787  2S+1 = 2.0023465
-converged SCF energy = -75.7520911937775  <S^2> = 0.75243107  2S+1 = 2.0024296
-converged SCF energy = -75.6441095195589  <S^2> = 0.75212044  2S+1 = 2.0021193
-converged SCF energy = -75.7079212459475  <S^2> = 0.75213672  2S+1 = 2.0021356
-converged SCF energy = -75.6750682202895  <S^2> = 0.75213996  2S+1 = 2.0021388
-Excited State energies (eV)
-[6.06357336]
-Dipole moment(X, Y, Z, Debye): -0.13293,  0.38039, -1.15020
-==================================================
-    Progress: 2.6% (1/38 points completed)==================================================
-Excited State energies (eV)
-[8.15729401]
-Dipole moment(X, Y, Z, Debye):  0.26290, -3.59270, -1.36568
-==================================================
-    Progress: 5.3% (2/38 points completed)==================================================
-Excited State energies (eV)
-[7.34096961]
-Dipole moment(X, Y, Z, Debye):  1.09183, -0.64839, -2.00628
-==================================================
-    Progress: 7.9% (3/38 points completed)==================================================
-Excited State energies (eV)
-[7.60665653]
-Dipole moment(X, Y, Z, Debye): -1.26498, -3.45627, -0.94703
-==================================================
-    Progress: 10.5% (4/38 points completed)==================================================
-Excited State energies (eV)
-[8.24281608]
-Dipole moment(X, Y, Z, Debye): -1.35951, -2.46993, -1.84408
-==================================================
-    Progress: 13.2% (5/38 points completed)==================================================
-Excited State energies (eV)
-[7.31890649]
-Dipole moment(X, Y, Z, Debye):  1.32448, -3.48563, -0.67033
-==================================================
-    Progress: 15.8% (6/38 points completed)==================================================
-Excited State energies (eV)
-[8.606873]
-Dipole moment(X, Y, Z, Debye):  0.92647, -2.58263, -1.97410
-==================================================
-    Progress: 18.4% (7/38 points completed)==================================================
-converged SCF energy = -75.9503842863624
-converged SCF energy = -75.9952577139
-converged SCF energy = -75.9891986685442
-converged SCF energy = -75.9675827612249
-converged SCF energy = -75.9888594388535
-converged SCF energy = -75.9467811217088
-converged SCF energy = -75.9978745294642
-Excited State energies (eV)
-[9.34634602]
-Dipole moment(X, Y, Z, Debye): -0.31418, -1.60064, -2.27320
-==================================================
-    Progress: 21.1% (8/38 points completed)==================================================
-converged SCF energy = -75.949662304099
-converged SCF energy = -76.7685440580534  <S^2> = 0.75066487  2S+1 = 2.0006648
-converged SCF energy = -76.7745546043957  <S^2> = 0.75033366  2S+1 = 2.0003336
-converged SCF energy = -76.7601642649162  <S^2> = 0.7505069  2S+1 = 2.0005068
-converged SCF energy = -76.7732010333099  <S^2> = 0.75037686  2S+1 = 2.0003768
-converged SCF energy = -76.7779278403476  <S^2> = 0.7504369  2S+1 = 2.0004369
-converged SCF energy = -76.7726573374916  <S^2> = 0.75040145  2S+1 = 2.0004014
-converged SCF energy = -76.7651688474865  <S^2> = 0.75049428  2S+1 = 2.0004942
-converged SCF energy = -76.7791971203217  <S^2> = 0.75085835  2S+1 = 2.0008582
-converged SCF energy = -75.77855465148  <S^2> = 0.75257614  2S+1 = 2.0025745
-converged SCF energy = -75.7252036241727  <S^2> = 0.75253928  2S+1 = 2.0025377
-converged SCF energy = -75.7576788611342  <S^2> = 0.75230423  2S+1 = 2.0023029
-converged SCF energy = -75.7705185230717  <S^2> = 0.75255663  2S+1 = 2.002555
-converged SCF energy = -75.7647579443578  <S^2> = 0.75248417  2S+1 = 2.0024826
-converged SCF energy = -75.6904251723533  <S^2> = 0.75224226  2S+1 = 2.002241
-converged SCF energy = -75.7292197033718  <S^2> = 0.75234857  2S+1 = 2.0023472
-Excited State energies (eV)
-[6.52545923]
-Dipole moment(X, Y, Z, Debye): -1.91081, -3.07804,  0.13669
-==================================================
-    Progress: 23.7% (9/38 points completed)==================================================
-Excited State energies (eV)
-[7.64730491]
-Dipole moment(X, Y, Z, Debye): -0.35430, -4.02382, -0.25740
-Excited State energies (eV)
-[8.29725715]
-Dipole moment(X, Y, Z, Debye):  0.04809, -3.49020,  1.52087
-==================================================
-    Progress: 26.3% (10/38 points completed)==================================================
-==================================================
-    Progress: 28.9% (11/38 points completed)==================================================
-Excited State energies (eV)
-[7.50502808]
-Dipole moment(X, Y, Z, Debye):  0.77498, -3.88217,  0.38985
-==================================================
-    Progress: 31.6% (12/38 points completed)==================================================
-converged SCF energy = -75.6549072363569  <S^2> = 0.75208388  2S+1 = 2.0020828
-Excited State energies (eV)
-[7.08937647]
-Dipole moment(X, Y, Z, Debye): -1.95664, -2.33335,  1.40454
-Excited State energies (eV)
-[7.44494848]
-Excited State energies (eV)
-[7.65501403]
-==================================================
-    Progress: 34.2% (13/38 points completed)==================================================
-Dipole moment(X, Y, Z, Debye):  1.48918, -3.08951,  1.13228
-Dipole moment(X, Y, Z, Debye): -0.96049, -3.71251,  0.79429
-==================================================
-    Progress: 36.8% (14/38 points completed)==================================================
-==================================================
-    Progress: 39.5% (15/38 points completed)==================================================
-converged SCF energy = -75.9732889386224
-converged SCF energy = -75.9236165530926
-converged SCF energy = -75.9895057871955
-converged SCF energy = -75.9101468259695
-converged SCF energy = -75.879452755483
-converged SCF energy = -75.8709291615435
-converged SCF energy = -75.8756624456973
-Excited State energies (eV)
-[7.89581953]
-Dipole moment(X, Y, Z, Debye): -1.29939, -1.10611,  2.11591
-==================================================
-    Progress: 42.1% (16/38 points completed)==================================================
-converged SCF energy = -76.7781965900037  <S^2> = 0.75048402  2S+1 = 2.000484
-converged SCF energy = -76.7776443458618  <S^2> = 0.75060602  2S+1 = 2.0006059
-converged SCF energy = -76.7749185107146  <S^2> = 0.75110745  2S+1 = 2.0011071
-converged SCF energy = -76.7729680473296  <S^2> = 0.75097488  2S+1 = 2.0009746
-converged SCF energy = -75.9064833426471
-converged SCF energy = -76.7843045886647  <S^2> = 0.75143738  2S+1 = 2.0014369
-converged SCF energy = -76.79716781102  <S^2> = 0.75109545  2S+1 = 2.0010951
-converged SCF energy = -76.7742839437365  <S^2> = 0.75148556  2S+1 = 2.001485
-converged SCF energy = -76.7656097759931  <S^2> = 0.75062228  2S+1 = 2.0006222
-converged SCF energy = -75.672759807829  <S^2> = 0.75239578  2S+1 = 2.0023943
-converged SCF energy = -75.6494276412934  <S^2> = 0.75226151  2S+1 = 2.0022602
-converged SCF energy = -75.6714332068355  <S^2> = 0.75293092  2S+1 = 2.0029288
-converged SCF energy = -75.6937892447122  <S^2> = 0.75209288  2S+1 = 2.0020918
-converged SCF energy = -75.6816134424236  <S^2> = 0.75289818  2S+1 = 2.0028961
-converged SCF energy = -75.7174938279225  <S^2> = 0.75211837  2S+1 = 2.0021172
-converged SCF energy = -75.6593977089737  <S^2> = 0.75299406  2S+1 = 2.0029918
-Excited State energies (eV)
-[5.50056135]
-Dipole moment(X, Y, Z, Debye):  2.17151, -1.52476, -1.44308
-==================================================
-    Progress: 44.7% (17/38 points completed)==================================================
-Excited State energies (eV)
-[6.48608316]
-Dipole moment(X, Y, Z, Debye):  1.30413, -0.49083, -1.88983
-==================================================
-    Progress: 47.4% (18/38 points completed)==================================================
-Excited State energies (eV)
-[3.30857248]
-Dipole moment(X, Y, Z, Debye):  2.09898,  0.01466, -1.03323
-==================================================
-    Progress: 50.0% (19/38 points completed)==================================================
-Excited State energies (eV)
-[2.20918028]
-Dipole moment(X, Y, Z, Debye):  2.62553, -0.97523, -0.42288
-==================================================
-    Progress: 52.6% (20/38 points completed)==================================================
-Excited State energies (eV)
-[8.95489337]
-Dipole moment(X, Y, Z, Debye): -0.52036, -2.54965,  2.11091
-==================================================
-    Progress: 55.3% (21/38 points completed)==================================================
-converged SCF energy = -75.6856164551984  <S^2> = 0.7525661  2S+1 = 2.0025645
-converged SCF energy = -75.8677343981876
-Excited State energies (eV)
-[3.36400116]
-Dipole moment(X, Y, Z, Debye):  1.41169,  0.58331, -0.09915
-==================================================
-    Progress: 57.9% (22/38 points completed)==================================================
-Excited State energies (eV)
-[8.62008567]
-Dipole moment(X, Y, Z, Debye):  1.11640, -2.15731,  2.07089
-==================================================
-    Progress: 60.5% (23/38 points completed)==================================================
-converged SCF energy = -75.8948817769924
-converged SCF energy = -75.8878103887876
-converged SCF energy = -75.9105009550569
-converged SCF energy = -75.8960720945865
-Excited State energies (eV)
-[4.70405985]
-Dipole moment(X, Y, Z, Debye):  2.22790, -2.39026,  0.08859
-==================================================
-    Progress: 63.2% (24/38 points completed)==================================================
-converged SCF energy = -75.8964926544997
-converged SCF energy = -75.8983784454424
-converged SCF energy = -75.8696034877467
-converged SCF energy = -76.791042971652  <S^2> = 0.75133067  2S+1 = 2.0013302
-converged SCF energy = -76.7775758211312  <S^2> = 0.75098551  2S+1 = 2.0009853
-converged SCF energy = -76.7541392617708  <S^2> = 0.75108359  2S+1 = 2.0010833
-converged SCF energy = -76.7807703275288  <S^2> = 0.75127054  2S+1 = 2.0012701
-converged SCF energy = -76.7815947893928  <S^2> = 0.75140053  2S+1 = 2.0014
-converged SCF energy = -76.773860553892  <S^2> = 0.75098531  2S+1 = 2.0009851
-converged SCF energy = -76.7581526003137  <S^2> = 0.75112589  2S+1 = 2.0011256
-converged SCF energy = -76.7898338615104  <S^2> = 0.75130741  2S+1 = 2.001307
-converged SCF energy = -75.679076367667  <S^2> = 0.75261624  2S+1 = 2.0026145
-converged SCF energy = -75.6777064798271  <S^2> = 0.7530947  2S+1 = 2.0030923
-converged SCF energy = -75.62830277295  <S^2> = 0.75250543  2S+1 = 2.0025039
-converged SCF energy = -75.6642878417322  <S^2> = 0.7526415  2S+1 = 2.0026398
-converged SCF energy = -75.6609886441031  <S^2> = 0.75243165  2S+1 = 2.0024302
-converged SCF energy = -75.6767178735889  <S^2> = 0.75252298  2S+1 = 2.0025214
-converged SCF energy = -75.6365130910287  <S^2> = 0.75248779  2S+1 = 2.0024862
-Excited State energies (eV)
-[2.29590805]
-Dipole moment(X, Y, Z, Debye):  2.46296, -0.20711,  0.43385
-==================================================
-    Progress: 65.8% (25/38 points completed)==================================================
-Excited State energies (eV)
-[3.87730763]
-Dipole moment(X, Y, Z, Debye):  2.41021, -1.41793,  0.96010
-==================================================
-    Progress: 68.4% (26/38 points completed)==================================================
-Excited State energies (eV)
-[5.64963702]
-Dipole moment(X, Y, Z, Debye):  0.43270,  0.42034,  1.05684
-==================================================
-    Progress: 71.1% (27/38 points completed)==================================================
-converged SCF energy = -75.6778661369473  <S^2> = 0.75303071  2S+1 = 2.0030284
-Excited State energies (eV)
-[4.49869653]
-Dipole moment(X, Y, Z, Debye):  1.81112, -0.16057,  1.50687
-==================================================
-    Progress: 73.7% (28/38 points completed)==================================================
-converged SCF energy = -75.9148102251039
-Excited State energies (eV)
-[5.45807317]
-Dipole moment(X, Y, Z, Debye): -1.76589, -0.45922, -1.76761
-==================================================
-    Progress: 76.3% (29/38 points completed)==================================================
-converged SCF energy = -75.8747935202434
-converged SCF energy = -75.8707902802799
-Excited State energies (eV)
-[4.57266394]
-Dipole moment(X, Y, Z, Debye): -2.36961, -1.37805, -1.17773
-==================================================
-    Progress: 78.9% (30/38 points completed)==================================================
-Excited State energies (eV)
-[5.60897075]
-Dipole moment(X, Y, Z, Debye): -0.67216,  0.31620, -1.24629
-==================================================
-    Progress: 81.6% (31/38 points completed)==================================================
-Excited State energies (eV)
-[2.4751041]
-Dipole moment(X, Y, Z, Debye): -2.49414, -0.23166, -0.60646
-==================================================
-    Progress: 84.2% (32/38 points completed)==================================================
-converged SCF energy = -75.8745075255013
-converged SCF energy = -75.9054288796572
-converged SCF energy = -75.9077856659702
-converged SCF energy = -76.7639084013893  <S^2> = 0.75062317  2S+1 = 2.0006231
-converged SCF energy = -76.7777633541914  <S^2> = 0.75150451  2S+1 = 2.0015039
-converged SCF energy = -76.7995597458965  <S^2> = 0.75103499  2S+1 = 2.0010347
-converged SCF energy = -76.7704431910043  <S^2> = 0.75089907  2S+1 = 2.0008989
-converged SCF energy = -76.7854435039571  <S^2> = 0.75141856  2S+1 = 2.0014181
-converged SCF energy = -76.7703585549558  <S^2> = 0.75122978  2S+1 = 2.0012294
-converged SCF energy = -75.6860930808411  <S^2> = 0.75253825  2S+1 = 2.0025366
-converged SCF energy = -75.6824255223548  <S^2> = 0.75288565  2S+1 = 2.0028836
-converged SCF energy = -75.6624701009026  <S^2> = 0.75304018  2S+1 = 2.0030379
-converged SCF energy = -75.6735320772045  <S^2> = 0.75301728  2S+1 = 2.003015
-converged SCF energy = -75.6763934976867  <S^2> = 0.75244381  2S+1 = 2.0024423
-converged SCF energy = -75.6497696990594  <S^2> = 0.75242882  2S+1 = 2.0024274
-Excited State energies (eV)
-[5.20329533]
-Dipole moment(X, Y, Z, Debye): -2.30355, -2.42255, -0.27450
-==================================================
-    Progress: 86.8% (33/38 points completed)==================================================
-Excited State energies (eV)
-[2.05387552]
-Dipole moment(X, Y, Z, Debye): -2.65435, -0.99822,  0.25386
-==================================================
-    Progress: 89.5% (34/38 points completed)==================================================
-Excited State energies (eV)
-[3.16909082]
-Dipole moment(X, Y, Z, Debye): -1.52360,  0.61586, -0.09796
-==================================================
-    Progress: 92.1% (35/38 points completed)==================================================
-Excited State energies (eV)
-[5.13493435]
-Dipole moment(X, Y, Z, Debye): -2.30566, -1.62921,  1.20598
-==================================================
-    Progress: 94.7% (36/38 points completed)==================================================
-Excited State energies (eV)
-[2.93690845]
-Dipole moment(X, Y, Z, Debye): -2.20050,  0.10207,  0.82384
-==================================================
-    Progress: 97.4% (37/38 points completed)==================================================
-Excited State energies (eV)
-[5.65010975]
-Dipole moment(X, Y, Z, Debye): -1.21558, -0.04081,  1.62418
-==================================================
-    Progress: 100.0% (38/38 points completed)==================================================
-
-Created 14 MOL2 files for mol_8603

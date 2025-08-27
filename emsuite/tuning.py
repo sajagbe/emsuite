@@ -535,12 +535,13 @@ class TuningCalculator:
         """Main method to run the entire tuning calculation with parallel processing"""
         properties_to_calculate, required_calculations = self.setup_calculation(requested_properties)
 
-        print("="*60)
+        print("="*63)
         print(" ")
         print(f"    EMSuite: Electrostatic Map Suite by Stephen O. Ajagbe")
         print("   Based on foundations by Jacques James Gay & the Gozem Lab")
+        print("    See: https://pubs.acs.org/doi/10.1021/acs.jpcb.9b00489")
         print(" ")
-        print("="*60)
+        print("="*63)
         print(" ")
         print(f"Properties: {properties_to_calculate}")
         print(f"Calculations: {required_calculations}")
