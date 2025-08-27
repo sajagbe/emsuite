@@ -534,6 +534,14 @@ class TuningCalculator:
     def run_calculation(self, requested_properties=['gse', 'homo', 'lumo', 'gap'], n_processes=None):
         """Main method to run the entire tuning calculation with parallel processing"""
         properties_to_calculate, required_calculations = self.setup_calculation(requested_properties)
+
+        print("="*60)
+        print(" ")
+        print(f"    EMSuite: Electrostatic Map Suite by Stephen O. Ajagbe")
+        print("   Based on foundations by Jacques James Gay & the Gozem Lab")
+        print(" ")
+        print("="*60)
+        print(" ")
         print(f"Properties: {properties_to_calculate}")
         print(f"Calculations: {required_calculations}")
 
