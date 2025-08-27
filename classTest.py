@@ -1,17 +1,17 @@
-from emsuite import TuningCalculator
+from emsuite.tuning import TuningCalculator
 
 # Basic usage
 waterTuning = TuningCalculator(
-    input_type='xyz',
-    molecule ='water',
+    input_type='smiles',
+    molecule ='O',
     method='dft',
     functional='b3lyp',
     basis_set='augccpvdz',
     state_of_interest = 1,
-    optimize_geometry=False
+    optimize_geometry=True
 )
 
-waterTuning.run_calculation(['all'])
+waterTuning.run_calculation(['gse'])
 
 
 

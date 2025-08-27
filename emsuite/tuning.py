@@ -373,11 +373,9 @@ class TuningCalculator:
                 optimize=self.optimize_geometry
             )
 
-        print(self.molecule_object.mol.atom)
-
         # Create XYZ file from molecule_object.mol atom coordinates and symbols
         mol = self.molecule_object.mol
-        atom_coords = mol.atom_coords()
+        atom_coords = mol.atom_coords(unit='Ang')
         atom_data = []
         for i in range(mol.natm):
             symbol = mol.atom_symbol(i)
