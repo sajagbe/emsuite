@@ -12,7 +12,7 @@ calculator = TuningCalculator(
 )
 
 tuning_results, reference_properties = calculator.run_calculation(
-        requested_properties=['all']
+        requested_properties=['all'], n_processes=1
     )
 
 

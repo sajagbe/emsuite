@@ -2,6 +2,8 @@ import numpy as np
 import os
 import subprocess
 import sys
+from concurrent.futures import ThreadPoolExecutor
+import multiprocessing as mp
 from pyscf import gto, scf, dft, qmmm, tdscf
 from pyscf.solvent import smd
 from pyscf.hessian import thermo
@@ -437,43 +439,81 @@ class TuningCalculator:
                 arr = np.fromstring(line.strip(), sep=' ').reshape(1, 3)
                 self.surface_coords.append(arr)
 
-    def calculate_tuning_properties(self, properties_to_calculate):
-        """Calculate tuning properties for all surface coordinates"""
+    def calculate_tuning_properties(self, properties_to_calculate, n_processes=None):
+        """Calculate tuning properties for all surface coordinates using parallel processing"""
+        if n_processes is None:
+            n_processes = mp.cpu_count()
+        
         self.tuning = {name: [] for name in properties_to_calculate}
-
-        for coord in self.surface_coords:
-            # Create perturbed molecules
+        
+        def process_coord(coord):
+            """Process a single coordinate point"""
+            import threading
+            import tempfile
+            import os
+            
+            # Create unique checkpoint file names for each thread to avoid conflicts
+            thread_id = threading.get_ident()
+            temp_dir = tempfile.mkdtemp()
+            
+            # Create perturbed molecules with thread-safe checkpoint files
             molecule_wsc = qmmm.mm_charge(self.molecule_object, coord, np.array([1.0]))
+            molecule_wsc.chkfile = os.path.join(temp_dir, f'mol_{thread_id}.chk')
             molecule_wsc.kernel()
             
-            anion_wsc = qmmm.mm_charge(self.anion_mf, coord, np.array([1.0])) if self.anion_mf else None
-            if anion_wsc: anion_wsc.kernel()
+            anion_wsc = None
+            if hasattr(self, 'anion_mf') and self.anion_mf:
+                anion_wsc = qmmm.mm_charge(self.anion_mf, coord, np.array([1.0]))
+                anion_wsc.chkfile = os.path.join(temp_dir, f'anion_{thread_id}.chk')
+                anion_wsc.kernel()
             
-            cation_wsc = qmmm.mm_charge(self.cation_mf, coord, np.array([1.0])) if self.cation_mf else None
-            if cation_wsc: cation_wsc.kernel()
+            cation_wsc = None
+            if hasattr(self, 'cation_mf') and self.cation_mf:
+                cation_wsc = qmmm.mm_charge(self.cation_mf, coord, np.array([1.0]))
+                cation_wsc.chkfile = os.path.join(temp_dir, f'cation_{thread_id}.chk')
+                cation_wsc.kernel()
             
             td_wsc = None
-            if self.td_object:
+            if hasattr(self, 'td_object') and self.td_object:
                 td_wsc = self.create_td_molecule_object(
                     molecule_wsc, triplet=self.triplet_excitation, 
                     nstates=self.state_of_interest
                 )
-                if self.solvent:
+                if hasattr(self, 'solvent') and self.solvent:
                     td_wsc.with_solvent.equilibrium_solvation = True
                 td_wsc.kernel()
             
-            # Calculate perturbed properties and store deltas
+            # Calculate perturbed properties
             properties_wsc = self.calculate_all_properties(
                 molecule_wsc, anion_wsc, cation_wsc, td_wsc, properties_to_calculate
             )
             
+            # Clean up temporary files
+            try:
+                import shutil
+                shutil.rmtree(temp_dir)
+            except:
+                pass
+            
+            # Calculate deltas for each property
+            result = {}
             for prop in properties_to_calculate:
                 if prop in properties_wsc and prop in self.properties_alone:
                     delta = (properties_wsc[prop] - self.properties_alone[prop]) * self.PROPERTY_CONFIG[prop]['unit']
-                    self.tuning[prop].append([coord, delta])
+                    result[prop] = [coord, delta]
+            return result
+        
+        # Run calculations in parallel using ThreadPoolExecutor
+        with ThreadPoolExecutor(max_workers=n_processes) as executor:
+            results = list(executor.map(process_coord, self.surface_coords))
+        
+        # Collect and organize results
+        for result in results:
+            for prop, data in result.items():
+                self.tuning[prop].append(data)
 
-    def run_calculation(self, requested_properties=['gse', 'homo', 'lumo', 'gap']):
-        """Main method to run the entire tuning calculation"""
+    def run_calculation(self, requested_properties=['gse', 'homo', 'lumo', 'gap'], n_processes=None):
+        """Main method to run the entire tuning calculation with parallel processing"""
         properties_to_calculate, required_calculations = self.setup_calculation(requested_properties)
         print(f"Properties: {properties_to_calculate}")
         print(f"Calculations: {required_calculations}")
@@ -488,9 +528,9 @@ class TuningCalculator:
             self.td_object, properties_to_calculate
         )
 
-        # Calculate surface coordinates and tuning properties
+        # Calculate surface coordinates and tuning properties (now with parallel processing)
         self.calculate_surface_coordinates()
-        self.calculate_tuning_properties(properties_to_calculate)
+        self.calculate_tuning_properties(properties_to_calculate, n_processes)
 
         # Create output files
         self.create_mol2_files(self.tuning, self.molecule_name, properties_to_calculate)
