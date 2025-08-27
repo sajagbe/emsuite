@@ -503,9 +503,28 @@ class TuningCalculator:
                     result[prop] = [coord, delta]
             return result
         
-        # Run calculations in parallel using ThreadPoolExecutor
+        # Run calculations in parallel using ThreadPoolExecutor with progress tracking
+        total_coords = len(self.surface_coords)
+        completed = 0
+        print(f"Starting parallel calculation of {total_coords} surface points using {n_processes} threads...")
+        
         with ThreadPoolExecutor(max_workers=n_processes) as executor:
-            results = list(executor.map(process_coord, self.surface_coords))
+            # Submit all tasks
+            future_to_coord = {executor.submit(process_coord, coord): coord for coord in self.surface_coords}
+            results = []
+            
+            # Process completed tasks and show progress
+            from concurrent.futures import as_completed
+            for future in as_completed(future_to_coord):
+                result = future.result()
+                results.append(result)
+                completed += 1
+                percentage = (completed / total_coords) * 100
+                print("="*50)
+                print(f"    Progress: {percentage:.1f}% ({completed}/{total_coords} points completed)", end='\r')
+                print("="*50)
+
+        print()  # New line after progress
         
         # Collect and organize results
         for result in results:

@@ -35,9 +35,9 @@ optimize_geometry = True # Option to optimize the geometry of the input. Works f
 )
 
 # Run calculations
-calc.run_calculation(['gse', 'homo', 'lumo', 'gap', 'exe']) #Calculate the tuning effect of a 
+calc.run_calculation(['gse', 'homo', 'lumo', 'gap', 'exe'], n_processes = N) #Calculate the tuning effect of a 
 #+1.0e charge on the ground state energy, HOMO, LUMO, HOMO-LUMO gap and S2 execitation energy.
-
+# N is number of threads to run in parallel. It does this point wise. 
 
 ## Available Properties
 
