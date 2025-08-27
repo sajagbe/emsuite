@@ -15,6 +15,7 @@ tuning_results, reference_properties = calculator.run_calculation(
         requested_properties=['all'], n_processes=8
     )
 
+csv_filename = calculator.create_csv_output(tuning_results, reference_properties)
 
 #Parameters extended 
 """

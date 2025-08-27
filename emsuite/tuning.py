@@ -2,6 +2,7 @@ import numpy as np
 import os
 import subprocess
 import sys
+import csv
 from concurrent.futures import ThreadPoolExecutor
 import multiprocessing as mp
 from pyscf import gto, scf, dft, qmmm, tdscf
@@ -343,6 +344,56 @@ class TuningCalculator:
                 for i, (coord, delta_value) in enumerate(property_data, 1):
                     x, y, z = coord[0]  # Extract coordinates from (1,3) array
                     f.write(f"{i:>4}    H  {x:>8.4f}  {y:>8.4f}  {z:>8.4f}  H1  1  {property_name.upper()}  {delta_value:>10.6f}\n")
+
+    def create_csv_output(self, tuning_results, reference_properties):
+        """Create a CSV file with coordinates, reference properties, and deltas"""
+        filename = f"{self.molecule_name}_tuning_results.csv"
+        
+        # Get all properties that have tuning data
+        properties_with_data = [prop for prop in tuning_results.keys() if tuning_results[prop]]
+        
+        if not properties_with_data:
+            print("No tuning data to write to CSV")
+            return
+        
+        # Prepare header
+        header = ['Point_ID', 'X', 'Y', 'Z']
+
+        # Add property columns (will contain both reference and delta values)
+        for prop in properties_with_data:
+            header.append(f'{prop.upper()}')
+        
+        # Write CSV file
+        with open(filename, 'w', newline='') as csvfile:
+            writer = csv.writer(csvfile)
+            writer.writerow(header)
+            
+            # First row: Reference properties
+            ref_row = ['REF', '-', '-', '-']  # Empty coordinates for reference
+            for prop in properties_with_data:
+                ref_value = reference_properties.get(prop, 'N/A')
+                ref_row.append(ref_value)
+            writer.writerow(ref_row)
+            
+            # Subsequent rows: Surface points with delta values
+            num_points = len(tuning_results[properties_with_data[0]])
+            
+            for i in range(num_points):
+                row = [i + 1]  # Point ID starting from 1
+                
+                # Get coordinates from first property (they should be the same for all)
+                coord = tuning_results[properties_with_data[0]][i][0][0]  # Extract from (1,3) array
+                row.extend([coord[0], coord[1], coord[2]])
+                
+                # Add delta values
+                for prop in properties_with_data:
+                    delta_value = tuning_results[prop][i][1]  # Get delta from [coord, delta] pair
+                    row.append(delta_value)
+                
+                writer.writerow(row)
+        
+        print(f"CSV file created: {filename}")
+        return filename
 
     def prepare_molecule(self):
         """Prepare the initial molecule structure"""
