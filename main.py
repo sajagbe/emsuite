@@ -317,8 +317,8 @@ smiles_input = 'O'
 optimize_geometry = True 
 
 # User input and setup
-requested_properties = ['gse', 'homo', 'lumo', 'gap']  # User specifies
-# requested_properties = ['all']  # Or everything
+# requested_properties = ['gse', 'homo', 'lumo', 'gap']  # User specifies
+requested_properties = ['all']  # Or everything
 
 properties_to_calculate, required_calculations = setup_calculation(requested_properties)
 print(f"Properties: {properties_to_calculate}")
