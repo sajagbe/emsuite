@@ -13,6 +13,8 @@
 *.tmp
 *.so
 *.o
+*.xyz
+*.png
 .DS_Store
 .vscode/
 .idea/
