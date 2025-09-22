@@ -24,3 +24,6 @@
 *.bak
 *.swp
 *.swo
+__pycache__/
+*.pyc
+*.pyo

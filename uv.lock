@@ -1,5 +1,5 @@
 version = 1
-revision = 2
+revision = 3
 requires-python = ">=3.13"
 
 [[package]]
@@ -82,6 +82,7 @@ source = { virtual = "." }
 dependencies = [
     { name = "geometric" },
     { name = "pyscf" },
+    { name = "pyscf-forge" },
     { name = "rdkit" },
     { name = "vdw-surfgen" },
 ]
@@ -90,6 +91,7 @@ dependencies = [
 requires-dist = [
     { name = "geometric", specifier = ">=1.1" },
     { name = "pyscf", specifier = ">=2.10.0" },
+    { name = "pyscf-forge", specifier = ">=1.0.3" },
     { name = "rdkit", specifier = ">=2025.3.5" },
     { name = "vdw-surfgen", specifier = ">=0.5.1" },
 ]
@@ -411,6 +413,19 @@ wheels = [
     { url = "https://files.pythonhosted.org/packages/22/aa/bf26ade4969b90841d27e42c49bd976279f187d29f4b041dc443b8e00fff/pyscf-2.10.0-py3-none-macosx_11_0_arm64.whl", hash = "sha256:4d38ac0bd02544eae781de1c1e143c5d0e06163f6d318a828801b129c1f43654", size = 35050983, upload-time = "2025-07-23T23:49:16.885Z" },
     { url = "https://files.pythonhosted.org/packages/a9/ff/ea2b9656b2d3a6302f7675c1d29a1f8b553c4f7fd86ee5509832e2afdcb0/pyscf-2.10.0-py3-none-manylinux2014_aarch64.manylinux_2_17_aarch64.whl", hash = "sha256:72263fb85ebeb56c4acd566d8b58ed3d4ef52875ee2a0052421ca9fccdf53917", size = 44453169, upload-time = "2025-07-24T08:16:26.772Z" },
     { url = "https://files.pythonhosted.org/packages/d2/ff/cdd53c75345be8d8283462565664dbcf97b34eb21e9f069107b69cb8f541/pyscf-2.10.0-py3-none-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:40a04c6f972ad07890210ce4a8db41183d8be91d25f068b6ad0e97738dc449c7", size = 51248550, upload-time = "2025-07-24T00:14:42.073Z" },
+]
+
+[[package]]
+name = "pyscf-forge"
+version = "1.0.3"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "numpy" },
+    { name = "pyscf" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/78/00/b39b16ac873c79b945502c44cb50d27b364da475f3102bd7264fde10aa93/pyscf_forge-1.0.3.tar.gz", hash = "sha256:184222e014aa9765e291a83938a19ca20350f26e2014e5a5054f43b7a7cced8e", size = 232711, upload-time = "2025-01-22T04:08:09.35Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/c9/6a/ce51c1f1448525a157803d856d234ca3a6c727c9ae6d300ebfefa6d9ffe4/pyscf_forge-1.0.3-py3-none-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:745f1a2536648a39e269fe74ae8b955d0b62e7f28b8c6b24a35710fe54f409c8", size = 10740976, upload-time = "2025-01-22T04:25:18.868Z" },
 ]
 
 [[package]]
