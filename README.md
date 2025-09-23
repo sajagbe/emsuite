@@ -26,45 +26,7 @@ pip install emsuite[gpu]
 
 ```
 
-
-## Dependencies
-
-### Core Dependencies (CPU Installation)
-- **Python**: ≥3.11
-- **PySCF**: ≥2.10.0 
-- **RDKit**: ≥2025.3.5 
-- **Geometric**: ≥1.1 
-- **PySCF-Forge**: ≥1.0.3 
-- **VDW-SurfGen**: ≥0.5.1 
-- **NumPy**
-- **Requests**: HTTP library for API calls
-
-### GPU Dependencies (GPU Installation)
-Additional packages for CUDA 12.x acceleration:
-- **GPU4PySCF-CUDA12x**: 1.4.3 - GPU-accelerated PySCF calculations
-- **GPU4PySCF-LibXC-CUDA12x**: 0.5 - GPU exchange-correlation functionals
-- **CuPy-CUDA12x**: 13.6.0 - GPU array library (NumPy-like interface)
-- **CuTensor-CU12**: 2.0.2 (GPU4PySCF is CuTensor version sensitive)
-
-### System Requirements
-- **CUDA 12.x toolkit** (for GPU installation)
-- **CUDA-compatible GPU** with compute capability 6.0+ (for GPU acceleration)
-
-
-## Hardware Requirements
-
-### CPU Mode
-- **Minimum**: Any modern multi-core CPU
-- **Recommended**: 8+ cores for optimal performance
-- **Memory**: 8GB+ RAM (depends on molecule size and basis set)
-
-### GPU Mode (Recommended for Speed)
-- **CUDA-compatible GPU** with compute capability 6.0+
-- **GPU Memory**: 4GB+ VRAM (larger molecules require more)
-- **Performance Boost**: 5-50x speedup depending on calculation type
-- **Installation**: Requires CuPy, CuTensor and GPU4PySCF
-
-The package automatically detects available hardware and uses GPU acceleration when available, falling back to CPU mode otherwise.
+EMSuite automatically detects available hardware and uses GPU acceleration when available, falling back to CPU mode otherwise.
 
 ## Quick Start
 
@@ -164,15 +126,7 @@ state_of_interest = 5
 triplet = True
 ```
 
-Sample Outputs for tuning.in in water-test/
-
-
-## Performance Tips
-
-1. **Use GPU acceleration** when available for significant speedup
-2. **Start with smaller basis sets** (e.g., 6-31G*) for initial testing
-3. **Limit excited states** to only what's needed (each state increases computation time)
-4. **Consider molecular size** - larger molecules require more memory and time
+Sample Outputs for `tuning.in` in `water-test/`
 
 ## Citation
 
