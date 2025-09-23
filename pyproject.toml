@@ -1,13 +1,30 @@
 [project]
-name = "emsuitev1"
-version = "0.1.0"
-description = "Add your description here"
+name = "emsuite"
+version = "1.0.0"
+description = "Electrostatic Map Suite - A Comprehensive Set of Calculators for Qualifying and Quantifying Electrostatic Interactions and Effects."
 readme = "README.md"
-requires-python = ">=3.13"
+requires-python = ">=3.11"
 dependencies = [
     "geometric>=1.1",
     "pyscf>=2.10.0",
     "pyscf-forge>=1.0.3",
     "rdkit>=2025.3.5",
     "vdw-surfgen>=0.5.1",
+    "requests",
+    "numpy",
 ]
+
+[project.optional-dependencies]
+gpu = [
+    "gpu4pyscf-cuda12x==1.4.3",
+    "gpu4pyscf-libxc-cuda12x==0.5",
+    "cupy-cuda12x==13.6.0",
+    "cutensor-cu12==2.0.2",
+]
+
+[project.scripts]
+emsuite = "emsuite.cli:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
