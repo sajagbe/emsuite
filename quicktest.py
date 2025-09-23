@@ -44,3 +44,6 @@ td_gpu_trip.kernel()
 td_gpu_qmmm.kernel()
 td_solvated_vac.kernel()
 td_solvated_wsc.kernel()
+
+
+# srun -p qGPU24 -A CHEM9C4 --nodes=1 --ntasks-per-node=1 --cpus-per-task=1 --gres=gpu:1 --time=01:00:00 --mem=8G --pty bash

@@ -234,7 +234,7 @@ def create_output_files(surface_coords, all_effects, molecule_name, properties_t
     # Create MOL2 files for each property
     for prop, effect_values in property_effects.items():
         core.create_mol2_file(molecule_name, surface_coords, effect_values, prop)
-        print(f"Created {molecule_name}_{prop}_tuning.mol2")
+        # print(f"Created {molecule_name}_{prop}_tuning.mol2")
     
     # Create CSV summary
     csv_filename = f"{molecule_name}_tuning_summary.csv"
@@ -255,7 +255,18 @@ def create_output_files(surface_coords, all_effects, molecule_name, properties_t
                 row[f'{prop}_effect'] = effect.get(f'{prop}_effect', 0.0)
             writer.writerow(row)
     
-    print(f"Created {csv_filename}")
+    # print(f"Created {csv_filename}")
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -265,7 +276,7 @@ def create_output_files(surface_coords, all_effects, molecule_name, properties_t
 ####User Input####
 #Input options
 input_type = 'xyz'  # 'xyz' or 'smiles'
-input_data = 'LF.xyz' #'O' 
+input_data = 'water.xyz' #'O' 
 
 #Calculation options
 method = 'dft'
@@ -277,17 +288,32 @@ surface_charge = 1.0 # Charge of the surface point
 solvent = None
 
 #Calculation specifics
-properties =  ['hard', 'cp', 'ea', 'gap', 'eng', 'lumo', 'gse', 'ie', 'homo', 'dm', 'nfl', 'efl']
+properties =  ['gse']
 state_of_interest = 2
 triplet = False
 
-#'hard', 'cp', 'ea', 'exe', 'gap', 'osc', 'eng', 'lumo', 'gse', 'ie', 'homo', 'dm', 'nfl', 'efl'
+#Options: 'hard', 'cp', 'ea', 'exe', 'gap', 'osc', 'eng', 'lumo', 'gse', 'ie', 'homo', 'dm', 'nfl', 'efl'
+
+
+
+
+
 
 ####Main Execution####
+### Setup Required Calculations and Properties
+
+core.print_startup_message()
+print(f"="*60)
+print(f"                  Electrostatic Tuning Maps")
+print(f"             Built on efforts by the Gozem Lab")
+print(f"   See: https://pubs.acs.org/doi/10.1021/acs.jpcb.9b00489")
+print(f"="*60)
+print(f"\n")
+
 No_of_GPUs = core.check_gpu_info()
 No_of_CPUs = core.check_cpu_info()
 
-### Setup Required Calculations and Properties
+
 properties_to_calculate, required_calculations = setup_calculation(properties)
 print(f"Properties: {properties_to_calculate}")
 print(f"Calculations: {required_calculations}")
@@ -298,7 +324,9 @@ q_mm = np.array([surface_charge])
 input_data = prepare_input_data(input_type, input_data)
 molecule_name = os.path.splitext(os.path.basename(input_data))[0]  # Always extract base name from xyz file
 molecule_name = molecule_name.replace('/', '_').replace('\\', '_')  # Clean filename
-surface_coords = core.get_vdw_surface_coordinates(input_data)
+# surface_coords = core.get_vdw_surface_coordinates(input_data)
+
+surface_coords = np.array([[0.143397, -0.368820, 1.585376]])
 
 # Create base molecule objects
 base_molecules = create_molecule_objects(required_calculations, state_of_interest, triplet)
@@ -316,4 +344,21 @@ for i, coord in enumerate(surface_coords):
 
 # Create output files
 create_output_files(surface_coords, all_effects, molecule_name, properties_to_calculate)
-print("\nOutput files created successfully!")
+
+if len(surface_coords) == 1:
+    core.print_office_quote()
+else:
+    missing = []
+    for prop in properties_to_calculate:
+        filepath = f"{molecule_name}_{prop}_tm.mol2"
+        if not os.path.exists(filepath):
+            missing.append(filepath)
+    
+    csv_path = f"{molecule_name}_tuning_summary.csv"
+    if not os.path.exists(csv_path):
+        missing.append(csv_path)
+
+    if missing:
+        print(f"Missing: {', '.join(missing)}")
+    else:
+        core.print_office_quote()

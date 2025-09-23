@@ -1,4 +1,4 @@
-import os,time, subprocess
+import os,time, subprocess, requests
 import numpy as np
 import cupy as cp
 from rdkit import Chem
@@ -7,29 +7,55 @@ from pyscf import gto, scf, dft, tdscf, qmmm, lib
 from pyscf.solvent import smd
 from pyscf.geomopt.geometric_solver import optimize
 
+OFFICE_API = "https://officeapi.akashrajpurohit.com"
+
 
 def check_gpu_info():
     try:
         device_count = cp.cuda.runtime.getDeviceCount()
         GPU_AVAILABLE = device_count > 0
-        if GPU_AVAILABLE:
-            print(f"\n Found {device_count} GPU(s).")
-        else:
+        if GPU_AVAILABLE < 1:
             print("\n No GPUs found.\n \n Switching to CPU mode.\n")
     except ImportError:
         GPU_AVAILABLE = False
         print("CuPy not installed - CPU mode only.")
     except Exception as e:
         GPU_AVAILABLE = False
-        print(f"GPU not available: {e}")
+        # print(f"GPU not available: {e}")
+        print(f"GPU not available - using CPU.")
     
     return device_count if GPU_AVAILABLE else 0
+
+
+def print_startup_message():
+    print(f"\n"*2)
+    print(f"="*60)
+    print(f"                   Electrostatic Map Suite")
+    print(f"                    By Stephen O. Ajagbe")
+    print(f"="*60)
+
+
+
+def print_office_quote():
+    print("\nFetching inspirational quote...\n")
+    url = f"{OFFICE_API}/quote/random"
+    resp = requests.get(url)
+    resp.raise_for_status()
+    data = resp.json()
+    #remove quote*.svg if it exists, * is a wildcard for any characters
+    for file in os.listdir():
+        if file.startswith("quote") and file.endswith(".svg"):
+            try:
+                os.remove(file)
+            except OSError as e:
+                print(f"Warning: could not remove {file}: {e}")
+    print(f"\n  {data['quote']} \n                     - {data['character']}\n")
 
 
 def check_cpu_info():
     try:
         cpu_cores = os.cpu_count()
-        print(f"Number of CPU cores available: {cpu_cores}")
+        # print(f"Number of CPU cores available: {cpu_cores}")
         return cpu_cores
     except Exception as e:
         print(f"Could not determine CPU cores: {e}")
@@ -289,8 +315,6 @@ def create_mol2_file(molecule_name, coordinates, property_list, property_name):
             subst_id = 1
             subst_name = property_name.upper()
             f.write(f"{i:>4} {atom_name:<4} {x:>9.4f} {y:>9.4f} {z:>9.4f} {atom_type:<4} {subst_id} {subst_name} {prop_val:>10.6f}\n")
-
-
 
 
 def find_homo_lumo_and_gap(mf):
