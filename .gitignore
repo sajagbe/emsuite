@@ -13,7 +13,6 @@
 *.tmp
 *.so
 *.o
-*.in
 *.xyz
 *.png
 .DS_Store
