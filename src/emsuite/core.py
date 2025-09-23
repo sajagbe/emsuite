@@ -1,10 +1,18 @@
-import os,time, subprocess, requests
+import os, time, subprocess, requests
 import numpy as np
 from rdkit import Chem
 from rdkit.Chem import AllChem
 from pyscf import gto, scf, dft, tdscf, qmmm, lib
 from pyscf.solvent import smd
 from pyscf.geomopt.geometric_solver import optimize
+
+# GPU imports
+try:
+    import cupy as cp
+    GPU_AVAILABLE = True
+except ImportError:
+    cp = None
+    GPU_AVAILABLE = False
 
 OFFICE_API = "https://officeapi.akashrajpurohit.com"
 
@@ -17,34 +25,25 @@ OFFICE_API = "https://officeapi.akashrajpurohit.com"
 def check_gpu_info():
     """
     This function uses CuPy to detect CUDA-capable GPUs on the system.
-    It handles cases where CuPy is not installed or no GPUs are available.
-    
-    Returns:
-        int: Number of available GPU devices, or 0 if no GPUs are available
-        
-    Note:
-        Prints informational messages about GPU availability to stdout.
     """
+    if not GPU_AVAILABLE:
+        print("\nCuPy not installed - CPU mode only.")
+        print("For GPU acceleration: pip install emsuite[gpu]\n")
+        return 0
+    
     try:
         device_count = cp.cuda.runtime.getDeviceCount()
-        GPU_AVAILABLE = device_count > 0
-        if GPU_AVAILABLE < 1:
-            print("\n No GPUs found.\n \n Switching to CPU mode.\n")
-    except ImportError:
-        GPU_AVAILABLE = False
-        print("CuPy not installed - CPU mode only.")
+        if device_count < 1:
+            print("\nNo GPUs found.\nSwitching to CPU mode.\n")
+            return 0
+        else:
+            print(f"\n{device_count} GPU(s) detected.\n")
+            return device_count
     except Exception as e:
-        GPU_AVAILABLE = False
-        # print(f"GPU not available: {e}")
-        print(f"GPU not available - using CPU.")
-    
-    return device_count if GPU_AVAILABLE else 0
+        print(f"\nGPU not available: {e}")
+        print("Switching to CPU mode.\n")
+        return 0
 
-
-No_of_GPUs = check_gpu_info()
-if No_of_GPUs > 0:
-    import cupy as cp
-    # print(f"Number of GPUs available: {No_of_GPUs}")
 
 def check_cpu_info():
     """

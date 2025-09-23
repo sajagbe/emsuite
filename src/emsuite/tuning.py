@@ -662,6 +662,12 @@ def main(tuning_file='tuning.in'):
     create_output_files(surface_coords, all_effects, molecule_name, properties_to_calculate)
     check_all_files_created(molecule_name, surface_coords, properties_to_calculate)
 
+    #Remove temporary checkpoint files
+    temp_files = ['molecule_alone.chk', 'anion_alone.chk', 'cation_alone.chk']
+    for temp_file in temp_files:
+        if os.path.exists(temp_file):
+            os.remove(temp_file)
+
 if __name__ == "__main__":
     tuning_file = sys.argv[1] if len(sys.argv) > 1 else 'tuning.in'
     main(tuning_file)

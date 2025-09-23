@@ -1,12 +1,12 @@
 input_type = 'SMILES'
 input_data = 'O'
 method = 'dft'
-basis_set = '6-31G*'
-functional = 'pbe0'
+basis_set = 'cc-pvtz'
+functional = 'b3lyp'
 charge = 0
 spin = 0
 surface_charge = 1.0
 solvent = None
-properties = ['gse']
+properties = ['all']
 state_of_interest = 1
 triplet = False

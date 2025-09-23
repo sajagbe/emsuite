@@ -4,8 +4,7 @@ A comprehensive Python package for calculating electrostatic tuning effects on m
 
 ## Overview
 
-EMSuite calculates how external electrostatic fields affect various molecular properties. 
-The current implementation includes the tuning module inspired by the concluding sentence of Electrostatic Spectral Tuning Maps for Biological Chromophores's ([Gozem et al., 2019](https://pubs.acs.org/doi/10.1021/acs.jpcb.9b00489)) abstract. This module extends the central approach of ESTMs to 13 new chemical properties enabling systematic exploration supramolecular electronic influence. This approach enables the prediction and visualization of electrostatic tuning effects, which are crucial for understanding molecular behavior in different environments.
+EMSuite is aimed at qualifying and quantifying the influence of external electrostatic fields on electronic structure and corresponding chemistry. The current implementation includes the `tuning` module, inspired by the concluding sentence of Electrostatic Spectral Tuning Maps for Biological Chromophores's ([Gozem et al., 2019](https://pubs.acs.org/doi/10.1021/acs.jpcb.9b00489)) abstract. This module extends the central approach of ESTMs to 13 new chemical properties enabling systematic exploration of supramolecular electronic influence. This approach enables the prediction and visualization of electrostatic tuning effects, which are crucial for understanding molecular behavior in different environments.
 
 ## Features
 
@@ -18,8 +17,39 @@ The current implementation includes the tuning module inspired by the concluding
 ## Installation
 
 ```bash
+
+#CPU Installation
 pip install emsuite
+
+#GPU Installation
+pip install emsuite[gpu]
+
 ```
+
+
+## Dependencies
+
+### Core Dependencies (CPU Installation)
+- **Python**: ≥3.11
+- **PySCF**: ≥2.10.0 
+- **RDKit**: ≥2025.3.5 
+- **Geometric**: ≥1.1 
+- **PySCF-Forge**: ≥1.0.3 
+- **VDW-SurfGen**: ≥0.5.1 
+- **NumPy**
+- **Requests**: HTTP library for API calls
+
+### GPU Dependencies (GPU Installation)
+Additional packages for CUDA 12.x acceleration:
+- **GPU4PySCF-CUDA12x**: 1.4.3 - GPU-accelerated PySCF calculations
+- **GPU4PySCF-LibXC-CUDA12x**: 0.5 - GPU exchange-correlation functionals
+- **CuPy-CUDA12x**: 13.6.0 - GPU array library (NumPy-like interface)
+- **CuTensor-CU12**: 2.0.2 (GPU4PySCF is CuTensor version sensitive)
+
+### System Requirements
+- **CUDA 12.x toolkit** (for GPU installation)
+- **CUDA-compatible GPU** with compute capability 6.0+ (for GPU acceleration)
+
 
 ## Hardware Requirements
 
@@ -32,7 +62,7 @@ pip install emsuite
 - **CUDA-compatible GPU** with compute capability 6.0+
 - **GPU Memory**: 4GB+ VRAM (larger molecules require more)
 - **Performance Boost**: 5-50x speedup depending on calculation type
-- **Installation**: Requires CuPy and GPU4PySCF
+- **Installation**: Requires CuPy, CuTensor and GPU4PySCF
 
 The package automatically detects available hardware and uses GPU acceleration when available, falling back to CPU mode otherwise.
 
@@ -134,6 +164,9 @@ state_of_interest = 5
 triplet = True
 ```
 
+Sample Outputs for tuning-sample.in in water-test/
+
+
 ## Performance Tips
 
 1. **Use GPU acceleration** when available for significant speedup
@@ -150,10 +183,6 @@ If you use EMSuite in your research, please cite:
 ## License
 
 This project is licensed under the MIT License - see the LICENSE file for details.
-
-## Contributing
-
-Contributions are welcome! Please see CONTRIBUTING.md for guidelines.
 
 ## Support
 
