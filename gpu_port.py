@@ -35,65 +35,55 @@ except (ImportError, cp.cuda.runtime.CUDARuntimeError) as e:
 
 
 
-def qmmm_gpu(mf_gpu, coord_mm, q_mm, chkfile = None):
+def create_qmmm_molecule_object(mf, coord_mm, q_mm, chkfile = None):
     """
-
-    Given a GPU SCF object (RHF/UHF/RKS/UKS) without MM,
-    return the SCF total energy including MM charges.  
-    mf_gpu: GPU SCF object (already created, possibly converged without MM)
+    mf: SCF object (already created, possibly converged without MM)
     coord_mm: array of MM coordinates (shape [N,3])
     q_mm: array of MM charges (shape [N])
 
     """
-    mol = mf_gpu.mol
+    # mf_new = qmmm.mm_charge(mf, coord_mm, q_mm)
+    if not hasattr(mf, 'to_cpu'):
+        mf_new = qmmm.mm_charge(mf, coord_mm, q_mm)
+    else:
+        mol = mf.mol        
+        # Create a new SCF object of the same type and settings
+        mf_new = type(mf)(mol)
+        mf_new.__dict__.update(mf.__dict__)     
+        # Move to CPU for MM charge integration
+        temp_mf = mf_new.to_cpu()       
+        temp_mf_mm = qmmm.mm_charge(temp_mf, coord_mm, q_mm)
+        v_mm = temp_mf_mm.get_hcore() - temp_mf.get_hcore()
+        e_nuc_mm = temp_mf_mm.energy_nuc() - temp_mf.energy_nuc()
+        v_mm_gpu = cp.asarray(v_mm)
+        orig_get_hcore = mf_new.get_hcore
+        orig_energy_nuc = mf_new.energy_nuc
+        def get_hcore_with_mm(*args):
+            hcore = orig_get_hcore()
+            return hcore + v_mm_gpu
+        def energy_nuc_with_mm(*args):
+            return orig_energy_nuc() + e_nuc_mm
+        mf_new.get_hcore = get_hcore_with_mm
+        mf_new.energy_nuc = energy_nuc_with_mm      
+        mf_new.charge = mol.charge
+        mf_new.spin = mol.spin
+        mf_new.basis = mol.basis
+        if hasattr(mf, 'xc'):
+            mf_new.xc = mf.xc
 
-    # Create a new SCF object of the same type and settings
-    mf_gpu_new = type(mf_gpu)(mol)
-
-    mf_gpu_new.__dict__.update(mf_gpu.__dict__)
-
-    # if soscf:
-    #     mf_gpu_new = mf_gpu_new.undo_soscf()
-
-    temp_mf = mf_gpu_new.to_cpu()
-
-    temp_mf_mm = qmmm.mm_charge(temp_mf, coord_mm, q_mm)
-    v_mm = temp_mf_mm.get_hcore() - temp_mf.get_hcore()
-    e_nuc_mm = temp_mf_mm.energy_nuc() - temp_mf.energy_nuc()
-    v_mm_gpu = cp.asarray(v_mm)
-    orig_get_hcore = mf_gpu_new.get_hcore
-    orig_energy_nuc = mf_gpu_new.energy_nuc
-    def get_hcore_with_mm(*args):
-        hcore = orig_get_hcore()
-        return hcore + v_mm_gpu
-    def energy_nuc_with_mm(*args):
-        return orig_energy_nuc() + e_nuc_mm
-    mf_gpu_new.get_hcore = get_hcore_with_mm
-    mf_gpu_new.energy_nuc = energy_nuc_with_mm
-
-    mf_gpu_new.charge = mol.charge
-    mf_gpu_new.spin = mol.spin
-    mf_gpu_new.basis = mol.basis
-    if hasattr(mf_gpu, 'xc'):
-        mf_gpu_new.xc = mf_gpu.xc
-
-    print("Running QMMM on GPU with charge:", mol.charge, "spin:", mol.spin)
-    
     if chkfile:
-        mf_gpu_new.chkfile = chkfile
-        mf_gpu_new.init_guess = 'chkfile'
-
-    mf_gpu_new.kernel()
-
-    if not mf_gpu_new.converged:
+        mf_new.chkfile = chkfile
+        mf_new.init_guess = 'chkfile'
+    mf_new.kernel()
+    if not mf_new.converged:
         print("SCF did not converge with MM charges. Trying SOSCF...")
-        mf_gpu_new = mf_gpu_new.newton()
-        mf_gpu_new.kernel()
-        if not mf_gpu_new.converged:
+        mf_new = mf_new.newton()
+        mf_new.kernel()
+        if not mf_new.converged:
             print("SOSCF also did not converge.")
         else:
             print("SOSCF converged.")
-    return mf_gpu_new
+    return mf_new
 
 
 
@@ -186,7 +176,7 @@ def optimize_and_get_equilibrium(mf):
     atom_list = [(atom, coord) for atom, coord in zip(atoms, coords)]
     return atom_list
 
-molecule = "LF.xyz"
+molecule = "water.xyz"
 coord_mm = np.array([[0.0, 0.0, 1.5]])
 q_mm = np.array([1.0])
 
@@ -206,7 +196,7 @@ mf_gpu.chkfile = 'anion.chk'
 mf_gpu.dump_chk(mf_gpu.__dict__)
 
 
-mf_gpu_qmmm = qmmm_gpu(mf_gpu, coord_mm, q_mm, chkfile = 'anion.chk')
+mf_gpu_qmmm = create_qmmm_molecule_object(mf_gpu, coord_mm, q_mm, chkfile = 'anion.chk')
 
 
 
@@ -278,44 +268,44 @@ print("Excitation energies (Ha):", td_sol_wsc.e)
 print("Oscillator strengths:", td_sol_wsc.oscillator_strength())
 
 
-srun -p qGPU48 -A CHEM9C4 --nodes=1 --ntasks-per-node=1 --cpus-per-task=1 --gres=gpu:1 --time=01:00:00 --mem=8G --pty bash
+# srun -p qGPU48 -A CHEM9C4 --nodes=1 --ntasks-per-node=1 --cpus-per-task=1 --gres=gpu:1 --time=01:00:00 --mem=8G --pty bash
 
 
 
 
 
-def gpu_worker(gpu_id, calculation_func, result_dict, key, *args):
-    """Worker function for GPU calculations"""
-    with cp.cuda.Device(gpu_id):  # Switch to specific GPU
-        result_dict[key] = calculation_func(*args)  # Run calc and store result
+# def gpu_worker(gpu_id, calculation_func, result_dict, key, *args):
+#     """Worker function for GPU calculations"""
+#     with cp.cuda.Device(gpu_id):  # Switch to specific GPU
+#         result_dict[key] = calculation_func(*args)  # Run calc and store result
 
 
-def run_scf_calculation(mol_data):
-    """Example SCF calculation function"""
-    mol = gto.M(**mol_data)
-    mf = scf.RHF(mol).to_gpu()
-    return mf.kernel()
+# def run_scf_calculation(mol_data):
+#     """Example SCF calculation function"""
+#     mol = gto.M(**mol_data)
+#     mf = scf.RHF(mol).to_gpu()
+#     return mf.kernel()
 
-if No_of_GPUs:
-    # Run two different molecules simultaneously
+# if No_of_GPUs:
+#     # Run two different molecules simultaneously
 
 
 
 
     
-    mol1_data = {'atom': 'H 0 0 0; H 0 0 0.74', 'basis': 'cc-pVDZ'}
-    mol2_data = {'atom': 'He 0 0 0', 'basis': 'cc-pVDZ'}
+#     mol1_data = {'atom': 'H 0 0 0; H 0 0 0.74', 'basis': 'cc-pVDZ'}
+#     mol2_data = {'atom': 'He 0 0 0', 'basis': 'cc-pVDZ'}
     
-    results = {}
-    t1 = threading.Thread(target=gpu_worker, 
-                         args=(0, run_scf_calculation, results, 'H2', mol1_data))
-    t2 = threading.Thread(target=gpu_worker, 
-                         args=(1, run_scf_calculation, results, 'He', mol2_data))
+#     results = {}
+#     t1 = threading.Thread(target=gpu_worker, 
+#                          args=(0, run_scf_calculation, results, 'H2', mol1_data))
+#     t2 = threading.Thread(target=gpu_worker, 
+#                          args=(1, run_scf_calculation, results, 'He', mol2_data))
     
-    t1.start()
-    t2.start()
-    t1.join()
-    t2.join()
+#     t1.start()
+#     t2.start()
+#     t1.join()
+#     t2.join()
     
-    print(f"H2 energy: {results['H2']}")
-    print(f"He energy: {results['He']}")
+#     print(f"H2 energy: {results['H2']}")
+#     print(f"He energy: {results['He']}")
