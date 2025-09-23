@@ -164,7 +164,7 @@ state_of_interest = 5
 triplet = True
 ```
 
-Sample Outputs for tuning-sample.in in water-test/
+Sample Outputs for tuning.in in water-test/
 
 
 ## Performance Tips
