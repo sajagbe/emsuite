@@ -2,6 +2,11 @@
 
 A comprehensive Python package for calculating electrostatic tuning effects on molecular properties using quantum mechanical methods.
 
+
+![Water molecule tuning example](water-test/water_tuning.gif)
+**Figure 1:** Tuning effects of a +1 *e* charge on the S<sub>1</sub> excitation energy of water, calculated at the B3LYP/cc-pVTZ level in vacuum.
+
+
 ## Overview
 
 EMSuite is aimed at qualifying and quantifying the influence of external electrostatic fields on electronic structure and corresponding chemistry. The current implementation includes the `tuning` module, inspired by the concluding sentence of Electrostatic Spectral Tuning Maps for Biological Chromophores's ([Gozem et al., 2019](https://pubs.acs.org/doi/10.1021/acs.jpcb.9b00489)) abstract. This module extends the central approach of ESTMs to 13 new chemical properties enabling systematic exploration of supramolecular electronic influence. This approach enables the prediction and visualization of electrostatic tuning effects, which are crucial for understanding molecular behavior in different environments.
