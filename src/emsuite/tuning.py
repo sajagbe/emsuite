@@ -490,70 +490,76 @@ def prepare_input_data(input_type, input_data, basis_set, method='dft', function
     else:
         raise ValueError("input_type must be 'file' or 'smiles'")
 
+
 def create_output_files(surface_coords, all_effects, molecule_name, properties_to_calculate):
     """
     Create MOL2 files and CSV summary for surface effects analysis.
-    
-    This function generates visualization files for molecular property maps
-    and a comprehensive CSV summary of all calculated surface effects.
-    
+
+    This function scans all effect dictionaries for any key ending in '_effect'
+    (including sX_exe_effect, tX_osc_effect, etc.) and creates output files for each.
+    This ensures all excited state effects are included, regardless of the original
+    properties requested.
+
     Args:
         surface_coords (numpy.ndarray): Array of surface coordinates with shape [N, 3]
         all_effects (list): List of effect dictionaries for each surface point
         molecule_name (str): Base name for output files
         properties_to_calculate (list): List of calculated molecular properties
-        
+
     Returns:
         None: Creates files directly on disk
-        
-    Output Files:
-        - MOL2 files: "{molecule_name}_{property}.mol2" for each property
-          (suitable for visualization in molecular graphics software)
-        - CSV file: "{molecule_name}_tuning_summary.csv" with all effects data
-          
-    Note:
-        - MOL2 files map property effects to surface coordinates for visualization
-        - CSV contains point index, coordinates, and all property effects
-        - Files are saved in the current working directory
-        - Property effects represent the change due to external charges
     """
-    
-    # Collect all effects by property
-    property_effects = {}
-    for prop in properties_to_calculate:
-        prop_effect_key = f'{prop}_effect'
-        property_effects[prop] = [effect.get(prop_effect_key, 0.0) for effect in all_effects]
-    
-    # Create MOL2 files for each property
-    for prop, effect_values in property_effects.items():
-        core.create_mol2_file(molecule_name, surface_coords, effect_values, prop)
-        # print(f"Created {molecule_name}_{prop}_tuning.mol2")
-    
-    # Create CSV summary
+    # Gather all effect keys found in all_effects
+    effect_keys = set()
+    for effect in all_effects:
+        effect_keys.update(effect.keys())
+    effect_keys = sorted(effect_keys)
+
+    # For each effect key, create a MOL2 file
+    for key in effect_keys:
+        if key.endswith('_effect'):
+            # Remove '_effect' for file naming
+            prop_base = key.replace('_effect', '')
+            core.create_mol2_file(
+                molecule_name,
+                surface_coords,
+                [effect.get(key, 0.0) for effect in all_effects],
+                prop_base
+            )
+
+    # Create CSV summary with all effect keys as columns
     csv_filename = f"{molecule_name}_tuning_summary.csv"
     with open(csv_filename, 'w', newline='') as csvfile:
-        fieldnames = ['point_index', 'x', 'y', 'z'] + [f'{prop}_effect' for prop in properties_to_calculate]
+        fieldnames = ['point_index', 'x', 'y', 'z'] + effect_keys
         writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
-        
         writer.writeheader()
         for i, (coord, effect) in enumerate(zip(surface_coords, all_effects)):
             row = {
                 'point_index': i,
                 'x': coord[0],
-                'y': coord[1], 
+                'y': coord[1],
                 'z': coord[2]
             }
-            # Add property effects
-            for prop in properties_to_calculate:
-                row[f'{prop}_effect'] = effect.get(f'{prop}_effect', 0.0)
+            for key in effect_keys:
+                row[key] = effect.get(key, 0.0)
             writer.writerow(row)
     
-def check_all_files_created(molecule_name, surface_coords, properties_to_calculate):
+def check_all_files_created(molecule_name, surface_coords, properties_to_calculate, all_effects=None):
     if len(surface_coords) == 1:
         core.print_office_quote()
     else:
         missing = []
-        for prop in properties_to_calculate:
+        # Use effect keys from all_effects if provided, otherwise fallback to properties_to_calculate
+        effect_keys = set()
+        if all_effects and len(all_effects) > 0:
+            for effect in all_effects:
+                effect_keys.update(effect.keys())
+            # Only check for keys ending with '_effect'
+            effect_props = [key.replace('_effect', '') for key in effect_keys if key.endswith('_effect')]
+        else:
+            effect_props = properties_to_calculate
+
+        for prop in effect_props:
             filepath = f"{molecule_name}_{prop}.mol2"
             if not os.path.exists(filepath):
                 missing.append(filepath)
@@ -566,7 +572,6 @@ def check_all_files_created(molecule_name, surface_coords, properties_to_calcula
             print(f"Missing: {', '.join(missing)}")
         else:
             core.print_office_quote()
-
 
 #################
 # Miscellaneous #
@@ -657,10 +662,9 @@ def main(tuning_file='tuning.in'):
         all_effects.append(effects)
         print(f"Point {i+1}/{len(surface_coords)}: {effects}")
 
-
-    # Create output files
+     # Create output files
     create_output_files(surface_coords, all_effects, molecule_name, properties_to_calculate)
-    check_all_files_created(molecule_name, surface_coords, properties_to_calculate)
+    check_all_files_created(molecule_name, surface_coords, properties_to_calculate, all_effects)
 
     #Remove temporary checkpoint files
     temp_files = ['molecule_alone.chk', 'anion_alone.chk', 'cation_alone.chk']
