@@ -3,7 +3,7 @@
 A comprehensive Python package for calculating electrostatic tuning effects on molecular properties using quantum mechanical methods.
 
 
-![Water molecule tuning example](water-test/water_test.gif)
+![Water molecule tuning example](water-test/water-test.gif)
 **Figure 1:** Tuning effects of a +1 *e* charge on the S<sub>1</sub> excitation energy of water, calculated at the B3LYP/cc-pVTZ level in vacuum.
 
 
