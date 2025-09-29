@@ -154,7 +154,13 @@ def create_molecule_object(
         - Prints convergence information for each spin state
     """
     charge = original_charge + charge_change
-    spin_guesses = spin_guesses or [0, 1, 2, 3, 4]
+    if spin_guesses is None:
+        spin_guesses = [0, 1, 2, 3, 4]
+    elif isinstance(spin_guesses, int):
+        spin_guesses = [spin_guesses]
+    elif isinstance(spin_guesses, list) and len(spin_guesses) == 0:
+        spin_guesses = [0, 1, 2, 3, 4]    
+        
     results = []  # store (spin, energy, mf)
 
     for spin in spin_guesses:
@@ -164,12 +170,12 @@ def create_molecule_object(
             mol.basis = basis_set
             mol.charge = charge
             mol.spin = spin  
+            # mol.verbose = 4
             mol.build()
 
             # RKS for singlet, UKS for open shell
             if method.lower() == 'dft':
-                mol.xc = functional
-                mf = dft.UKS(mol) if spin > 0 else dft.RKS(mol)
+                mf = dft.UKS(mol, xc=functional) if spin > 0 else dft.RKS(mol, xc=functional)
             elif method.lower() == 'hf':
                 mf = scf.UHF(mol) if spin > 0 else scf.RHF(mol)
             else:

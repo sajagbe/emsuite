@@ -16,7 +16,7 @@ EMSuite is aimed at qualifying and quantifying the influence of external electro
 - **Multiple Input Formats**: Support for SMILES strings (with automatic QM optimization) and XYZ coordinate files
 - **Comprehensive Property Calculations**: Ground state energies, orbital energies, dipole moments, ionization potentials, electron affinities, and excited state properties
 - **GPU Acceleration**: Full GPU support via GPU4PySCF for enhanced computational speed (CPU fallback immediately available).
-- **Implicit Solvation**: Built-in support for solvent effects using the SMD model.
+- **Implicit Solvation**: Built-in support for solvent effects using the PCM model.
 - **Visualization Output**: MOL2 files for 3D visualization and CSV summaries for data analysis.
 
 ## Installation

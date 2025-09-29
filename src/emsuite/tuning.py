@@ -264,7 +264,7 @@ def create_alone_molecule_objects(input_data, basis_set, method, functional, cha
         spin_guesses=spin_guesses
     )
 
-def create_molecule_objects(input_data, basis_set, method, functional, charge, gpu_available, required_calculations, state_of_interest, triplet):
+def create_molecule_objects(input_data, basis_set, spin_guesses, method, functional, charge, gpu_available, required_calculations, state_of_interest, triplet):
     """
     Create and save all required molecule objects for property calculations.
     
@@ -281,6 +281,10 @@ def create_molecule_objects(input_data, basis_set, method, functional, charge, g
         gpu_available (bool): Whether GPU is available for calculations
         required_calculations (dict): Dictionary specifying which calculations are needed
                                     (e.g., {'neutral': True, 'anion': False, ...})
+        spin_guesses (list, optional): List of spin multiplicities to test. 
+                                     Defaults to [0, 1, 2, 3, 4]. Uses 2S notation not multiplicity (2S+1).
+                                     Important for open-shell systems.
+    
         state_of_interest (int): Number of excited states to calculate for TD
         triplet (bool): Whether to calculate triplet excited states
         
@@ -294,8 +298,7 @@ def create_molecule_objects(input_data, basis_set, method, functional, charge, g
         - Charge states: neutral (0), anion (-1), cation (+1)
     """
     molecules = {}
-    
-    calc_configs = [('neutral', 0, None), ('anion', -1, None), ('cation', +1, None)]
+    calc_configs = [('neutral', 0, spin_guesses), ('anion', -1, None), ('cation', +1, None)]
     for name, charge_change, spin_guesses in calc_configs:
         if required_calculations.get(name, False):
             molecules[name] = create_alone_molecule_objects(
@@ -303,16 +306,16 @@ def create_molecule_objects(input_data, basis_set, method, functional, charge, g
                 charge_change, gpu_available, spin_guesses
             )
     
-    # Only create TD if explicitly needed
-    if required_calculations.get('td', False):
-        molecules['td'] = core.create_td_molecule_object(molecules['neutral'], nstates=state_of_interest, triplet=triplet)
+    # # Only create TD if explicitly needed
+    # if required_calculations.get('td', False):
+    #     molecules['td'] = core.create_td_molecule_object(molecules['neutral'], nstates=state_of_interest, triplet=triplet)
     
-    chkfile_map = {'neutral': 'molecule_alone', 'anion': 'anion_alone', 'cation': 'cation_alone'}
-    for key, filename in chkfile_map.items():
-        if molecules.get(key):
-            core.save_chkfile(molecules[key], filename)
+    # chkfile_map = {'neutral': 'molecule_alone', 'anion': 'anion_alone', 'cation': 'cation_alone'}
+    # for key, filename in chkfile_map.items():
+    #     if molecules.get(key):
+    #         core.save_chkfile(molecules[key], filename)
     
-    return [molecules.get(k) for k in ['neutral', 'anion', 'cation', 'td']]
+    # return [molecules.get(k) for k in ['neutral', 'anion', 'cation', 'td']]
 
 def create_wsc_objects(molecules, coord, q_mm, state_of_interest, triplet, required_calculations):
     """
@@ -488,7 +491,7 @@ def prepare_input_data(input_type, input_data, basis_set, method='dft', function
         spin_guesses=None)
         return optimized_xyz
     else:
-        raise ValueError("input_type must be 'file' or 'smiles'")
+        raise ValueError("input_type must be 'xyz' or 'smiles'")
 
 
 def create_output_files(surface_coords, all_effects, molecule_name, properties_to_calculate):
@@ -618,7 +621,7 @@ def main(tuning_file='tuning.in'):
     properties = tuning_params.get('properties', ['lumo'])
     state_of_interest = tuning_params.get('state_of_interest', 2)
     triplet = tuning_params.get('triplet', False)
-
+    print(spin)
 
     # Check available hardware
     No_of_GPUs = core.check_gpu_info()
@@ -642,35 +645,34 @@ def main(tuning_file='tuning.in'):
     print(f"\n")
 
 
-    #######################################
-    #    Core Tuning Map Calculations     #
-    #######################################
+    # #######################################
+    # #    Core Tuning Map Calculations     #
+    # #######################################
 
-    # Create base molecule objects
+    # # Create base molecule objects
     base_molecules = create_molecule_objects(
-        input_data, basis_set, method, functional, charge, 
-        No_of_GPUs > 0, required_calculations, state_of_interest, triplet
-    )
+        input_data, basis_set, spin, method, functional, charge, 
+        No_of_GPUs > 0, required_calculations, state_of_interest, triplet)
     
-    # Calculate effects at each surface point
-    all_effects = []
-    for i, coord in enumerate(surface_coords):
-        effects = calculate_surface_effect_at_point(
-            base_molecules, coord, surface_charge, 
-            solvent, state_of_interest, triplet, properties_to_calculate, required_calculations
-        )
-        all_effects.append(effects)
-        print(f"Point {i+1}/{len(surface_coords)}: {effects}")
+    # # Calculate effects at each surface point
+    # all_effects = []
+    # for i, coord in enumerate(surface_coords):
+    #     effects = calculate_surface_effect_at_point(
+    #         base_molecules, coord, surface_charge, 
+    #         solvent, state_of_interest, triplet, properties_to_calculate, required_calculations
+    #     )
+    #     all_effects.append(effects)
+    #     print(f"Point {i+1}/{len(surface_coords)}: {effects}")
 
-     # Create output files
-    create_output_files(surface_coords, all_effects, molecule_name, properties_to_calculate)
-    check_all_files_created(molecule_name, surface_coords, properties_to_calculate, all_effects)
+    #  # Create output files
+    # create_output_files(surface_coords, all_effects, molecule_name, properties_to_calculate)
+    # check_all_files_created(molecule_name, surface_coords, properties_to_calculate, all_effects)
 
-    #Remove temporary checkpoint files
-    temp_files = ['molecule_alone.chk', 'anion_alone.chk', 'cation_alone.chk']
-    for temp_file in temp_files:
-        if os.path.exists(temp_file):
-            os.remove(temp_file)
+    # #Remove temporary checkpoint files
+    # temp_files = ['molecule_alone.chk', 'anion_alone.chk', 'cation_alone.chk']
+    # for temp_file in temp_files:
+    #     if os.path.exists(temp_file):
+    #         os.remove(temp_file)
 
 if __name__ == "__main__":
     tuning_file = sys.argv[1] if len(sys.argv) > 1 else 'tuning.in'

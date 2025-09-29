@@ -73,5 +73,5 @@ best_mf, best_spin, best_energy = create_charged_molecule_object(
 
 print(best_spin, best_energy, best_mf.kernel() if best_mf else None)
 
-# srun -p qGPU24 -A CHEM9C4 --nodes=1 --ntasks-per-node=1 --cpus-per-task=1 --gres=gpu:1 --time=01:00:00 --mem=8G --pty ems
+# srun -p qGPU24 -A CHEM9C4 --nodes=1 --ntasks-per-node=1 --cpus-per-task=1 --gres=gpu:1 --time=01:00:00 --mem=8G --pty bash
 
