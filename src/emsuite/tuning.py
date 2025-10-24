@@ -1,7 +1,7 @@
 from . import core
 import csv, os, argparse, ast, sys
 import numpy as np
-
+import ray
 
 ##############################################
 #              Dependency Setup              #
@@ -306,16 +306,16 @@ def create_molecule_objects(input_data, basis_set, spin_guesses, method, functio
                 charge_change, gpu_available, spin_guesses
             )
     
-    # # Only create TD if explicitly needed
-    # if required_calculations.get('td', False):
-    #     molecules['td'] = core.create_td_molecule_object(molecules['neutral'], nstates=state_of_interest, triplet=triplet)
+    # Only create TD if explicitly needed
+    if required_calculations.get('td', False):
+        molecules['td'] = core.create_td_molecule_object(molecules['neutral'], nstates=state_of_interest, triplet=triplet)
     
-    # chkfile_map = {'neutral': 'molecule_alone', 'anion': 'anion_alone', 'cation': 'cation_alone'}
-    # for key, filename in chkfile_map.items():
-    #     if molecules.get(key):
-    #         core.save_chkfile(molecules[key], filename)
+    chkfile_map = {'neutral': 'molecule_alone', 'anion': 'anion_alone', 'cation': 'cation_alone'}
+    for key, filename in chkfile_map.items():
+        if molecules.get(key):
+            core.save_chkfile(molecules[key], filename)
     
-    # return [molecules.get(k) for k in ['neutral', 'anion', 'cation', 'td']]
+    return [molecules.get(k) for k in ['neutral', 'anion', 'cation', 'td']]
 
 def create_wsc_objects(molecules, coord, q_mm, state_of_interest, triplet, required_calculations):
     """
@@ -616,6 +616,8 @@ def main(tuning_file='tuning.in'):
     spin = tuning_params.get('spin', 0)
     surface_charge = tuning_params.get('surface_charge', 1.0)
     solvent = tuning_params.get('solvent', 'water')
+    density = tuning_params.get('density', 1.0)  
+    scale = tuning_params.get('scale', 1.0)
 
     # Calculation specifics
     properties = tuning_params.get('properties', ['lumo'])
@@ -637,7 +639,7 @@ def main(tuning_file='tuning.in'):
     q_mm = np.array([surface_charge])
     input_data = prepare_input_data(input_type, input_data, basis_set, method, functional, charge, spin, gpu_available=No_of_GPUs > 0)
     molecule_name = core.extract_xyz_name(input_data)
-    surface_coords = core.get_vdw_surface_coordinates(input_data)
+    surface_coords = core.get_vdw_surface_coordinates(input_data, density=density, scale=scale)
     print(f"\n")
     print(f"="*60)
     print(f"         Running calculations on {len(surface_coords)} surface points")
@@ -654,25 +656,25 @@ def main(tuning_file='tuning.in'):
         input_data, basis_set, spin, method, functional, charge, 
         No_of_GPUs > 0, required_calculations, state_of_interest, triplet)
     
-    # # Calculate effects at each surface point
-    # all_effects = []
-    # for i, coord in enumerate(surface_coords):
-    #     effects = calculate_surface_effect_at_point(
-    #         base_molecules, coord, surface_charge, 
-    #         solvent, state_of_interest, triplet, properties_to_calculate, required_calculations
-    #     )
-    #     all_effects.append(effects)
-    #     print(f"Point {i+1}/{len(surface_coords)}: {effects}")
+    # Calculate effects at each surface point
+    all_effects = []
+    for i, coord in enumerate(surface_coords):
+        effects = calculate_surface_effect_at_point(
+            base_molecules, coord, surface_charge, 
+            solvent, state_of_interest, triplet, properties_to_calculate, required_calculations
+        )
+        all_effects.append(effects)
+        print(f"Point {i+1}/{len(surface_coords)}: {effects}")
 
-    #  # Create output files
-    # create_output_files(surface_coords, all_effects, molecule_name, properties_to_calculate)
-    # check_all_files_created(molecule_name, surface_coords, properties_to_calculate, all_effects)
+     # Create output files
+    create_output_files(surface_coords, all_effects, molecule_name, properties_to_calculate)
+    check_all_files_created(molecule_name, surface_coords, properties_to_calculate, all_effects)
 
-    # #Remove temporary checkpoint files
-    # temp_files = ['molecule_alone.chk', 'anion_alone.chk', 'cation_alone.chk']
-    # for temp_file in temp_files:
-    #     if os.path.exists(temp_file):
-    #         os.remove(temp_file)
+    #Remove temporary checkpoint files
+    temp_files = ['molecule_alone.chk', 'anion_alone.chk', 'cation_alone.chk']
+    for temp_file in temp_files:
+        if os.path.exists(temp_file):
+            os.remove(temp_file)
 
 if __name__ == "__main__":
     tuning_file = sys.argv[1] if len(sys.argv) > 1 else 'tuning.in'

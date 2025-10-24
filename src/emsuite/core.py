@@ -421,7 +421,7 @@ def create_td_molecule_object(mf, nstates=5, triplet=False):
 #          Molecular File Operations         #
 ##############################################
 
-def get_vdw_surface_coordinates(xyz_file):
+def get_vdw_surface_coordinates(xyz_file, density=1.0, scale=1.0):
     """
     Generate van der Waals surface coordinates for a molecule.
     
@@ -430,6 +430,8 @@ def get_vdw_surface_coordinates(xyz_file):
     
     Args:
         xyz_file (str): Path to the XYZ file containing molecular coordinates
+        density (float, optional): Surface point density. Defaults to 1.0.
+        scale (float, optional): Scaling factor for van der Waals radii. Defaults to 1.0.
         
     Returns:
         numpy.ndarray: Array of surface coordinates with shape [N, 3]
@@ -443,7 +445,7 @@ def get_vdw_surface_coordinates(xyz_file):
         - Automatically cleans up temporary surface files after reading
         - Handles single-point surfaces by reshaping to proper dimensions
     """
-    ret = subprocess.run(['vsg', xyz_file, '--txt'], capture_output=True, text=True)
+    ret = subprocess.run(['vsg', xyz_file, '-d', str(density), '-s', str(scale), '-t'])
     if ret.returncode != 0:
         raise RuntimeError(f"vsg failed: {ret.stderr}")
     base, _ = os.path.splitext(xyz_file)

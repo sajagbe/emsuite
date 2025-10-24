@@ -1,6 +1,6 @@
 [project]
 name = "emsuite"
-version = "1.0.0"
+version = "1.0.3"
 description = "Electrostatic Map Suite - A Comprehensive Set of Calculators for Qualifying and Quantifying Electrostatic Interactions and Effects."
 readme = "README.md"
 requires-python = ">=3.11"
@@ -9,9 +9,10 @@ dependencies = [
     "pyscf>=2.10.0",
     "pyscf-forge>=1.0.3",
     "rdkit>=2025.3.5",
-    "vdw-surfgen>=0.5.1",
+    "vdw-surfgen>=0.5.6",
     "requests",
     "numpy",
+    "ray>=2.50.1",
 ]
 
 [project.optional-dependencies]
