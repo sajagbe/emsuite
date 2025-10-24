@@ -494,14 +494,52 @@ def prepare_input_data(input_type, input_data, basis_set, method='dft', function
         raise ValueError("input_type must be 'xyz' or 'smiles'")
 
 
+
+
+def normalize_effects(all_effects, effect_keys):
+    """
+    Normalize effect values to [-1, 1] range using min-max normalization.
+    
+    Args:
+        all_effects (list): List of effect dictionaries for each surface point
+        effect_keys (list): List of effect keys to normalize
+        
+    Returns:
+        list: List of dictionaries with normalized values
+    """
+    normalized_effects = []
+    
+    # Calculate min and max for each effect key
+    normalization_params = {}
+    for key in effect_keys:
+        values = [effect.get(key, 0.0) for effect in all_effects]
+        min_val = min(values)
+        max_val = max(values)
+        normalization_params[key] = (min_val, max_val)
+    
+    # Normalize each effect dictionary
+    for effect in all_effects:
+        normalized = {}
+        for key in effect_keys:
+            min_val, max_val = normalization_params[key]
+            value = effect.get(key, 0.0)
+            
+            # Min-max normalization to [-1, 1]
+            if max_val - min_val != 0:
+                normalized[key] = 2 * (value - min_val) / (max_val - min_val) - 1
+            else:
+                normalized[key] = 0.0
+        normalized_effects.append(normalized)
+    
+    return normalized_effects, normalization_params
+
 def create_output_files(surface_coords, all_effects, molecule_name, properties_to_calculate):
     """
     Create MOL2 files and CSV summary for surface effects analysis.
 
     This function scans all effect dictionaries for any key ending in '_effect'
     (including sX_exe_effect, tX_osc_effect, etc.) and creates output files for each.
-    This ensures all excited state effects are included, regardless of the original
-    properties requested.
+    Creates both normalized and non-normalized versions.
 
     Args:
         surface_coords (numpy.ndarray): Array of surface coordinates with shape [N, 3]
@@ -518,10 +556,12 @@ def create_output_files(surface_coords, all_effects, molecule_name, properties_t
         effect_keys.update(effect.keys())
     effect_keys = sorted(effect_keys)
 
-    # For each effect key, create a MOL2 file
+    # Normalize the effects
+    normalized_effects, normalization_params = normalize_effects(all_effects, effect_keys)
+
+    # Create MOL2 files for non-normalized values
     for key in effect_keys:
         if key.endswith('_effect'):
-            # Remove '_effect' for file naming
             prop_base = key.replace('_effect', '')
             core.create_mol2_file(
                 molecule_name,
@@ -530,13 +570,30 @@ def create_output_files(surface_coords, all_effects, molecule_name, properties_t
                 prop_base
             )
 
-    # Create CSV summary with all effect keys as columns
+    # Create MOL2 files for normalized values
+    for key in effect_keys:
+        if key.endswith('_effect'):
+            prop_base = key.replace('_effect', '')
+            core.create_mol2_file(
+                molecule_name,
+                surface_coords,
+                [effect.get(key, 0.0) for effect in normalized_effects],
+                f"{prop_base}_normalized"
+            )
+
+    # Create CSV summary with both original and normalized values
     csv_filename = f"{molecule_name}_tuning_summary.csv"
     with open(csv_filename, 'w', newline='') as csvfile:
-        fieldnames = ['point_index', 'x', 'y', 'z'] + effect_keys
+        # Create fieldnames with both original and normalized columns
+        fieldnames = ['point_index', 'x', 'y', 'z']
+        for key in effect_keys:
+            fieldnames.append(key)
+            fieldnames.append(f"{key}_normalized")
+        
         writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
         writer.writeheader()
-        for i, (coord, effect) in enumerate(zip(surface_coords, all_effects)):
+        
+        for i, (coord, effect, norm_effect) in enumerate(zip(surface_coords, all_effects, normalized_effects)):
             row = {
                 'point_index': i,
                 'x': coord[0],
@@ -545,8 +602,14 @@ def create_output_files(surface_coords, all_effects, molecule_name, properties_t
             }
             for key in effect_keys:
                 row[key] = effect.get(key, 0.0)
+                row[f"{key}_normalized"] = norm_effect.get(key, 0.0)
             writer.writerow(row)
     
+    # Print normalization parameters for reference
+    print("\nNormalization parameters (min, max):")
+    for key, (min_val, max_val) in normalization_params.items():
+        print(f"  {key}: ({min_val:.6f}, {max_val:.6f})")
+        
 def check_all_files_created(molecule_name, surface_coords, properties_to_calculate, all_effects=None):
     if len(surface_coords) == 1:
         core.print_office_quote()
