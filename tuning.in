@@ -1,5 +1,5 @@
-input_type = 'xyz'
-input_data = 'water.xyz'
+input_type = 'SMILES'
+input_data = 'O'
 method = 'dft'
 basis_set = 'cc-pvtz'
 functional = 'b3lyp'
