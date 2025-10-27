@@ -1,6 +1,6 @@
 [project]
 name = "emsuite"
-version = "1.0.3"
+version = "1.0.4"
 description = "Electrostatic Map Suite - A Comprehensive Set of Calculators for Qualifying and Quantifying Electrostatic Interactions and Effects."
 readme = "README.md"
 requires-python = ">=3.11"

@@ -217,13 +217,12 @@ wheels = [
 
 [[package]]
 name = "emsuite"
-version = "1.0.3"
+version = "1.0.4"
 source = { editable = "." }
 dependencies = [
     { name = "geometric" },
     { name = "numpy" },
     { name = "pyscf" },
-    { name = "pyscf-forge" },
     { name = "ray" },
     { name = "rdkit" },
     { name = "requests" },
@@ -247,7 +246,6 @@ requires-dist = [
     { name = "gpu4pyscf-libxc-cuda12x", marker = "extra == 'gpu'", specifier = "==0.5" },
     { name = "numpy" },
     { name = "pyscf", specifier = ">=2.10.0" },
-    { name = "pyscf-forge", specifier = ">=1.0.3" },
     { name = "ray", specifier = ">=2.50.1" },
     { name = "rdkit", specifier = ">=2025.3.5" },
     { name = "requests" },
@@ -882,18 +880,6 @@ wheels = [
     { url = "https://files.pythonhosted.org/packages/69/01/1b6fbffb4189bd6f9cab4bff31cd3fcd053aa07e1f7c62c012010b1e23d3/pyscf_dispersion-1.3.0-py3-none-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:f17bf50d24d46b320ecea5441bac193b34b95896b89eb38dd9287013bfbcceb8", size = 12391407, upload-time = "2025-02-04T18:45:03.462Z" },
 ]
 
-[[package]]
-name = "pyscf-forge"
-version = "1.0.3"
-source = { registry = "https://pypi.org/simple" }
-dependencies = [
-    { name = "numpy" },
-    { name = "pyscf" },
-]
-sdist = { url = "https://files.pythonhosted.org/packages/78/00/b39b16ac873c79b945502c44cb50d27b364da475f3102bd7264fde10aa93/pyscf_forge-1.0.3.tar.gz", hash = "sha256:184222e014aa9765e291a83938a19ca20350f26e2014e5a5054f43b7a7cced8e", size = 232711, upload-time = "2025-01-22T04:08:09.35Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/c9/6a/ce51c1f1448525a157803d856d234ca3a6c727c9ae6d300ebfefa6d9ffe4/pyscf_forge-1.0.3-py3-none-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:745f1a2536648a39e269fe74ae8b955d0b62e7f28b8c6b24a35710fe54f409c8", size = 10740976, upload-time = "2025-01-22T04:25:18.868Z" },
-]
 
 [[package]]
 name = "python-dateutil"

@@ -1,5 +1,5 @@
 input_type = 'SMILES'
-input_data = 'O'
+input_data = 'OO'
 method = 'dft'
 basis_set = 'cc-pvtz'
 functional = 'b3lyp'
