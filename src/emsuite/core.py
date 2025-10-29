@@ -220,13 +220,60 @@ def save_chkfile(mf, chkfile_name, functional=None):
         functional: XC functional (optional, for DFT calculations)
     """
     mf.chkfile = chkfile_name
-    mf.kernel()
     if functional:
         lib.chkfile.save(chkfile_name, 'scf/xc', functional)
+    
+    mf.kernel()
     print(f"Saved to {chkfile_name}, Energy: {mf.e_tot}")
     return mf
 
 
+
+# def resurrect_mol(chkfile_name):
+#     """Reconstruct and run a mean-field calculation from a checkpoint file.
+    
+#     Args:
+#         chkfile_name: Name of the checkpoint file
+        
+#     Returns:
+#         mf: Reconstructed mean-field object after running kernel()
+#     """
+#     print(f"\n=== Resurrecting {chkfile_name} ===")
+    
+#     # Load molecule and scf data
+#     mol_data = lib.chkfile.load_mol(chkfile_name)
+#     scf_data = lib.chkfile.load(chkfile_name, 'scf')
+    
+#     # Rebuild molecule
+#     mol = gto.Mole()
+#     mol.atom = mol_data.atom
+#     mol.basis = mol_data.basis
+#     mol.charge = mol_data.charge
+#     mol.spin = mol_data.spin
+#     mol.build()
+    
+#     # Determine method
+#     is_gpu = 'gpu4pyscf' in str(type(scf_data.get('mo_coeff', '')))
+#     xc = lib.chkfile.load(chkfile_name, 'scf/xc')
+#     is_dft = xc is not None
+#     is_unrestricted = mol.spin != 0 or len(scf_data.get('mo_occ', [[]])) == 2
+    
+#     # Create appropriate method object
+#     if is_dft:
+#         mf = dft.UKS(mol) if is_unrestricted else dft.RKS(mol)
+#         mf.xc = xc.decode('utf-8') if isinstance(xc, bytes) else xc
+#     else:
+#         mf = scf.UHF(mol) if is_unrestricted else scf.RHF(mol)
+    
+#     # Convert to GPU if needed
+#     if is_gpu:
+#         mf = mf.to_gpu()
+    
+#     mf.chkfile = chkfile_name
+#     mf.init_guess = 'chkfile'
+#     mf.kernel()
+#     # print(f"Energy: {mf.e_tot}")
+#     return mf
 
 def resurrect_mol(chkfile_name):
     """Reconstruct and run a mean-field calculation from a checkpoint file.
@@ -240,16 +287,8 @@ def resurrect_mol(chkfile_name):
     print(f"\n=== Resurrecting {chkfile_name} ===")
     
     # Load molecule and scf data
-    mol_data = lib.chkfile.load_mol(chkfile_name)
+    mol = lib.chkfile.load_mol(chkfile_name)
     scf_data = lib.chkfile.load(chkfile_name, 'scf')
-    
-    # Rebuild molecule
-    mol = gto.Mole()
-    mol.atom = mol_data.atom
-    mol.basis = mol_data.basis
-    mol.charge = mol_data.charge
-    mol.spin = mol_data.spin
-    mol.build()
     
     # Determine method
     is_gpu = 'gpu4pyscf' in str(type(scf_data.get('mo_coeff', '')))
@@ -271,7 +310,6 @@ def resurrect_mol(chkfile_name):
     mf.chkfile = chkfile_name
     mf.init_guess = 'chkfile'
     mf.kernel()
-    print(f"Energy: {mf.e_tot}")
     return mf
 
 

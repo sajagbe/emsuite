@@ -16,19 +16,3 @@ properties = ['all']
 solvent = None
 scale = 1
 density = 1
-num_cpu = None
-
-if surface type and calctype don't exist:
-    surface_type = homogenous
-    surface_charge = 1.0
-    calctype = separate
-else:   
-    surface_type = homogenous / heterogenous
-    if homogenous:
-        surface_charge = 1.0
-    else:
-        get the surface charge array from the surface.in file
-
-calc_type = separate / combined
-    if separate, do the loop as it currently does using the surface.in file
-    if together do the combined thing with multiple charges and coordinates at once

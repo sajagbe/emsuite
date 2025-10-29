@@ -1,5 +1,5 @@
 from . import core
-import csv, os, argparse, ast, sys
+import csv, os, argparse, ast, sys, shutil
 import numpy as np
 import ray
 
@@ -165,16 +165,13 @@ def calculate_all_properties(mf, anion_mf=None, cation_mf=None, td_obj=None, tri
     
     return results
 
-def calculate_surface_effect_at_point(base_molecules, coord, surface_charge, solvent, state_of_interest, triplet, properties_to_calculate, required_calculations):
+def calculate_surface_effect_at_point(base_chkfiles, coord, surface_charge, solvent, state_of_interest, triplet, properties_to_calculate, required_calculations, functional):
     """
     Calculate the effect of a surface charge at a single coordinate point.
     
-    This function computes how a point charge at a specific location affects
-    various molecular properties by comparing calculations with and without
-    the external charge.
-    
     Args:
-        base_molecules (list): [neutral_mf, anion_mf, cation_mf, td_obj] base objects
+        base_chkfiles (dict): Dictionary with keys 'neutral', 'anion', 'cation' 
+                             pointing to checkpoint file paths
         coord (array-like): 3D coordinates [x, y, z] of the surface charge
         surface_charge (float): Magnitude of the point charge
         solvent (str or None): Solvent for implicit solvation
@@ -182,18 +179,20 @@ def calculate_surface_effect_at_point(base_molecules, coord, surface_charge, sol
         triplet (bool): Whether to calculate triplet excited states
         properties_to_calculate (list): List of molecular properties to compute
         required_calculations (dict): Dictionary specifying needed calculations
+        functional (str): XC functional for DFT calculations
         
     Returns:
-        dict: Dictionary of property effects with keys like '{property}_effect'
-              containing the difference (with_charge - without_charge)
-              
-    Note:
-        - Creates QM/MM calculations with the single point charge
-        - Applies solvation if specified
-        - Calculates the difference in properties due to the external charge
-        - Effects show how the external charge modifies each property
+        dict: Dictionary of property effects
     """
-    molecule_alone, anion_alone, cation_alone, td_alone = base_molecules
+    # Resurrect base molecules from checkpoint files
+    molecule_alone = core.resurrect_mol(base_chkfiles['neutral']) if base_chkfiles.get('neutral') else None
+    anion_alone = core.resurrect_mol(base_chkfiles['anion']) if base_chkfiles.get('anion') else None
+    cation_alone = core.resurrect_mol(base_chkfiles['cation']) if base_chkfiles.get('cation') else None
+    
+    # Create TD object if needed
+    td_alone = None
+    if required_calculations.get('td', False) and molecule_alone:
+        td_alone = core.create_td_molecule_object(molecule_alone, nstates=state_of_interest, triplet=triplet)
     
     # Create single-point charge array
     single_coord = np.array([coord])
@@ -229,6 +228,95 @@ def calculate_surface_effect_at_point(base_molecules, coord, surface_charge, sol
     
     return effects
 
+
+###############################################
+#              Parallel Processing            #
+###############################################
+
+@ray.remote(num_cpus=1, num_gpus=0, max_retries=0, memory=4*1024*1024*1024)
+def calculate_point_effect_cpu(base_chkfiles, coord, surface_charge, solvent, state_of_interest, triplet, properties_to_calculate, required_calculations, functional, point_index):
+    
+    # Get CPU core affinity
+    cpu_id = os.sched_getaffinity(0)
+    print(f"[Point {point_index}] Running on CPU cores: {cpu_id}, PID: {os.getpid()}")
+    
+    
+    # Create unique directory for this worker
+    worker_dir = f"point_{point_index}"
+    os.makedirs(worker_dir, exist_ok=True)
+    
+    # Copy checkpoint files to worker directory
+    worker_chkfiles = {}
+    for key, chkfile in base_chkfiles.items():
+        if chkfile:
+            worker_chkfile = os.path.join(worker_dir, os.path.basename(chkfile))
+            shutil.copy2(chkfile, worker_chkfile)
+            worker_chkfiles[key] = worker_chkfile
+        else:
+            worker_chkfiles[key] = None
+    
+    # Change to worker directory
+    original_dir = os.getcwd()
+    os.chdir(worker_dir)
+    
+    try:
+        effects = calculate_surface_effect_at_point(
+            {k: os.path.basename(v) if v else None for k, v in worker_chkfiles.items()},
+            coord, surface_charge, 
+            solvent, state_of_interest, triplet, properties_to_calculate, 
+            required_calculations, functional
+        )
+        return point_index, effects
+    except Exception as e:
+        print(f"Error at point {point_index}: {e}")
+        return point_index, None
+    finally:
+        os.chdir(original_dir)
+        if os.path.exists(worker_dir):
+            shutil.rmtree(worker_dir, ignore_errors=True)
+
+
+@ray.remote(num_cpus=1, num_gpus=1, max_retries=0, memory=4*1024*1024*1024)
+def calculate_point_effect_gpu(base_chkfiles, coord, surface_charge, solvent, state_of_interest, triplet, properties_to_calculate, required_calculations, functional, point_index):
+    # Get assigned GPU ID and set environment
+    gpu_id = ray.get_gpu_ids()[0]
+    os.environ['CUDA_VISIBLE_DEVICES'] = str(gpu_id)
+    print(f"[Point {point_index}] Running on GPU: {gpu_id}, PID: {os.getpid()}, CUDA_VISIBLE_DEVICES: {os.environ.get('CUDA_VISIBLE_DEVICES')}")
+    
+    
+    # Create unique directory for this worker
+    worker_dir = f"point_{point_index}"
+    os.makedirs(worker_dir, exist_ok=True)
+    
+    # Copy checkpoint files to worker directory
+    worker_chkfiles = {}
+    for key, chkfile in base_chkfiles.items():
+        if chkfile:
+            worker_chkfile = os.path.join(worker_dir, os.path.basename(chkfile))
+            shutil.copy2(chkfile, worker_chkfile)
+            worker_chkfiles[key] = worker_chkfile
+        else:
+            worker_chkfiles[key] = None
+    
+    # Change to worker directory
+    original_dir = os.getcwd()
+    os.chdir(worker_dir)
+    
+    try:
+        effects = calculate_surface_effect_at_point(
+            {k: os.path.basename(v) if v else None for k, v in worker_chkfiles.items()},
+            coord, surface_charge, 
+            solvent, state_of_interest, triplet, properties_to_calculate, 
+            required_calculations, functional
+        )
+        return point_index, effects
+    except Exception as e:
+        print(f"Error at point {point_index}: {e}")
+        return point_index, None
+    finally:
+        os.chdir(original_dir)
+        if os.path.exists(worker_dir):
+            shutil.rmtree(worker_dir, ignore_errors=True)
 
 ##########################################################
 # Create Molecular Objects for Any Requested Calculation #
@@ -681,6 +769,7 @@ def main(tuning_file='tuning.in'):
     solvent = tuning_params.get('solvent', 'water')
     density = tuning_params.get('density', 1.0)  
     scale = tuning_params.get('scale', 1.0)
+    num_procs = tuning_params.get('num_procs', None)
 
     # Calculation specifics
     properties = tuning_params.get('properties', ['lumo'])
@@ -690,7 +779,8 @@ def main(tuning_file='tuning.in'):
     # Check available hardware
     No_of_GPUs = core.check_gpu_info()
     No_of_CPUs = core.check_cpu_info()
-    
+
+
     # Resolve property dependencies and required calculations
     properties_to_calculate, required_calculations = setup_calculation(properties)
     print(f"Calculating Tuning of:  {properties_to_calculate}")
@@ -701,9 +791,15 @@ def main(tuning_file='tuning.in'):
     q_mm = np.array([surface_charge])
     input_data = prepare_input_data(input_type, input_data, basis_set, method, functional, charge, spin, gpu_available=No_of_GPUs > 0)
     molecule_name = core.extract_xyz_name(input_data)
-    # surface_coords = core.get_vdw_surface_coordinates(input_data, density=density, scale=scale)
-    surface_coords = [[-0.0629, 1.2696, 0.8334],
-                      [0.0046, -0.0118, 1.5199]]
+    surface_coords = core.get_vdw_surface_coordinates(input_data, density=density, scale=scale)
+    # surface_coords = [[-0.062922,1.269617,0.833374],
+    #                   [0.004572,-0.011758,1.519948],
+    #                   [-0.830712,0.439265,1.194723],
+    #                   ]
+
+                        
+
+
     print(surface_coords)
     print(f"\n")
     print(f"="*60)
@@ -721,26 +817,77 @@ def main(tuning_file='tuning.in'):
         input_data, basis_set, spin, method, functional, charge, 
         No_of_GPUs > 0, required_calculations, state_of_interest, triplet)
     
+    # Create checkpoint file dictionary
+    base_chkfiles = {
+    'neutral': 'molecule_alone.chk' if required_calculations.get('neutral') else None,
+    'anion': 'anion_alone.chk' if required_calculations.get('anion') else None,
+    'cation': 'cation_alone.chk' if required_calculations.get('cation') else None}
+
+# Calculate effects at each surface point in parallel
+    if num_procs is None:
+        parallel_processes = No_of_CPUs if No_of_GPUs < 1 else No_of_GPUs
+    else:
+        parallel_processes = min(No_of_CPUs if No_of_GPUs < 1 else No_of_GPUs, num_procs)
     
-    # Calculate effects at each surface point
+    # Choose the appropriate remote function
+    if No_of_GPUs < 1:
+        ray.init(num_cpus=parallel_processes)
+        calculate_point_effect = calculate_point_effect_cpu
+    else:
+        ray.init(num_gpus=parallel_processes)
+        calculate_point_effect = calculate_point_effect_gpu
+    
+    print(f"Using {parallel_processes} parallel processes on {'GPU' if No_of_GPUs > 0 else 'CPU'}")
+        
+    all_effects = [None] * len(surface_coords)
+    
+    # Process in batches
+    batch_size = parallel_processes
+    for batch_start in range(0, len(surface_coords), batch_size):
+        batch_end = min(batch_start + batch_size, len(surface_coords))
+        batch_indices = range(batch_start, batch_end)
+    
+        futures = [
+            calculate_point_effect.remote(
+                base_chkfiles, surface_coords[i], surface_charge, 
+                solvent, state_of_interest, triplet, properties_to_calculate, 
+                required_calculations, functional, i
+            )
+            for i in batch_indices
+        ]
+    
+        for future in ray.get(futures):
+            point_index, effects = future
+            if effects:
+                all_effects[point_index] = effects
+                print(f"Point {point_index+1}/{len(surface_coords)}: {effects}")
+            else:
+                print(f"Point {point_index+1}/{len(surface_coords)}: FAILED")
+    
+    ray.shutdown()
+
+
+# # Calculate effects at each surface point
     # all_effects = []
     # for i, coord in enumerate(surface_coords):
     #     effects = calculate_surface_effect_at_point(
-    #         base_molecules, coord, surface_charge, 
-    #         solvent, state_of_interest, triplet, properties_to_calculate, required_calculations
+    #         base_chkfiles, coord, surface_charge, 
+    #         solvent, state_of_interest, triplet, properties_to_calculate, required_calculations, functional
     #     )
     #     all_effects.append(effects)
     #     print(f"Point {i+1}/{len(surface_coords)}: {effects}")
 
-    #  # Create output files
-    # create_output_files(surface_coords, all_effects, molecule_name, properties_to_calculate)
-    # check_all_files_created(molecule_name, surface_coords, properties_to_calculate, all_effects)
+    # print(all_effects)
 
-    # #Remove temporary checkpoint files
-    # temp_files = ['molecule_alone.chk', 'anion_alone.chk', 'cation_alone.chk']
-    # for temp_file in temp_files:
-    #     if os.path.exists(temp_file):
-    #         os.remove(temp_file)
+     # Create output files
+    create_output_files(surface_coords, all_effects, molecule_name, properties_to_calculate)
+    check_all_files_created(molecule_name, surface_coords, properties_to_calculate, all_effects)
+
+    #Remove temporary checkpoint files
+    temp_files = ['molecule_alone.chk', 'anion_alone.chk', 'cation_alone.chk']
+    for temp_file in temp_files:
+        if os.path.exists(temp_file):
+            os.remove(temp_file)
 
 if __name__ == "__main__":
     tuning_file = sys.argv[1] if len(sys.argv) > 1 else 'tuning.in'
