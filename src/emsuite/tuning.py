@@ -235,7 +235,6 @@ def calculate_surface_effect_at_point(base_chkfiles, coord, surface_charge, solv
 
 @ray.remote(num_cpus=1, num_gpus=0, max_retries=0, memory=4*1024*1024*1024)
 def calculate_point_effect_cpu(base_chkfiles, coord, surface_charge, solvent, state_of_interest, triplet, properties_to_calculate, required_calculations, functional, point_index):
-    
     # Get CPU core affinity
     cpu_id = os.sched_getaffinity(0)
     print(f"[Point {point_index}] Running on CPU cores: {cpu_id}, PID: {os.getpid()}")
@@ -317,6 +316,145 @@ def calculate_point_effect_gpu(base_chkfiles, coord, surface_charge, solvent, st
         os.chdir(original_dir)
         if os.path.exists(worker_dir):
             shutil.rmtree(worker_dir, ignore_errors=True)
+
+##########################################################
+#        Surface Data Loading and Validation             #
+##########################################################
+
+def load_surface_data(surface_type, calc_type, surface_file='surface.etm', xyz_file=None, density=1.0, scale=1.0):
+    """
+    Load or generate surface coordinates and charges based on surface type.
+    
+    Args:
+        surface_type (str): 'homogenous' or 'heterogenous'
+        calc_type (str): 'separate' or 'combined'
+        surface_file (str): Path to surface file (default: 'surface.etm')
+        xyz_file (str, optional): Path to XYZ file for VDW surface generation
+        density (float): Surface point density for VDW generation
+        scale (float): Scaling factor for VDW radii
+        
+    Returns:
+        tuple: (surface_coords, surface_charges) where:
+            - surface_coords: numpy array of shape [N, 3]
+            - surface_charges: numpy array of shape [N] or None for homogenous
+            
+    Raises:
+        FileNotFoundError: If surface file is required but not found
+        ValueError: If surface_type is invalid
+    """
+    if surface_file is None:
+        surface_file = 'surface.etm'
+
+    if surface_type == 'homogenous':
+        # Check if surface file exists
+        if not os.path.exists(surface_file):
+            # Generate VDW surface and save to surface file
+            if xyz_file is None:
+                raise ValueError("xyz_file required to generate VDW surface")
+            
+            print(f"Generating VDW surface and saving to {surface_file}...")
+            coords = core.get_vdw_surface_coordinates(xyz_file, density=density, scale=scale)
+            
+            # Save to surface file (x, y, z format only)
+            with open(surface_file, 'w') as f:
+                f.write(f"{'x':<10} {'y':<10} {'z':<10}\n")
+                for coord in coords:
+                    f.write(f"{coord[0]:<10.6f} {coord[1]:<10.6f} {coord[2]:<10.6f}\n")
+        else:
+            # Load existing surface file
+            print(f"Loading surface coordinates from {surface_file}...")
+            data = np.loadtxt(surface_file, skiprows=1)
+            if data.ndim == 1:
+                data = data.reshape(1, -1)
+            coords = data[:, :3]  # Take only x, y, z columns
+        
+        # Return coords with None for charges (will be set per calculation)
+        return coords, None
+        
+    elif surface_type == 'heterogenous':
+        # Must have surface file with 4 columns
+        if not os.path.exists(surface_file):
+            raise FileNotFoundError(
+                f"For heterogenous surfaces, {surface_file} with x, y, z, q columns is required"
+            )
+        
+        print(f"Loading surface coordinates and charges from {surface_file}...")
+        data = np.loadtxt(surface_file, skiprows=1)
+        if data.ndim == 1:
+            data = data.reshape(1, -1)
+        
+        if data.shape[1] < 4:
+            raise ValueError(
+                f"{surface_file} must have 4 columns (x, y, z, q) for heterogenous surfaces"
+            )
+        
+        coords = data[:, :3]
+        charges = data[:, 3]
+        
+        return coords, charges
+    
+    else:
+        raise ValueError(f"Invalid surface_type: {surface_type}. Must be 'homogenous' or 'heterogenous'")
+
+
+def calculate_combined_surface_effect(base_chkfiles, coords, charges, solvent, state_of_interest, 
+                                      triplet, properties_to_calculate, required_calculations, functional):
+    """
+    Calculate the effect of all surface charges together in a single QM/MM calculation.
+    
+    Args:
+        base_chkfiles (dict): Dictionary with checkpoint file paths
+        coords (numpy.ndarray): All surface coordinates [N, 3]
+        charges (numpy.ndarray): All surface charges [N]
+        solvent (str or None): Solvent for implicit solvation
+        state_of_interest (int): Number of excited states
+        triplet (bool): Whether to calculate triplet states
+        properties_to_calculate (list): Properties to compute
+        required_calculations (dict): Required calculation types
+        functional (str): XC functional
+        
+    Returns:
+        dict: Dictionary of combined property effects
+    """
+    # Resurrect base molecules
+    molecule_alone = core.resurrect_mol(base_chkfiles['neutral']) if base_chkfiles.get('neutral') else None
+    anion_alone = core.resurrect_mol(base_chkfiles['anion']) if base_chkfiles.get('anion') else None
+    cation_alone = core.resurrect_mol(base_chkfiles['cation']) if base_chkfiles.get('cation') else None
+    
+    # Create TD object if needed
+    td_alone = None
+    if required_calculations.get('td', False) and molecule_alone:
+        td_alone = core.create_td_molecule_object(molecule_alone, nstates=state_of_interest, triplet=triplet)
+    
+    # Create QM/MM objects with ALL charges at once
+    molecule_wsc, anion_wsc, cation_wsc, td_wsc = create_wsc_objects(
+        [molecule_alone, anion_alone, cation_alone, td_alone], 
+        coords, charges, state_of_interest, triplet, required_calculations
+    )
+    
+    # Apply solvation if needed
+    if solvent:
+        all_molecules = [molecule_alone, anion_alone, cation_alone, td_alone, 
+                       molecule_wsc, anion_wsc, cation_wsc, td_wsc]
+        all_molecules = apply_solvation(all_molecules, solvent, state_of_interest, triplet, required_calculations)
+        molecule_alone, anion_alone, cation_alone, td_alone, \
+        molecule_wsc, anion_wsc, cation_wsc, td_wsc = all_molecules
+    
+    # Calculate properties
+    results = calculate_all_properties(molecule_alone, anion_mf=anion_alone, 
+                                     cation_mf=cation_alone, td_obj=td_alone, 
+                                     triplet=triplet, props_to_calc=properties_to_calculate)
+    wsc_results = calculate_all_properties(molecule_wsc, anion_mf=anion_wsc, 
+                                         cation_mf=cation_wsc, td_obj=td_wsc, 
+                                         triplet=triplet, props_to_calculate=properties_to_calculate)
+    
+    # Calculate differences
+    effects = {}
+    for prop in results:
+        if prop in wsc_results:
+            effects[f'{prop}_effect'] = wsc_results[prop] - results[prop]
+    
+    return effects
 
 ##########################################################
 # Create Molecular Objects for Any Requested Calculation #
@@ -765,14 +903,22 @@ def main(tuning_file='tuning.in'):
     functional = tuning_params.get('functional')
     charge = tuning_params.get('charge', 0)
     spin = tuning_params.get('spin', 0)
-    surface_charge = tuning_params.get('surface_charge', 1.0)
-    solvent = tuning_params.get('solvent', 'water')
+    solvent = tuning_params.get('solvent', None)
     density = tuning_params.get('density', 1.0)  
     scale = tuning_params.get('scale', 1.0)
+
+    # Surface calculation parameters
+    surface_type = tuning_params.get('surface_type', 'homogenous')
+    surface_charge = tuning_params.get('surface_charge', 0.1)
+    surface_file = tuning_params.get('surface_file', None)
+    calc_type = tuning_params.get('calc_type', 'separate')
+    
+    # Parallel processing parameter (default: True)
+    parallel = tuning_params.get('parallel', True)
     num_procs = tuning_params.get('num_procs', None)
 
     # Calculation specifics
-    properties = tuning_params.get('properties', ['lumo'])
+    properties = tuning_params.get('properties', ['all'])
     state_of_interest = tuning_params.get('state_of_interest', 2)
     triplet = tuning_params.get('triplet', False)
 
@@ -780,110 +926,145 @@ def main(tuning_file='tuning.in'):
     No_of_GPUs = core.check_gpu_info()
     No_of_CPUs = core.check_cpu_info()
 
-
     # Resolve property dependencies and required calculations
     properties_to_calculate, required_calculations = setup_calculation(properties)
     print(f"Calculating Tuning of:  {properties_to_calculate}")
     print(f"Using molecular states: {required_calculations}")
 
-
     # Prepare input data
-    q_mm = np.array([surface_charge])
     input_data = prepare_input_data(input_type, input_data, basis_set, method, functional, charge, spin, gpu_available=No_of_GPUs > 0)
     molecule_name = core.extract_xyz_name(input_data)
-    surface_coords = core.get_vdw_surface_coordinates(input_data, density=density, scale=scale)
-    # surface_coords = [[-0.062922,1.269617,0.833374],
-    #                   [0.004572,-0.011758,1.519948],
-    #                   [-0.830712,0.439265,1.194723],
-    #                   ]
+    
+    # Load surface data based on surface_type
+    surface_coords, surface_charges = load_surface_data(
+        surface_type, calc_type, surface_file=surface_file, 
+        xyz_file=input_data, density=density, scale=scale
+    )
 
-                        
-
-
-    print(surface_coords)
     print(f"\n")
     print(f"="*60)
-    print(f"         Running calculations on {len(surface_coords)} surface points")
+    print(f"  Surface Type: {surface_type}")
+    print(f"  Calculation Type: {calc_type}")
+    print(f"  Number of surface points: {len(surface_coords)}")
+    print(f"  Parallel Processing: {parallel}")
     print(f"="*60)
     print(f"\n")
-
 
     #######################################
     #    Core Tuning Map Calculations     #
     #######################################
 
-    # # Create base molecule objects
+    # Create base molecule objects
     base_molecules = create_molecule_objects(
         input_data, basis_set, spin, method, functional, charge, 
         No_of_GPUs > 0, required_calculations, state_of_interest, triplet)
     
     # Create checkpoint file dictionary
     base_chkfiles = {
-    'neutral': 'molecule_alone.chk' if required_calculations.get('neutral') else None,
-    'anion': 'anion_alone.chk' if required_calculations.get('anion') else None,
-    'cation': 'cation_alone.chk' if required_calculations.get('cation') else None}
+        'neutral': 'molecule_alone.chk' if required_calculations.get('neutral') else None,
+        'anion': 'anion_alone.chk' if required_calculations.get('anion') else None,
+        'cation': 'cation_alone.chk' if required_calculations.get('cation') else None
+    }
 
-# Calculate effects at each surface point in parallel
-    if num_procs is None:
-        parallel_processes = No_of_CPUs if No_of_GPUs < 1 else No_of_GPUs
-    else:
-        parallel_processes = min(No_of_CPUs if No_of_GPUs < 1 else No_of_GPUs, num_procs)
-    
-    # Choose the appropriate remote function
-    if No_of_GPUs < 1:
-        ray.init(num_cpus=parallel_processes)
-        calculate_point_effect = calculate_point_effect_cpu
-    else:
-        ray.init(num_gpus=parallel_processes)
-        calculate_point_effect = calculate_point_effect_gpu
-    
-    print(f"Using {parallel_processes} parallel processes on {'GPU' if No_of_GPUs > 0 else 'CPU'}")
+    # Branch based on calc_type
+    if calc_type == 'combined':
+        # Combined calculation: all charges at once
+        print(f"Running combined calculation with all {len(surface_coords)} surface points...")
         
-    all_effects = [None] * len(surface_coords)
-    
-    # Process in batches
-    batch_size = parallel_processes
-    for batch_start in range(0, len(surface_coords), batch_size):
-        batch_end = min(batch_start + batch_size, len(surface_coords))
-        batch_indices = range(batch_start, batch_end)
-    
-        futures = [
-            calculate_point_effect.remote(
-                base_chkfiles, surface_coords[i], surface_charge, 
-                solvent, state_of_interest, triplet, properties_to_calculate, 
-                required_calculations, functional, i
-            )
-            for i in batch_indices
-        ]
-    
-        for future in ray.get(futures):
-            point_index, effects = future
-            if effects:
-                all_effects[point_index] = effects
-                print(f"Point {point_index+1}/{len(surface_coords)}: {effects}")
+        # Prepare charges array
+        if surface_type == 'homogenous':
+            q_mm = np.full(len(surface_coords), surface_charge)
+        else:  # heterogenous
+            q_mm = surface_charges
+        
+        # Single combined calculation
+        combined_effects = calculate_combined_surface_effect(
+            base_chkfiles, surface_coords, q_mm,
+            solvent, state_of_interest, triplet, properties_to_calculate,
+            required_calculations, functional
+        )
+        
+        print(f"Combined effects: {combined_effects}")
+        
+        # For combined, we create a single-entry output
+        all_effects = [combined_effects]
+        output_coords = np.mean(surface_coords, axis=0).reshape(1, 3)  # Use centroid
+        
+    else:  # calc_type == 'separate'
+        # Separate calculations: one per surface point
+        print(f"Running separate calculations on {len(surface_coords)} surface points...")
+        
+        # Determine charges per point
+        if surface_type == 'homogenous':
+            point_charges = [surface_charge] * len(surface_coords)
+        else:  # heterogenous
+            point_charges = surface_charges
+        
+        # Choose parallel or sequential processing
+        if parallel:
+            # Parallel processing setup
+            if num_procs is None:
+                parallel_processes = No_of_CPUs if No_of_GPUs < 1 else No_of_GPUs
             else:
-                print(f"Point {point_index+1}/{len(surface_coords)}: FAILED")
-    
-    ray.shutdown()
+                parallel_processes = min(No_of_CPUs if No_of_GPUs < 1 else No_of_GPUs, num_procs)
+            
+            # Choose the appropriate remote function
+            if No_of_GPUs < 1:
+                ray.init(num_cpus=parallel_processes)
+                calculate_point_effect = calculate_point_effect_cpu
+            else:
+                ray.init(num_gpus=parallel_processes)
+                calculate_point_effect = calculate_point_effect_gpu
+            
+            print(f"Using {parallel_processes} parallel processes on {'GPU' if No_of_GPUs > 0 else 'CPU'}")
+                
+            all_effects = [None] * len(surface_coords)
+            
+            # Process in batches
+            batch_size = parallel_processes
+            for batch_start in range(0, len(surface_coords), batch_size):
+                batch_end = min(batch_start + batch_size, len(surface_coords))
+                batch_indices = range(batch_start, batch_end)
+            
+                futures = [
+                    calculate_point_effect.remote(
+                        base_chkfiles, surface_coords[i], point_charges[i], 
+                        solvent, state_of_interest, triplet, properties_to_calculate, 
+                        required_calculations, functional, i
+                    )
+                    for i in batch_indices
+                ]
+            
+                for future in ray.get(futures):
+                    point_index, effects = future
+                    if effects:
+                        all_effects[point_index] = effects
+                        print(f"Point {point_index+1}/{len(surface_coords)}: {effects}")
+                    else:
+                        print(f"Point {point_index+1}/{len(surface_coords)}: FAILED")
+            
+            ray.shutdown()
+            
+        else:
+            # Sequential processing
+            print(f"Using sequential processing (parallel=False)")
+            all_effects = []
+            for i, coord in enumerate(surface_coords):
+                effects = calculate_surface_effect_at_point(
+                    base_chkfiles, coord, point_charges[i], 
+                    solvent, state_of_interest, triplet, properties_to_calculate, 
+                    required_calculations, functional
+                )
+                all_effects.append(effects)
+                print(f"Point {i+1}/{len(surface_coords)}: {effects}")
+        
+        output_coords = surface_coords
 
+    # Create output files
+    create_output_files(output_coords, all_effects, molecule_name, properties_to_calculate)
+    check_all_files_created(molecule_name, output_coords, properties_to_calculate, all_effects)
 
-# # Calculate effects at each surface point
-    # all_effects = []
-    # for i, coord in enumerate(surface_coords):
-    #     effects = calculate_surface_effect_at_point(
-    #         base_chkfiles, coord, surface_charge, 
-    #         solvent, state_of_interest, triplet, properties_to_calculate, required_calculations, functional
-    #     )
-    #     all_effects.append(effects)
-    #     print(f"Point {i+1}/{len(surface_coords)}: {effects}")
-
-    # print(all_effects)
-
-     # Create output files
-    create_output_files(surface_coords, all_effects, molecule_name, properties_to_calculate)
-    check_all_files_created(molecule_name, surface_coords, properties_to_calculate, all_effects)
-
-    #Remove temporary checkpoint files
+    # Remove temporary checkpoint files
     temp_files = ['molecule_alone.chk', 'anion_alone.chk', 'cation_alone.chk']
     for temp_file in temp_files:
         if os.path.exists(temp_file):
