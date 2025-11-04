@@ -1,4 +1,4 @@
-import os, time, subprocess, requests
+import os, sys, time, subprocess, requests,tempfile, pickle
 import numpy as np
 from rdkit import Chem
 from rdkit.Chem import AllChem
@@ -219,61 +219,25 @@ def save_chkfile(mf, chkfile_name, functional=None):
         chkfile_name: Name of the checkpoint file
         functional: XC functional (optional, for DFT calculations)
     """
+    # Mark if this is a GPU calculation - check multiple ways
+    is_gpu = False
+    if hasattr(mf, 'to_cpu') and callable(mf.to_cpu):
+        is_gpu = True
+    elif 'gpu4pyscf' in str(type(mf)):
+        is_gpu = True
+    
+    print(f"Saving {'GPU' if is_gpu else 'CPU'} object type: {type(mf)}")
+    
     mf.chkfile = chkfile_name
+    mf.kernel()
+    
+    # Save functional and GPU tag AFTER kernel() to prevent overwriting
     if functional:
         lib.chkfile.save(chkfile_name, 'scf/xc', functional)
+    lib.chkfile.save(chkfile_name, 'scf/_gpu_tag', is_gpu)
     
-    mf.kernel()
-    print(f"Saved to {chkfile_name}, Energy: {mf.e_tot}")
+    print(f"Saved to {chkfile_name}, Energy: {mf.e_tot} ({'GPU' if is_gpu else 'CPU'})")
     return mf
-
-
-
-# def resurrect_mol(chkfile_name):
-#     """Reconstruct and run a mean-field calculation from a checkpoint file.
-    
-#     Args:
-#         chkfile_name: Name of the checkpoint file
-        
-#     Returns:
-#         mf: Reconstructed mean-field object after running kernel()
-#     """
-#     print(f"\n=== Resurrecting {chkfile_name} ===")
-    
-#     # Load molecule and scf data
-#     mol_data = lib.chkfile.load_mol(chkfile_name)
-#     scf_data = lib.chkfile.load(chkfile_name, 'scf')
-    
-#     # Rebuild molecule
-#     mol = gto.Mole()
-#     mol.atom = mol_data.atom
-#     mol.basis = mol_data.basis
-#     mol.charge = mol_data.charge
-#     mol.spin = mol_data.spin
-#     mol.build()
-    
-#     # Determine method
-#     is_gpu = 'gpu4pyscf' in str(type(scf_data.get('mo_coeff', '')))
-#     xc = lib.chkfile.load(chkfile_name, 'scf/xc')
-#     is_dft = xc is not None
-#     is_unrestricted = mol.spin != 0 or len(scf_data.get('mo_occ', [[]])) == 2
-    
-#     # Create appropriate method object
-#     if is_dft:
-#         mf = dft.UKS(mol) if is_unrestricted else dft.RKS(mol)
-#         mf.xc = xc.decode('utf-8') if isinstance(xc, bytes) else xc
-#     else:
-#         mf = scf.UHF(mol) if is_unrestricted else scf.RHF(mol)
-    
-#     # Convert to GPU if needed
-#     if is_gpu:
-#         mf = mf.to_gpu()
-    
-#     mf.chkfile = chkfile_name
-#     mf.init_guess = 'chkfile'
-#     mf.kernel()
-#     # print(f"Energy: {mf.e_tot}")
-#     return mf
 
 def resurrect_mol(chkfile_name):
     """Reconstruct and run a mean-field calculation from a checkpoint file.
@@ -290,8 +254,20 @@ def resurrect_mol(chkfile_name):
     mol = lib.chkfile.load_mol(chkfile_name)
     scf_data = lib.chkfile.load(chkfile_name, 'scf')
     
+    # Check if this was a GPU calculation by looking for the GPU flag
+    is_gpu = False
+    try:
+        gpu_tag = lib.chkfile.load(chkfile_name, 'scf/_gpu_tag')
+        if isinstance(gpu_tag, np.ndarray):
+            is_gpu = bool(gpu_tag.item())
+        else:
+            is_gpu = bool(gpu_tag)
+        print(f"GPU tag found: {is_gpu}")
+    except (KeyError, TypeError) as e:
+        print(f"No GPU tag found in checkpoint file: {e}")
+        is_gpu = False
+    
     # Determine method
-    is_gpu = 'gpu4pyscf' in str(type(scf_data.get('mo_coeff', '')))
     xc = lib.chkfile.load(chkfile_name, 'scf/xc')
     is_dft = xc is not None
     is_unrestricted = mol.spin != 0 or len(scf_data.get('mo_occ', [[]])) == 2
@@ -303,14 +279,29 @@ def resurrect_mol(chkfile_name):
     else:
         mf = scf.UHF(mol) if is_unrestricted else scf.RHF(mol)
     
-    # Convert to GPU if needed
-    if is_gpu:
-        mf = mf.to_gpu()
+    # Convert to GPU if the checkpoint was created with GPU
+    if is_gpu and GPU_AVAILABLE:
+        try:
+            print(f"Attempting to convert {type(mf)} to GPU...")
+            mf = mf.to_gpu()
+            print(f"Successfully converted to GPU: {type(mf)}")
+        except Exception as e:
+            print(f"Warning: Could not convert to GPU: {e}")
+            print("Continuing with CPU")
+            is_gpu = False
+    elif is_gpu and not GPU_AVAILABLE:
+        print("Warning: Checkpoint was created with GPU but GPU not available")
+        is_gpu = False
     
     mf.chkfile = chkfile_name
     mf.init_guess = 'chkfile'
+    mf.verbose = 4
     mf.kernel()
+    
+    print(f"Resurrected {'GPU' if is_gpu else 'CPU'} object: {type(mf)}, Energy: {mf.e_tot}")
+    
     return mf
+
 
 
 ##############################################
@@ -446,59 +437,262 @@ def create_qmmm_molecule_object(mf, coord_mm, q_mm, chkfile = None):
     return mf_new
 
 
-def create_td_molecule_object(mf, nstates=5, triplet=False):
+# def create_td_molecule_object(mf, nstates=5, triplet=False):
+#     """
+#     Create a time-dependent (TD) calculation object for excited states.
+    
+#     This function creates either a TDDFT or TDHF object from a converged ground
+#     state calculation to compute excited state properties and electronic transitions.
+    
+#     Args:
+#         mf (pyscf.scf or gpu4pyscf.scf object): Converged ground state SCF object
+#         nstates (int, optional): Number of excited states to calculate. Defaults to 5.
+#         triplet (bool, optional): Calculate triplet states if True, singlet if False.
+#                                  Defaults to False.
+    
+#     Returns:
+#         pyscf.tdscf object: Time-dependent calculation object with computed excited states
+        
+#     Note:
+#         - Automatically detects DFT vs HF ground state from mf attributes and uses appropriate TD method
+#         - Handles both solvated and non-solvated molecules
+#         - Compatible with both CPU and GPU calculations
+        
+#     Raises:
+#         ValueError: If the ground state object type is not supported
+#     """
+
+#     # For GPU calculations, ensure proper synchronization
+#     if hasattr(mf, 'to_cpu') and GPU_AVAILABLE:
+#         import cupy as cp
+#         # Synchronize before creating TD object
+#         cp.cuda.Stream.null.synchronize()
+#         print("GPU synchronized before TD creation")
+
+#     if hasattr(mf, 'to_cpu') and callable(mf.to_cpu):
+#         if hasattr(mf, 'TDDFT') and mf.TDDFT is not None:
+#             td = mf.TDDFT()
+#         elif hasattr(mf, 'TDHF') and mf.TDHF is not None:
+#             td = mf.TDHF()
+#         else:
+#             raise ValueError("Unsupported ground state object type")
+#     else:   
+#         # Handle solvated molecules
+#         if hasattr(mf, 'with_solvent'):
+#             # For solvated molecules, use tdscf directly
+#             if hasattr(mf, 'xc'):  # DFT case
+#                 td = tdscf.TDDFT(mf)
+#             else:  # HF case
+#                 td = tdscf.TDHF(mf)
+#         else:
+#             # For non-solvated molecules, use the original method
+#             if hasattr(mf, 'TDDFT') and mf.TDDFT is not None:
+#                 td = mf.TDDFT()
+#             elif hasattr(mf, 'TDHF') and mf.TDHF is not None:
+#                 td = mf.TDHF()
+#             else:
+#                 raise ValueError("Unsupported ground state object type")
+
+#     td.singlet = not triplet
+#     td.nstates = nstates
+#     td.kernel()
+#     return td
+
+
+def create_td_molecule_object(mf, nstates=5, triplet=False, force_single_gpu=False):
     """
     Create a time-dependent (TD) calculation object for excited states.
     
-    This function creates either a TDDFT or TDHF object from a converged ground
-    state calculation to compute excited state properties and electronic transitions.
+    For multi-GPU systems, uses subprocess isolation to force single-GPU mode.
     
     Args:
-        mf (pyscf.scf or gpu4pyscf.scf object): Converged ground state SCF object
-        nstates (int, optional): Number of excited states to calculate. Defaults to 5.
-        triplet (bool, optional): Calculate triplet states if True, singlet if False.
-                                 Defaults to False.
-    
-    Returns:
-        pyscf.tdscf object: Time-dependent calculation object with computed excited states
-        
-    Note:
-        - Automatically detects DFT vs HF ground state from mf attributes and uses appropriate TD method
-        - Handles both solvated and non-solvated molecules
-        - Compatible with both CPU and GPU calculations
-        
-    Raises:
-        ValueError: If the ground state object type is not supported
+        mf: Converged ground state SCF object
+        nstates: Number of excited states to calculate
+        triplet: Whether to calculate triplet states (True) or singlet (False)
+        force_single_gpu: If True, skip subprocess isolation (for Ray workers)
     """
-    if hasattr(mf, 'to_cpu') and callable(mf.to_cpu):
-        if hasattr(mf, 'TDDFT') and mf.TDDFT is not None:
-            td = mf.TDDFT()
-        elif hasattr(mf, 'TDHF') and mf.TDHF is not None:
-            td = mf.TDHF()
-        else:
-            raise ValueError("Unsupported ground state object type")
-    else:   
-        # Handle solvated molecules
-        if hasattr(mf, 'with_solvent'):
-            # For solvated molecules, use tdscf directly
-            if hasattr(mf, 'xc'):  # DFT case
-                td = tdscf.TDDFT(mf)
-            else:  # HF case
-                td = tdscf.TDHF(mf)
-        else:
-            # For non-solvated molecules, use the original method
-            if hasattr(mf, 'TDDFT') and mf.TDDFT is not None:
-                td = mf.TDDFT()
-            elif hasattr(mf, 'TDHF') and mf.TDHF is not None:
-                td = mf.TDHF()
+    
+    # Check if multiple GPUs are visible
+    current_cuda_devices = os.environ.get('CUDA_VISIBLE_DEVICES', '0')
+    visible_devices = current_cuda_devices.split(',')
+    
+    # Determine if we should use subprocess isolation
+    # Skip subprocess if:
+    # 1. force_single_gpu=True (Ray worker context), OR
+    # 2. Only one GPU visible, OR
+    # 3. Not a GPU object, OR
+    # 4. GPU not available
+    use_subprocess = (
+        len(visible_devices) > 1 and 
+        hasattr(mf, 'to_cpu') and 
+        callable(mf.to_cpu) and 
+        GPU_AVAILABLE and
+        not force_single_gpu  # ← NEW: Skip subprocess for Ray workers
+    )
+    
+    if use_subprocess:
+        print(f"Multi-GPU detected ({current_cuda_devices}). Using subprocess for single-GPU TDDFT...")
+        
+        chkfile = getattr(mf, 'chkfile', None)
+        if not chkfile:
+            raise ValueError("GPU molecule must have checkpoint file for multi-GPU TDDFT")
+        
+        # Get the functional/method info from the original object
+        is_dft = hasattr(mf, 'xc')
+        xc_functional = mf.xc if is_dft else None
+        
+        print(f"Original molecule: is_dft={is_dft}, xc={xc_functional}, type={type(mf)}")
+        
+        # Create a subprocess script that will run with single GPU
+        script = f"""
+import os
+import sys
+os.environ['CUDA_VISIBLE_DEVICES'] = '{visible_devices[0]}'
+print(f"=== SUBPROCESS START ===", file=sys.stderr)
+print(f"CUDA_VISIBLE_DEVICES={{os.environ.get('CUDA_VISIBLE_DEVICES')}}", file=sys.stderr)
+
+from pyscf import lib
+import pickle
+
+# Load checkpoint and recreate molecule
+chkfile = '{chkfile}'
+print(f"Loading checkpoint: {{chkfile}}", file=sys.stderr)
+
+mol = lib.chkfile.load_mol(chkfile)
+scf_data = lib.chkfile.load(chkfile, 'scf')
+
+# Use method info from parent process
+is_dft = {is_dft}
+xc_functional = {repr(xc_functional)}
+is_unrestricted = mol.spin != 0 or len(scf_data.get('mo_occ', [[]])) == 2
+
+print(f"Molecule info: is_dft={{is_dft}}, xc={{xc_functional}}, unrestricted={{is_unrestricted}}", file=sys.stderr)
+
+# Recreate molecule
+from pyscf import dft, scf
+if is_dft:
+    mf = dft.UKS(mol) if is_unrestricted else dft.RKS(mol)
+    mf.xc = xc_functional
+    print(f"Created DFT object: {{type(mf)}}, xc={{mf.xc}}", file=sys.stderr)
+else:
+    mf = scf.UHF(mol) if is_unrestricted else scf.RHF(mol)
+    print(f"Created HF object: {{type(mf)}}", file=sys.stderr)
+
+# Convert to GPU
+print(f"Converting to GPU...", file=sys.stderr)
+mf = mf.to_gpu()
+print(f"GPU object created: {{type(mf)}}", file=sys.stderr)
+
+mf.chkfile = chkfile
+mf.init_guess = 'chkfile'
+mf.verbose = 0
+
+print(f"Running SCF kernel...", file=sys.stderr)
+mf.kernel()
+print(f"SCF converged: E={{mf.e_tot}}", file=sys.stderr)
+
+# Create and run TDDFT
+print(f"Creating TDDFT object...", file=sys.stderr)
+td = mf.TDDFT() if is_dft else mf.TDHF()
+print(f"TDDFT object created: {{type(td)}}", file=sys.stderr)
+
+td.singlet = {not triplet}
+td.nstates = {nstates}
+td.verbose = 4
+
+print(f"Running TDDFT kernel with {{td.nstates}} states...", file=sys.stderr)
+td.kernel()
+print(f"TDDFT converged: {{len(td.e)}} excited states", file=sys.stderr)
+print(f"Excited state energies: {{td.e}}", file=sys.stderr)
+
+# Save results
+results = {{
+    'e': td.e.tolist(),
+    'xy': [[xy[0].tolist(), xy[1].tolist()] for xy in td.xy],
+    'oscillator_strength': td.oscillator_strength().tolist(),
+}}
+
+with open('td_results.pkl', 'wb') as f:
+    pickle.dump(results, f)
+
+print(f"Results saved to td_results.pkl", file=sys.stderr)
+print(f"=== SUBPROCESS END ===", file=sys.stderr)
+"""
+        
+        # Write script to temp file
+        with tempfile.NamedTemporaryFile(mode='w', suffix='.py', delete=False) as f:
+            script_path = f.name
+            f.write(script)
+        
+        print(f"Subprocess script written to: {script_path}")
+        
+        try:
+            # Run subprocess with single GPU
+            print(f"Starting subprocess...")
+            result = subprocess.run(
+                [sys.executable, script_path], 
+                check=True,
+                capture_output=True,
+                text=True,
+                env={**os.environ, 'CUDA_VISIBLE_DEVICES': visible_devices[0]}
+            )
+            
+            # print(f"\n=== Subprocess STDOUT ===")
+            # print(result.stdout)
+            # print(f"\n=== Subprocess STDERR ===")
+            # print(result.stderr)
+            # print(f"=== End Subprocess Output ===\n")
+            
+            # Load results
+            with open('td_results.pkl', 'rb') as f:
+                results = pickle.load(f)
+            
+            print(f"Loaded results: {len(results['e'])} excited states")
+            
+            # Reconstruct TD object with results
+            mf_cpu = mf.to_cpu()
+            if hasattr(mf_cpu, 'TDDFT'):
+                td = mf_cpu.TDDFT()
             else:
-                raise ValueError("Unsupported ground state object type")
-
-    td.singlet = not triplet
-    td.nstates = nstates
-    td.kernel()
-    return td
-
+                td = tdscf.TDDFT(mf_cpu)
+            
+            # Inject results without running kernel
+            td.e = np.array(results['e'])
+            td.xy = [(np.array(xy[0]), np.array(xy[1])) for xy in results['xy']]
+            td.converged = True
+            
+            print(f"TDDFT completed in subprocess on GPU {visible_devices[0]}, states: {len(td.e)}")
+            
+        except subprocess.CalledProcessError as e:
+            print(f"\n=== Subprocess FAILED ===")
+            print(f"Return code: {e.returncode}")
+            print(f"\nSTDOUT:\n{e.stdout}")
+            print(f"\nSTDERR:\n{e.stderr}")
+            raise
+        finally:
+            # Cleanup
+            if os.path.exists(script_path):
+                os.unlink(script_path)
+            if os.path.exists('td_results.pkl'):
+                os.unlink('td_results.pkl')
+        
+        return td
+    
+    else:
+        # Single GPU or CPU - normal path
+        # Also used by Ray workers when force_single_gpu=True
+        print(f"Running TDDFT in current process (force_single_gpu={force_single_gpu})")
+        
+        if hasattr(mf, 'with_solvent'):
+            td = tdscf.TDDFT(mf) if hasattr(mf, 'xc') else tdscf.TDHF(mf)
+        else:
+            td = mf.TDDFT() if hasattr(mf, 'TDDFT') else mf.TDHF()
+        
+        td.singlet = not triplet
+        td.nstates = nstates
+        td.kernel()
+        
+        return td
 
 ##############################################
 #          Molecular File Operations         #

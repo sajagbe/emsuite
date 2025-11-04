@@ -162,10 +162,13 @@ def calculate_all_properties(mf, anion_mf=None, cation_mf=None, td_obj=None, tri
             oscillator_strengths = td_obj.oscillator_strength()
             for i, osc in enumerate(oscillator_strengths, 1):
                 results[f'{state_prefix}{i}_osc'] = osc
+
     
     return results
 
-def calculate_surface_effect_at_point(base_chkfiles, coord, surface_charge, solvent, state_of_interest, triplet, properties_to_calculate, required_calculations, functional):
+def calculate_surface_effect_at_point(base_chkfiles, coord, surface_charge, solvent, 
+                                      state_of_interest, triplet, properties_to_calculate, 
+                                      required_calculations, functional, force_single_gpu=False):
     """
     Calculate the effect of a surface charge at a single coordinate point.
     
@@ -180,6 +183,7 @@ def calculate_surface_effect_at_point(base_chkfiles, coord, surface_charge, solv
         properties_to_calculate (list): List of molecular properties to compute
         required_calculations (dict): Dictionary specifying needed calculations
         functional (str): XC functional for DFT calculations
+        force_single_gpu (bool): Skip TD subprocess isolation (for Ray workers)
         
     Returns:
         dict: Dictionary of property effects
@@ -189,10 +193,15 @@ def calculate_surface_effect_at_point(base_chkfiles, coord, surface_charge, solv
     anion_alone = core.resurrect_mol(base_chkfiles['anion']) if base_chkfiles.get('anion') else None
     cation_alone = core.resurrect_mol(base_chkfiles['cation']) if base_chkfiles.get('cation') else None
     
-    # Create TD object if needed
+    # Create TD object if needed - pass force_single_gpu flag
     td_alone = None
     if required_calculations.get('td', False) and molecule_alone:
-        td_alone = core.create_td_molecule_object(molecule_alone, nstates=state_of_interest, triplet=triplet)
+        td_alone = core.create_td_molecule_object(
+            molecule_alone, 
+            nstates=state_of_interest, 
+            triplet=triplet,
+            force_single_gpu=force_single_gpu  
+        )
     
     # Create single-point charge array
     single_coord = np.array([coord])
@@ -276,14 +285,20 @@ def calculate_point_effect_cpu(base_chkfiles, coord, surface_charge, solvent, st
 
 
 @ray.remote(num_cpus=1, num_gpus=1, max_retries=0, memory=4*1024*1024*1024)
-def calculate_point_effect_gpu(base_chkfiles, coord, surface_charge, solvent, state_of_interest, triplet, properties_to_calculate, required_calculations, functional, point_index):
-    # Get assigned GPU ID and set environment
+def calculate_point_effect_gpu(base_chkfiles, coord, surface_charge, solvent, 
+                               state_of_interest, triplet, properties_to_calculate, 
+                               required_calculations, functional, point_index):
+    """
+    Ray remote function for GPU-accelerated calculations.
+    Runs each surface point calculation in isolation with its own GPU.
+    """
+    # Get the GPU assigned by Ray
     gpu_id = ray.get_gpu_ids()[0]
     os.environ['CUDA_VISIBLE_DEVICES'] = str(gpu_id)
-    print(f"[Point {point_index}] Running on GPU: {gpu_id}, PID: {os.getpid()}, CUDA_VISIBLE_DEVICES: {os.environ.get('CUDA_VISIBLE_DEVICES')}")
     
+    print(f"Point {point_index}: Using GPU {gpu_id}, PID {os.getpid()}")
     
-    # Create unique directory for this worker
+    # Create worker-specific directory
     worker_dir = f"point_{point_index}"
     os.makedirs(worker_dir, exist_ok=True)
     
@@ -302,17 +317,19 @@ def calculate_point_effect_gpu(base_chkfiles, coord, surface_charge, solvent, st
     os.chdir(worker_dir)
     
     try:
+        # Calculate effects - force_single_gpu=True skips subprocess
         effects = calculate_surface_effect_at_point(
             {k: os.path.basename(v) if v else None for k, v in worker_chkfiles.items()},
             coord, surface_charge, 
             solvent, state_of_interest, triplet, properties_to_calculate, 
-            required_calculations, functional
+            required_calculations, functional,
+            force_single_gpu=True  # ← NEW: Skip TD subprocess in Ray workers
         )
+        
         return point_index, effects
-    except Exception as e:
-        print(f"Error at point {point_index}: {e}")
-        return point_index, None
+        
     finally:
+        # Cleanup
         os.chdir(original_dir)
         if os.path.exists(worker_dir):
             shutil.rmtree(worker_dir, ignore_errors=True)
@@ -531,17 +548,13 @@ def create_molecule_objects(input_data, basis_set, spin_guesses, method, functio
                 input_data, basis_set, method, functional, charge, 
                 charge_change, gpu_available, spin_guesses
             )
-    
-    # Only create TD if explicitly needed
-    if required_calculations.get('td', False):
-        molecules['td'] = core.create_td_molecule_object(molecules['neutral'], nstates=state_of_interest, triplet=triplet)
 
     chkfile_map = {'neutral': 'molecule_alone.chk', 'anion': 'anion_alone.chk', 'cation': 'cation_alone.chk'}
     for key, filename in chkfile_map.items():
         if molecules.get(key):
             core.save_chkfile(molecules[key], filename, functional)
-    
-    return [molecules.get(k) for k in ['neutral', 'anion', 'cation', 'td']]
+
+    return [molecules.get(k) for k in ['neutral', 'anion', 'cation', None]]
 
 def create_wsc_objects(molecules, coord, q_mm, state_of_interest, triplet, required_calculations):
     """
@@ -565,7 +578,7 @@ def create_wsc_objects(molecules, coord, q_mm, state_of_interest, triplet, requi
     Note:
         - 'wsc' suffix indicates "with surface charge"
         - Uses checkpoint files from base calculations as initial guesses
-        - TD objects are only created if explicitly required
+        - TD objects are only created if explicitly needed
     """
     molecule_alone, anion_alone, cation_alone, td_alone = molecules
     
@@ -943,10 +956,10 @@ def main(tuning_file='tuning.in'):
 
     print(f"\n")
     print(f"="*60)
-    print(f"  Surface Type: {surface_type}")
-    print(f"  Calculation Type: {calc_type}")
-    print(f"  Number of surface points: {len(surface_coords)}")
-    print(f"  Parallel Processing: {parallel}")
+    print(f"                Surface Type: {surface_type}")
+    print(f"                Calculation Type: {calc_type}")
+    print(f"                Number of surface points: {len(surface_coords)}")
+    print(f"                Parallel Processing: {parallel}")
     print(f"="*60)
     print(f"\n")
 
@@ -965,6 +978,16 @@ def main(tuning_file='tuning.in'):
         'anion': 'anion_alone.chk' if required_calculations.get('anion') else None,
         'cation': 'cation_alone.chk' if required_calculations.get('cation') else None
     }
+
+    # molecule_alone = core.resurrect_mol(base_chkfiles['neutral']) if base_chkfiles.get('neutral') else None
+    # print(f"Base molecule prepared: type={type(molecule_alone)}")
+
+    # td_alone = None
+    # if required_calculations.get('td', False) and molecule_alone:
+    #     td_alone = core.create_td_molecule_object(molecule_alone, nstates=state_of_interest, triplet=triplet)
+
+    # print(f"TD Exe, Osc =({td_alone.e}, {td_alone.oscillator_strength()})" if td_alone else "No TD object created")
+
 
     # Branch based on calc_type
     if calc_type == 'combined':
@@ -1060,15 +1083,15 @@ def main(tuning_file='tuning.in'):
         
         output_coords = surface_coords
 
-    # Create output files
-    create_output_files(output_coords, all_effects, molecule_name, properties_to_calculate)
-    check_all_files_created(molecule_name, output_coords, properties_to_calculate, all_effects)
+    # # Create output files
+    # create_output_files(output_coords, all_effects, molecule_name, properties_to_calculate)
+    # check_all_files_created(molecule_name, output_coords, properties_to_calculate, all_effects)
 
-    # Remove temporary checkpoint files
-    temp_files = ['molecule_alone.chk', 'anion_alone.chk', 'cation_alone.chk']
-    for temp_file in temp_files:
-        if os.path.exists(temp_file):
-            os.remove(temp_file)
+    # # Remove temporary checkpoint files
+    # temp_files = ['molecule_alone.chk', 'anion_alone.chk', 'cation_alone.chk']
+    # for temp_file in temp_files:
+    #     if os.path.exists(temp_file):
+    #         os.remove(temp_file)
 
 if __name__ == "__main__":
     tuning_file = sys.argv[1] if len(sys.argv) > 1 else 'tuning.in'
