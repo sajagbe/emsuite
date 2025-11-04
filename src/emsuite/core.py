@@ -527,7 +527,7 @@ def create_td_molecule_object(mf, nstates=5, triplet=False, force_single_gpu=Fal
         hasattr(mf, 'to_cpu') and 
         callable(mf.to_cpu) and 
         GPU_AVAILABLE and
-        not force_single_gpu  # ← NEW: Skip subprocess for Ray workers
+        not force_single_gpu 
     )
     
     if use_subprocess:
