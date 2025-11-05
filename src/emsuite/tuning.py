@@ -1,7 +1,8 @@
-from . import core
-import csv, os, argparse, ast, sys, shutil
+import csv, os, argparse, ast, sys, shutil, json, ray
 import numpy as np
-import ray
+from datetime import datetime
+from pathlib import Path
+from . import core
 
 ##############################################
 #              Dependency Setup              #
@@ -238,22 +239,234 @@ def calculate_surface_effect_at_point(base_chkfiles, coord, surface_charge, solv
     return effects
 
 
+##########################################################
+#        Logging Infrastructure                         #
+##########################################################
+
+def setup_logs_directory():
+    """Create logs directory structure with timestamp."""
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    logs_dir = f"logs_{timestamp}"
+    os.makedirs(logs_dir, exist_ok=True)
+    return logs_dir
+
+def initialize_summary_log(logs_dir, calc_type, total_points):
+    """
+    Create summary file with header at the start of calculation.
+    
+    Args:
+        logs_dir (str): Directory for log files
+        calc_type (str): 'separate' or 'combined'
+        total_points (int): Expected number of surface points
+    
+    Returns:
+        str: Path to summary file
+    """
+    summary_file = os.path.join(logs_dir, "calculation_summary.out")
+    
+    with open(summary_file, 'w') as f:
+        f.write("="*70 + "\n")
+        f.write(f"{'ELECTROSTATIC TUNING MAP CALCULATION SUMMARY':^70}\n")
+        f.write("="*70 + "\n\n")
+        
+        f.write(f"Start Time:         {datetime.now().isoformat()}\n")
+        f.write(f"Calculation Type:   {calc_type}\n")
+        f.write(f"Total Points:       {total_points}\n")
+        f.write(f"Status:             IN PROGRESS\n\n")
+    
+    print(f"Summary log initialized: {summary_file}")
+    return summary_file
+
+def append_point_to_summary(summary_file, point_index, coord, charge, effects, 
+                           success=True, error_msg=None, total_points=None):
+    """
+    Append individual point result to summary file immediately after calculation.
+    
+    Args:
+        summary_file (str): Path to summary file
+        point_index (int): Index of completed point
+        coord (array): Coordinates
+        charge (float): Surface charge
+        effects (dict): Calculated effects
+        success (bool): Whether calculation succeeded
+        error_msg (str, optional): Error message if failed
+        total_points (int, optional): Total points for progress percentage
+    """
+    with open(summary_file, 'a') as f:
+        # Write point header
+        progress = f"[{point_index+1}/{total_points}]" if total_points else f"Point {point_index}"
+        f.write(f"\n{progress} " + "-"*55 + "\n")
+        f.write(f"Point {point_index:4d}:  ")
+        f.write(f"({coord[0]:8.4f}, {coord[1]:8.4f}, {coord[2]:8.4f})  ")
+        f.write(f"q = {charge:7.4f}\n")
+        f.write(f"Status:     {'SUCCESS' if success else 'FAILED'}\n")
+        f.write(f"Time:       {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n")
+        
+        if success and effects:
+            f.write("\nCalculated Effects:\n")
+            # Group by type for readability
+            for key, value in sorted(effects.items()):
+                f.write(f"  {key:<30} = {value:>12.8f}\n")
+        elif error_msg:
+            f.write(f"\nError: {error_msg}\n")
+        
+        f.write("\n")
+
+def finalize_summary_log(summary_file, all_effects, surface_coords, point_charges):
+    """
+    Add final statistics section to summary file after all calculations complete.
+    
+    Args:
+        summary_file (str): Path to summary file
+        all_effects (list): List of effects dictionaries (or None for failed)
+        surface_coords (array): All surface coordinates
+        point_charges (list): All surface charges
+    """
+    successful = sum(1 for e in all_effects if e is not None)
+    failed = sum(1 for e in all_effects if e is None)
+    
+    with open(summary_file, 'a') as f:
+        f.write("\n" + "="*70 + "\n")
+        f.write("FINAL STATISTICS\n")
+        f.write("="*70 + "\n\n")
+        
+        f.write(f"Completion Time:    {datetime.now().isoformat()}\n")
+        f.write(f"Successful Points:  {successful}\n")
+        f.write(f"Failed Points:      {failed}\n")
+        f.write(f"Success Rate:       {successful/len(all_effects)*100:.2f}%\n\n")
+        
+        # Get all unique property keys from successful calculations
+        all_keys = set()
+        for effects in all_effects:
+            if effects:
+                all_keys.update(effects.keys())
+        
+        if all_keys:
+            f.write("-"*70 + "\n")
+            f.write("STATISTICS FOR EACH PROPERTY EFFECT\n")
+            f.write("-"*70 + "\n")
+            f.write(f"{'Property':<25} {'Min':>12} {'Max':>12} {'Mean':>12} {'Std Dev':>12}\n")
+            f.write("-"*70 + "\n")
+            
+            for key in sorted(all_keys):
+                # Convert all values to float to handle both CPU and GPU arrays
+                values = []
+                for e in all_effects:
+                    if e and key in e:
+                        val = e[key]
+                        # Handle CuPy arrays from GPU calculations
+                        if hasattr(val, 'get'):
+                            val = float(val.get())
+                        else:
+                            val = float(val)
+                        values.append(val)
+                
+                if values:
+                    f.write(f"{key:<25} {min(values):>12.6f} {max(values):>12.6f} "
+                           f"{np.mean(values):>12.6f} {np.std(values):>12.6f}\n")
+            
+            f.write("\n")
+        
+        f.write("="*70 + "\n")
+        f.write("Calculation complete. Individual point files: point_XXXX.out\n")
+        f.write("="*70 + "\n")
+    
+    print(f"\nFinal statistics written to: {summary_file}")
+
+def log_point_result(logs_dir, point_index, coord, charge, effects, success=True, error_msg=None):
+    """Log individual point calculation result to structured .out file."""
+    log_file = os.path.join(logs_dir, f"point_{point_index:04d}.out")
+    
+    with open(log_file, 'w') as f:
+        f.write("="*70 + "\n")
+        f.write(f"{'SURFACE POINT CALCULATION RESULTS':^70}\n")
+        f.write("="*70 + "\n\n")
+        
+        f.write(f"Point Index:        {point_index}\n")
+        f.write(f"Timestamp:          {datetime.now().isoformat()}\n")
+        f.write(f"Status:             {'SUCCESS' if success else 'FAILED'}\n\n")
+        
+        f.write("-"*70 + "\n")
+        f.write("COORDINATES AND CHARGE\n")
+        f.write("-"*70 + "\n")
+        f.write(f"X-coordinate:       {coord[0]:>12.6f} Angstrom\n")
+        f.write(f"Y-coordinate:       {coord[1]:>12.6f} Angstrom\n")
+        f.write(f"Z-coordinate:       {coord[2]:>12.6f} Angstrom\n")
+        f.write(f"Surface Charge:     {charge:>12.6f} a.u.\n\n")
+        
+        if success and effects:
+            f.write("-"*70 + "\n")
+            f.write("CALCULATED EFFECTS\n")
+            f.write("-"*70 + "\n")
+            f.write(f"{'Property':<30} {'Effect Value':>20} {'Unit':>15}\n")
+            f.write("-"*70 + "\n")
+            
+            # Group effects by type
+            energy_effects = {}
+            orbital_effects = {}
+            excited_effects = {}
+            other_effects = {}
+            
+            for key, value in effects.items():
+                if any(x in key for x in ['gse', 'ie', 'ea', 'cp', 'eng', 'hard', 'efl', 'nfl']):
+                    energy_effects[key] = value
+                elif any(x in key for x in ['homo', 'lumo', 'gap']):
+                    orbital_effects[key] = value
+                elif 'exe' in key or 'osc' in key:
+                    excited_effects[key] = value
+                else:
+                    other_effects[key] = value
+            
+            # Write energy effects
+            if energy_effects:
+                f.write("\n  Energy Properties:\n")
+                for key, value in sorted(energy_effects.items()):
+                    unit = 'eV' if 'eng' in key or 'hard' in key or 'efl' in key or 'nfl' in key else 'kcal/mol'
+                    f.write(f"    {key:<28} {value:>20.8f} {unit:>15}\n")
+            
+            # Write orbital effects
+            if orbital_effects:
+                f.write("\n  Orbital Properties:\n")
+                for key, value in sorted(orbital_effects.items()):
+                    f.write(f"    {key:<28} {value:>20.8f} {'eV':>15}\n")
+            
+            # Write excited state effects
+            if excited_effects:
+                f.write("\n  Excited State Properties:\n")
+                for key, value in sorted(excited_effects.items()):
+                    unit = 'eV' if 'exe' in key else 'dimensionless'
+                    f.write(f"    {key:<28} {value:>20.8f} {unit:>15}\n")
+            
+            # Write other effects
+            if other_effects:
+                f.write("\n  Other Properties:\n")
+                for key, value in sorted(other_effects.items()):
+                    f.write(f"    {key:<28} {value:>20.8f} {'a.u.':>15}\n")
+                    
+        elif error_msg:
+            f.write("-"*70 + "\n")
+            f.write("ERROR INFORMATION\n")
+            f.write("-"*70 + "\n")
+            f.write(f"{error_msg}\n\n")
+        
+        f.write("\n" + "="*70 + "\n")
+
+
 ###############################################
 #              Parallel Processing            #
 ###############################################
+##########################################################
+# Modified Remote Functions - Return Metadata            #
+##########################################################
 
 @ray.remote(num_cpus=1, num_gpus=0, max_retries=0, memory=4*1024*1024*1024)
 def calculate_point_effect_cpu(base_chkfiles, coord, surface_charge, solvent, state_of_interest, triplet, properties_to_calculate, required_calculations, functional, point_index):
-    # Get CPU core affinity
     cpu_id = os.sched_getaffinity(0)
     print(f"[Point {point_index}] Running on CPU cores: {cpu_id}, PID: {os.getpid()}")
     
-    
-    # Create unique directory for this worker
     worker_dir = f"point_{point_index}"
     os.makedirs(worker_dir, exist_ok=True)
     
-    # Copy checkpoint files to worker directory
     worker_chkfiles = {}
     for key, chkfile in base_chkfiles.items():
         if chkfile:
@@ -263,7 +476,6 @@ def calculate_point_effect_cpu(base_chkfiles, coord, surface_charge, solvent, st
         else:
             worker_chkfiles[key] = None
     
-    # Change to worker directory
     original_dir = os.getcwd()
     os.chdir(worker_dir)
     
@@ -274,12 +486,30 @@ def calculate_point_effect_cpu(base_chkfiles, coord, surface_charge, solvent, st
             solvent, state_of_interest, triplet, properties_to_calculate, 
             required_calculations, functional
         )
-        return point_index, effects
-    except Exception as e:
-        print(f"Error at point {point_index}: {e}")
-        return point_index, None
-    finally:
         os.chdir(original_dir)
+        return {
+            'point_index': point_index,
+            'coord': coord,
+            'charge': surface_charge,
+            'effects': effects,
+            'success': True,
+            'error_msg': None
+        }
+        
+    except Exception as e:
+        error_msg = f"Error at point {point_index}: {e}"
+        print(error_msg)
+        os.chdir(original_dir)
+        return {
+            'point_index': point_index,
+            'coord': coord,
+            'charge': surface_charge,
+            'effects': None,
+            'success': False,
+            'error_msg': error_msg
+        }
+        
+    finally:
         if os.path.exists(worker_dir):
             shutil.rmtree(worker_dir, ignore_errors=True)
 
@@ -288,21 +518,14 @@ def calculate_point_effect_cpu(base_chkfiles, coord, surface_charge, solvent, st
 def calculate_point_effect_gpu(base_chkfiles, coord, surface_charge, solvent, 
                                state_of_interest, triplet, properties_to_calculate, 
                                required_calculations, functional, point_index):
-    """
-    Ray remote function for GPU-accelerated calculations.
-    Runs each surface point calculation in isolation with its own GPU.
-    """
-    # Get the GPU assigned by Ray
     gpu_id = ray.get_gpu_ids()[0]
     os.environ['CUDA_VISIBLE_DEVICES'] = str(gpu_id)
     
     print(f"Point {point_index}: Using GPU {gpu_id}, PID {os.getpid()}")
     
-    # Create worker-specific directory
     worker_dir = f"point_{point_index}"
     os.makedirs(worker_dir, exist_ok=True)
     
-    # Copy checkpoint files to worker directory
     worker_chkfiles = {}
     for key, chkfile in base_chkfiles.items():
         if chkfile:
@@ -312,25 +535,42 @@ def calculate_point_effect_gpu(base_chkfiles, coord, surface_charge, solvent,
         else:
             worker_chkfiles[key] = None
     
-    # Change to worker directory
     original_dir = os.getcwd()
     os.chdir(worker_dir)
     
     try:
-        # Calculate effects - force_single_gpu=True skips subprocess
         effects = calculate_surface_effect_at_point(
             {k: os.path.basename(v) if v else None for k, v in worker_chkfiles.items()},
             coord, surface_charge, 
             solvent, state_of_interest, triplet, properties_to_calculate, 
             required_calculations, functional,
-            force_single_gpu=True  # ← NEW: Skip TD subprocess in Ray workers
+            force_single_gpu=True
         )
         
-        return point_index, effects
+        os.chdir(original_dir)
+        return {
+            'point_index': point_index,
+            'coord': coord,
+            'charge': surface_charge,
+            'effects': effects,
+            'success': True,
+            'error_msg': None
+        }
+        
+    except Exception as e:
+        error_msg = f"Error at point {point_index}: {e}"
+        print(error_msg)
+        os.chdir(original_dir)
+        return {
+            'point_index': point_index,
+            'coord': coord,
+            'charge': surface_charge,
+            'effects': None,
+            'success': False,
+            'error_msg': error_msg
+        }
         
     finally:
-        # Cleanup
-        os.chdir(original_dir)
         if os.path.exists(worker_dir):
             shutil.rmtree(worker_dir, ignore_errors=True)
 
@@ -463,7 +703,7 @@ def calculate_combined_surface_effect(base_chkfiles, coords, charges, solvent, s
                                      triplet=triplet, props_to_calc=properties_to_calculate)
     wsc_results = calculate_all_properties(molecule_wsc, anion_mf=anion_wsc, 
                                          cation_mf=cation_wsc, td_obj=td_wsc, 
-                                         triplet=triplet, props_to_calculate=properties_to_calculate)
+                                         triplet=triplet, props_to_calc=properties_to_calculate)
     
     # Calculate differences
     effects = {}
@@ -891,16 +1131,269 @@ def startup_message():
     print(f"\n")
 
 
+##########################################################
+#        Resume/Recovery Infrastructure                  #
+##########################################################
 
-#######################################
-#            Main Execution           #
-#######################################
+def create_resume_metadata(logs_dir, calc_type, surface_type, total_points, 
+                          properties_to_calculate, surface_charge=None):
+    """
+    Create metadata file for resume capability.
+    
+    Args:
+        logs_dir (str): Logs directory path
+        calc_type (str): 'separate' or 'combined'
+        surface_type (str): 'homogenous' or 'heterogeneous'
+        total_points (int): Total number of points
+        properties_to_calculate (list): Properties being calculated
+        surface_charge (float, optional): Surface charge value
+    """
+    metadata = {
+        'original_start': datetime.now().isoformat(),
+        'last_updated': datetime.now().isoformat(),
+        'calc_type': calc_type,
+        'surface_type': surface_type,
+        'total_points': total_points,
+        'properties': sorted(properties_to_calculate),
+        'surface_charge': surface_charge,
+        'completed_points': [],
+        'failed_points': [],
+        'resume_count': 0
+    }
+    
+    metadata_file = os.path.join(logs_dir, '.resume_metadata.json')
+    with open(metadata_file, 'w') as f:
+        json.dump(metadata, f, indent=2)
+    
+    return metadata_file
+
+def update_resume_metadata(logs_dir, point_index, success):
+    """
+    Update metadata after each point completes.
+    
+    Args:
+        logs_dir (str): Logs directory path
+        point_index (int): Completed point index
+        success (bool): Whether point succeeded
+    """
+    metadata_file = os.path.join(logs_dir, '.resume_metadata.json')
+    
+    if os.path.exists(metadata_file):
+        with open(metadata_file, 'r') as f:
+            metadata = json.load(f)
+        
+        # Update completion tracking
+        if success:
+            if point_index not in metadata['completed_points']:
+                metadata['completed_points'].append(point_index)
+        else:
+            if point_index not in metadata['failed_points']:
+                metadata['failed_points'].append(point_index)
+        
+        metadata['last_updated'] = datetime.now().isoformat()
+        
+        # Sort for readability
+        metadata['completed_points'].sort()
+        metadata['failed_points'].sort()
+        
+        with open(metadata_file, 'w') as f:
+            json.dump(metadata, f, indent=2)
+
+def find_incomplete_logs():
+    """
+    Search current directory for incomplete log directories.
+    
+    Returns:
+        list: List of tuples (logs_dir, metadata_dict) sorted by timestamp (newest first)
+    """
+    incomplete_runs = []
+    
+    # Find all logs_* directories
+    for item in Path('.').glob('logs_*'):
+        if item.is_dir():
+            metadata_file = item / '.resume_metadata.json'
+            
+            if metadata_file.exists():
+                with open(metadata_file, 'r') as f:
+                    metadata = json.load(f)
+                
+                # Check if incomplete
+                completed = len(metadata['completed_points'])
+                total = metadata['total_points']
+                
+                if completed < total:
+                    incomplete_runs.append((str(item), metadata))
+    
+    # Sort by timestamp (newest first)
+    incomplete_runs.sort(key=lambda x: x[1]['original_start'], reverse=True)
+    
+    return incomplete_runs
+
+def validate_resume_compatibility(metadata, current_params):
+    """
+    Check if resume is compatible with current run parameters.
+    
+    Args:
+        metadata (dict): Metadata from previous run
+        current_params (dict): Current run parameters
+        
+    Returns:
+        tuple: (is_compatible, error_message)
+    """
+    checks = []
+    
+    # Check calc_type
+    if metadata['calc_type'] != current_params['calc_type']:
+        checks.append(f"calc_type mismatch: {metadata['calc_type']} vs {current_params['calc_type']}")
+    
+    # Check surface_type
+    if metadata['surface_type'] != current_params['surface_type']:
+        checks.append(f"surface_type mismatch: {metadata['surface_type']} vs {current_params['surface_type']}")
+    
+    # Check total_points
+    if metadata['total_points'] != current_params['total_points']:
+        checks.append(f"total_points mismatch: {metadata['total_points']} vs {current_params['total_points']}")
+    
+    # Check properties (must be same or subset)
+    old_props = set(metadata['properties'])
+    new_props = set(current_params['properties'])
+    if old_props != new_props:
+        checks.append(f"properties mismatch: {old_props} vs {new_props}")
+    
+    # Check surface_charge for homogenous surfaces
+    if metadata['surface_type'] == 'homogenous':
+        if abs(metadata.get('surface_charge', 0) - current_params.get('surface_charge', 0)) > 1e-6:
+            checks.append(f"surface_charge mismatch: {metadata['surface_charge']} vs {current_params['surface_charge']}")
+    
+    if checks:
+        return False, "\n".join(checks)
+    
+    return True, None
+
+def load_completed_results_from_logs(logs_dir, total_points):
+    """
+    Load results from existing point log files.
+    
+    Args:
+        logs_dir (str): Logs directory path
+        total_points (int): Total expected points
+        
+    Returns:
+        dict: Mapping of point_index -> {'coord': [...], 'charge': X, 'effects': {...}, 'success': bool}
+    """
+    results = {}
+    
+    for i in range(total_points):
+        point_file = os.path.join(logs_dir, f"point_{i:04d}.out")
+        
+        if os.path.exists(point_file):
+            # Parse the .out file to extract results
+            result = parse_point_log_file(point_file)
+            if result:
+                results[i] = result
+    
+    return results
+
+def parse_point_log_file(log_file):
+    """
+    Parse a point_XXXX.out file to extract calculation results.
+    
+    Args:
+        log_file (str): Path to log file
+        
+    Returns:
+        dict: {'coord': [x,y,z], 'charge': X, 'effects': {...}, 'success': bool} or None
+    """
+    try:
+        with open(log_file, 'r') as f:
+            lines = f.readlines()
+        
+        result = {'coord': None, 'charge': None, 'effects': {}, 'success': False}
+        
+        in_effects_section = False
+        
+        for line in lines:
+            # Parse status
+            if 'Status:' in line and 'SUCCESS' in line:
+                result['success'] = True
+            
+            # Parse coordinates
+            if 'X-coordinate:' in line:
+                result['coord'] = [0, 0, 0]
+                result['coord'][0] = float(line.split()[1])
+            elif 'Y-coordinate:' in line:
+                result['coord'][1] = float(line.split()[1])
+            elif 'Z-coordinate:' in line:
+                result['coord'][2] = float(line.split()[1])
+            
+            # Parse charge
+            if 'Surface Charge:' in line:
+                result['charge'] = float(line.split()[2])
+            
+            # Parse effects
+            if 'CALCULATED EFFECTS' in line:
+                in_effects_section = True
+                continue
+            
+            if in_effects_section and '=' in line and not line.startswith('-'):
+                parts = line.strip().split('=')
+                if len(parts) == 2:
+                    prop_name = parts[0].strip()
+                    try:
+                        value = float(parts[1].strip())
+                        result['effects'][prop_name] = value
+                    except ValueError:
+                        pass
+            
+            # End of effects section
+            if in_effects_section and line.startswith('='):
+                break
+        
+        return result if result['coord'] and result['charge'] is not None else None
+        
+    except Exception as e:
+        print(f"Warning: Could not parse {log_file}: {e}")
+        return None
+
+def prompt_user_resume(logs_dir, metadata):
+    """
+    Ask user if they want to resume an incomplete run.
+    
+    Args:
+        logs_dir (str): Logs directory path
+        metadata (dict): Metadata from incomplete run
+        
+    Returns:
+        bool: True if user wants to resume
+    """
+    completed = len(metadata['completed_points'])
+    failed = len(metadata['failed_points'])
+    total = metadata['total_points']
+    remaining = total - completed
+    
+    print("\n" + "="*70)
+    print("INCOMPLETE RUN DETECTED")
+    print("="*70)
+    print(f"Logs Directory:     {logs_dir}")
+    print(f"Original Start:     {metadata['original_start']}")
+    print(f"Last Updated:       {metadata['last_updated']}")
+    print(f"Calculation Type:   {metadata['calc_type']}")
+    print(f"Surface Type:       {metadata['surface_type']}")
+    print(f"Total Points:       {total}")
+    print(f"Completed:          {completed} ({completed/total*100:.1f}%)")
+    print(f"Failed:             {failed}")
+    print(f"Remaining:          {remaining}")
+    print("="*70)
+    
+    response = input("\nDo you want to resume this calculation? [Y/n]: ").strip().lower()
+    
+    return response in ['', 'y', 'yes']
 
 def main(tuning_file='tuning.in'):
 
-#######################################
-#           Preliminary Setup         #
-#######################################
+    #######################################
+    #           Preliminary Setup         #
+    #######################################
     """Main entry point for tuning calculations"""
     # Print startup message
     startup_message()
@@ -966,72 +1459,178 @@ def main(tuning_file='tuning.in'):
     #######################################
     #    Core Tuning Map Calculations     #
     #######################################
-
+    
+    # ========================================
+    # NEW: Check for incomplete runs
+    # ========================================
+    resume_mode = False
+    logs_dir = None
+    existing_results = {}
+    points_to_calculate = None
+    
+    incomplete_runs = find_incomplete_logs()
+    
+    if incomplete_runs:
+        # Get most recent incomplete run
+        latest_logs_dir, latest_metadata = incomplete_runs[0]
+        
+        # Check compatibility
+        current_params = {
+            'calc_type': calc_type,
+            'surface_type': surface_type,
+            'total_points': len(surface_coords),
+            'properties': sorted(properties_to_calculate),
+            'surface_charge': surface_charge if surface_type == 'homogenous' else None
+        }
+        
+        is_compatible, error_msg = validate_resume_compatibility(latest_metadata, current_params)
+        
+        if is_compatible:
+            if prompt_user_resume(latest_logs_dir, latest_metadata):
+                resume_mode = True
+                logs_dir = latest_logs_dir
+                
+                # Load existing results
+                print(f"\nLoading existing results from {logs_dir}...")
+                existing_results = load_completed_results_from_logs(logs_dir, len(surface_coords))
+                
+                # Determine which points still need calculation
+                completed_indices = set(existing_results.keys())
+                all_indices = set(range(len(surface_coords)))
+                points_to_calculate = sorted(all_indices - completed_indices)
+                
+                print(f"Loaded {len(existing_results)} existing results")
+                print(f"Will calculate {len(points_to_calculate)} remaining points: {points_to_calculate[:10]}{'...' if len(points_to_calculate) > 10 else ''}")
+                
+                # Update metadata for resume
+                with open(os.path.join(logs_dir, '.resume_metadata.json'), 'r') as f:
+                    metadata = json.load(f)
+                metadata['resume_count'] += 1
+                metadata['last_updated'] = datetime.now().isoformat()
+                with open(os.path.join(logs_dir, '.resume_metadata.json'), 'w') as f:
+                    json.dump(metadata, f, indent=2)
+        else:
+            print(f"\nWarning: Found incomplete run but parameters don't match:")
+            print(error_msg)
+            print("Starting new calculation instead.\n")
+    
+    # Create logs directory if not resuming
+    if not resume_mode:
+        logs_dir = setup_logs_directory()
+        print(f"Logging results to: {logs_dir}")
+        
+        # Create resume metadata
+        create_resume_metadata(
+            logs_dir, calc_type, surface_type, len(surface_coords),
+            properties_to_calculate, 
+            surface_charge if surface_type == 'homogenous' else None
+        )
+        
+        # Calculate all points
+        points_to_calculate = list(range(len(surface_coords)))
+    
     # Create base molecule objects
     base_molecules = create_molecule_objects(
         input_data, basis_set, spin, method, functional, charge, 
         No_of_GPUs > 0, required_calculations, state_of_interest, triplet)
     
-    # Create checkpoint file dictionary
     base_chkfiles = {
         'neutral': 'molecule_alone.chk' if required_calculations.get('neutral') else None,
         'anion': 'anion_alone.chk' if required_calculations.get('anion') else None,
         'cation': 'cation_alone.chk' if required_calculations.get('cation') else None
     }
 
-    # molecule_alone = core.resurrect_mol(base_chkfiles['neutral']) if base_chkfiles.get('neutral') else None
-    # print(f"Base molecule prepared: type={type(molecule_alone)}")
-
-    # td_alone = None
-    # if required_calculations.get('td', False) and molecule_alone:
-    #     td_alone = core.create_td_molecule_object(molecule_alone, nstates=state_of_interest, triplet=triplet)
-
-    # print(f"TD Exe, Osc =({td_alone.e}, {td_alone.oscillator_strength()})" if td_alone else "No TD object created")
-
-
-    # Branch based on calc_type
     if calc_type == 'combined':
-        # Combined calculation: all charges at once
         print(f"Running combined calculation with all {len(surface_coords)} surface points...")
         
-        # Prepare charges array
+        # Initialize or reopen summary log
+        summary_file = os.path.join(logs_dir, "calculation_summary.out")
+        if not resume_mode:
+            summary_file = initialize_summary_log(logs_dir, calc_type, 1)
+        
         if surface_type == 'homogenous':
             q_mm = np.full(len(surface_coords), surface_charge)
-        else:  # heterogenous
+        else:
             q_mm = surface_charges
         
-        # Single combined calculation
-        combined_effects = calculate_combined_surface_effect(
-            base_chkfiles, surface_coords, q_mm,
-            solvent, state_of_interest, triplet, properties_to_calculate,
-            required_calculations, functional
-        )
+        try:
+            combined_effects = calculate_combined_surface_effect(
+                base_chkfiles, surface_coords, q_mm,
+                solvent, state_of_interest, triplet, properties_to_calculate,
+                required_calculations, functional
+            )
+            
+            # Log combined result (individual file)
+            log_point_result(logs_dir, 0, np.mean(surface_coords, axis=0), 
+                           surface_charge, combined_effects, success=True)
+            
+            # Append to summary
+            append_point_to_summary(summary_file, 0, np.mean(surface_coords, axis=0),
+                                   surface_charge, combined_effects, success=True, total_points=1)
+            
+            # Update resume metadata
+            update_resume_metadata(logs_dir, 0, True)
+            
+            print(f"Combined effects: {combined_effects}")
+            all_effects = [combined_effects]
+            output_coords = np.mean(surface_coords, axis=0).reshape(1, 3)
+            
+        except Exception as e:
+            error_msg = f"Combined calculation failed: {e}"
+            print(error_msg)
+            
+            # Log failure
+            log_point_result(logs_dir, 0, np.mean(surface_coords, axis=0), 
+                           surface_charge, None, success=False, error_msg=error_msg)
+            
+            # Append failure to summary
+            append_point_to_summary(summary_file, 0, np.mean(surface_coords, axis=0),
+                                   surface_charge, None, success=False, 
+                                   error_msg=error_msg, total_points=1)
+            
+            # Update resume metadata
+            update_resume_metadata(logs_dir, 0, False)
+            
+            all_effects = [None]
+            output_coords = np.mean(surface_coords, axis=0).reshape(1, 3)
         
-        print(f"Combined effects: {combined_effects}")
-        
-        # For combined, we create a single-entry output
-        all_effects = [combined_effects]
-        output_coords = np.mean(surface_coords, axis=0).reshape(1, 3)  # Use centroid
+        # Finalize summary with statistics
+        finalize_summary_log(summary_file, all_effects, output_coords, [surface_charge])
         
     else:  # calc_type == 'separate'
-        # Separate calculations: one per surface point
-        print(f"Running separate calculations on {len(surface_coords)} surface points...")
+        if resume_mode:
+            print(f"\nResuming calculation for {len(points_to_calculate)} remaining points...")
+        else:
+            print(f"Running separate calculations on {len(surface_coords)} surface points...")
         
-        # Determine charges per point
+        # Initialize or reopen summary log
+        summary_file = os.path.join(logs_dir, "calculation_summary.out")
+        if not resume_mode:
+            summary_file = initialize_summary_log(logs_dir, calc_type, len(surface_coords))
+        else:
+            # Append resume notice to existing summary
+            with open(summary_file, 'a') as f:
+                f.write(f"\n{'='*70}\n")
+                f.write(f"RESUMING CALCULATION - {datetime.now().isoformat()}\n")
+                f.write(f"Calculating {len(points_to_calculate)} remaining points\n")
+                f.write(f"{'='*70}\n\n")
+        
         if surface_type == 'homogenous':
             point_charges = [surface_charge] * len(surface_coords)
-        else:  # heterogenous
+        else:
             point_charges = surface_charges
         
-        # Choose parallel or sequential processing
+        # Initialize results array (fill with existing + None for pending)
+        all_effects = [None] * len(surface_coords)
+        for idx, result in existing_results.items():
+            all_effects[idx] = result['effects']
+        
         if parallel:
-            # Parallel processing setup
             if num_procs is None:
                 parallel_processes = No_of_CPUs if No_of_GPUs < 1 else No_of_GPUs
             else:
                 parallel_processes = min(No_of_CPUs if No_of_GPUs < 1 else No_of_GPUs, num_procs)
             
-            # Choose the appropriate remote function
             if No_of_GPUs < 1:
                 ray.init(num_cpus=parallel_processes)
                 calculate_point_effect = calculate_point_effect_cpu
@@ -1040,14 +1639,12 @@ def main(tuning_file='tuning.in'):
                 calculate_point_effect = calculate_point_effect_gpu
             
             print(f"Using {parallel_processes} parallel processes on {'GPU' if No_of_GPUs > 0 else 'CPU'}")
-                
-            all_effects = [None] * len(surface_coords)
             
-            # Process in batches
+            # MODIFIED: Only submit jobs for points_to_calculate
             batch_size = parallel_processes
-            for batch_start in range(0, len(surface_coords), batch_size):
-                batch_end = min(batch_start + batch_size, len(surface_coords))
-                batch_indices = range(batch_start, batch_end)
+            for batch_start in range(0, len(points_to_calculate), batch_size):
+                batch_end = min(batch_start + batch_size, len(points_to_calculate))
+                batch_indices = [points_to_calculate[i] for i in range(batch_start, batch_end)]
             
                 futures = [
                     calculate_point_effect.remote(
@@ -1058,40 +1655,101 @@ def main(tuning_file='tuning.in'):
                     for i in batch_indices
                 ]
             
-                for future in ray.get(futures):
-                    point_index, effects = future
-                    if effects:
-                        all_effects[point_index] = effects
-                        print(f"Point {point_index+1}/{len(surface_coords)}: {effects}")
-                    else:
-                        print(f"Point {point_index+1}/{len(surface_coords)}: FAILED")
+                # Get results and log them IMMEDIATELY after each completes
+                for result in ray.get(futures):
+                    point_index = result['point_index']
+                    all_effects[point_index] = result['effects']
+                    
+                    # Log individual point file
+                    log_point_result(
+                        logs_dir, 
+                        point_index, 
+                        result['coord'], 
+                        result['charge'], 
+                        result['effects'],
+                        success=result['success'],
+                        error_msg=result['error_msg']
+                    )
+                    
+                    # Append to summary file IMMEDIATELY
+                    append_point_to_summary(
+                        summary_file,
+                        point_index,
+                        result['coord'],
+                        result['charge'],
+                        result['effects'],
+                        success=result['success'],
+                        error_msg=result['error_msg'],
+                        total_points=len(surface_coords)
+                    )
+                    
+                    # Update resume metadata
+                    update_resume_metadata(logs_dir, point_index, result['success'])
+                    
+                    status = "SUCCESS" if result['success'] else "FAILED"
+                    completed_so_far = len([e for e in all_effects if e is not None])
+                    print(f"Point {point_index+1}/{len(surface_coords)}: {status} ({completed_so_far}/{len(surface_coords)} total)")
             
             ray.shutdown()
             
         else:
-            # Sequential processing
+            # Sequential processing - only process points_to_calculate
             print(f"Using sequential processing (parallel=False)")
-            all_effects = []
-            for i, coord in enumerate(surface_coords):
-                effects = calculate_surface_effect_at_point(
-                    base_chkfiles, coord, point_charges[i], 
-                    solvent, state_of_interest, triplet, properties_to_calculate, 
-                    required_calculations, functional
-                )
-                all_effects.append(effects)
-                print(f"Point {i+1}/{len(surface_coords)}: {effects}")
+            for i in points_to_calculate:
+                coord = surface_coords[i]
+                try:
+                    effects = calculate_surface_effect_at_point(
+                        base_chkfiles, coord, point_charges[i], 
+                        solvent, state_of_interest, triplet, properties_to_calculate, 
+                        required_calculations, functional
+                    )
+                    
+                    # Log individual file
+                    log_point_result(logs_dir, i, coord, point_charges[i], effects, success=True)
+                    
+                    # Append to summary IMMEDIATELY
+                    append_point_to_summary(summary_file, i, coord, point_charges[i], 
+                                           effects, success=True, total_points=len(surface_coords))
+                    
+                    # Update resume metadata
+                    update_resume_metadata(logs_dir, i, True)
+                    
+                    all_effects[i] = effects
+                    completed_so_far = len([e for e in all_effects if e is not None])
+                    print(f"Point {i+1}/{len(surface_coords)}: SUCCESS ({completed_so_far}/{len(surface_coords)} total)")
+                    
+                except Exception as e:
+                    error_msg = f"Error at point {i}: {e}"
+                    print(f"Point {i+1}/{len(surface_coords)}: FAILED - {e}")
+                    
+                    # Log failure
+                    log_point_result(logs_dir, i, coord, point_charges[i], None, 
+                                   success=False, error_msg=error_msg)
+                    
+                    # Append failure to summary IMMEDIATELY
+                    append_point_to_summary(summary_file, i, coord, point_charges[i], None,
+                                           success=False, error_msg=error_msg, 
+                                           total_points=len(surface_coords))
+                    
+                    # Update resume metadata
+                    update_resume_metadata(logs_dir, i, False)
+                    
+                    all_effects[i] = None
         
         output_coords = surface_coords
+        
+        # Finalize summary with statistics
+        finalize_summary_log(summary_file, all_effects, output_coords, point_charges)
 
-    # # Create output files
-    # create_output_files(output_coords, all_effects, molecule_name, properties_to_calculate)
-    # check_all_files_created(molecule_name, output_coords, properties_to_calculate, all_effects)
+    # Create output files
+    create_output_files(output_coords, all_effects, molecule_name, properties_to_calculate)
+    check_all_files_created(molecule_name, output_coords, properties_to_calculate, all_effects)
 
-    # # Remove temporary checkpoint files
-    # temp_files = ['molecule_alone.chk', 'anion_alone.chk', 'cation_alone.chk']
-    # for temp_file in temp_files:
-    #     if os.path.exists(temp_file):
-    #         os.remove(temp_file)
+    # Remove temporary checkpoint files
+    temp_files = ['molecule_alone.chk', 'anion_alone.chk', 'cation_alone.chk']
+    for temp_file in temp_files:
+        if os.path.exists(temp_file):
+            os.remove(temp_file)
 
 if __name__ == "__main__":
     tuning_file = sys.argv[1] if len(sys.argv) > 1 else 'tuning.in'

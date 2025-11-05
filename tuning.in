@@ -1,6 +1,6 @@
 #Input parameters
 input_type = 'XYZ'
-input_data = 'LF.xyz'
+input_data = 'water.xyz'
 
 #QM calculation parameters
 method = 'dft'
@@ -13,7 +13,7 @@ state_of_interest = 2
 triplet = False
 
 #Surface parameters
-properties = ['exe']
+properties = ['all']
 scale = 1
 density = 1
 surface_type = 'homogenous'
@@ -21,5 +21,5 @@ surface_charge = 0.1
 calc_type = 'separate'
 
 # Parallel processing (default: True)
-parallel = False
+parallel = True
 num_procs = 10
