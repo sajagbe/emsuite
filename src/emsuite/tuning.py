@@ -973,6 +973,133 @@ def prepare_input_data(input_type, input_data, basis_set, method='dft', function
         raise ValueError("input_type must be 'xyz' or 'smiles'")
 
 
+def append_raw_properties_to_summary(summary_file, raw_properties):
+    """
+    Append raw baseline properties to the summary file.
+    
+    Args:
+        summary_file (str): Path to summary file
+        raw_properties (dict): Dictionary of baseline property values (no surface effects)
+    """
+    with open(summary_file, 'a') as f:
+        f.write("\n" + "="*70 + "\n")
+        f.write("RAW PROPERTIES (NO SURFACE EFFECTS)\n")
+        f.write("="*70 + "\n\n")
+        
+        # Group properties by category for better readability
+        energy_props = {}
+        orbital_props = {}
+        excited_props = {}
+        other_props = {}
+        
+        for prop, value in raw_properties.items():
+            if any(x in prop for x in ['gse', 'ie', 'ea', 'cp', 'eng', 'hard', 'efl', 'nfl']):
+                energy_props[prop] = value
+            elif any(x in prop for x in ['homo', 'lumo', 'gap']):
+                orbital_props[prop] = value
+            elif 'exe' in prop or 'osc' in prop:
+                excited_props[prop] = value
+            else:
+                other_props[prop] = value
+        
+        # Write energy properties
+        if energy_props:
+            f.write("Energy Properties:\n")
+            f.write("-" * 50 + "\n")
+            for prop, value in sorted(energy_props.items()):
+                unit = 'eV' if any(x in prop for x in ['eng', 'hard', 'efl', 'nfl']) else 'kcal/mol'
+                f.write(f"  {prop:<15s}: {value:>12.6f}  {unit}\n")
+            f.write("\n")
+        
+        # Write orbital properties
+        if orbital_props:
+            f.write("Orbital Properties:\n")
+            f.write("-" * 50 + "\n")
+            for prop, value in sorted(orbital_props.items()):
+                f.write(f"  {prop:<15s}: {value:>12.6f}  eV\n")
+            f.write("\n")
+        
+        # Write excited state properties
+        if excited_props:
+            f.write("Excited State Properties:\n")
+            f.write("-" * 50 + "\n")
+            for prop, value in sorted(excited_props.items()):
+                unit = 'eV' if 'exe' in prop else 'dimensionless'
+                f.write(f"  {prop:<15s}: {value:>12.6f}  {unit}\n")
+            f.write("\n")
+        
+        # Write other properties
+        if other_props:
+            f.write("Other Properties:\n")
+            f.write("-" * 50 + "\n")
+            for prop, value in sorted(other_props.items()):
+                f.write(f"  {prop:<15s}: {value:>12.6f}  a.u.\n")
+            f.write("\n")
+        
+        f.write("="*70 + "\n")
+    
+    print(f"Raw properties appended to: {summary_file}")
+
+def organize_results(molecule_name, properties_to_calculate, logs_dir):
+    """
+    Move all output files into a timestamped results folder.
+    
+    Args:
+        molecule_name (str): Base name of molecule
+        properties_to_calculate (list): List of properties that were calculated
+        logs_dir (str): Path to logs directory
+        
+    Returns:
+        str: Path to created results directory
+    """
+    timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+    results_dir = f"results_{molecule_name}_{timestamp}"
+    
+    # Create results directory
+    os.makedirs(results_dir, exist_ok=True)
+    print(f"\nOrganizing results into: {results_dir}/")
+    
+    # Move CSV summary file
+    csv_file = f"{molecule_name}_tuning_summary.csv"
+    if os.path.exists(csv_file):
+        shutil.move(csv_file, os.path.join(results_dir, csv_file))
+        print(f"  Moved: {csv_file}")
+    
+    # Move all .mol2 files (scan directory for all matching files)
+    mol2_files = []
+    for file in os.listdir('.'):
+        if file.startswith(molecule_name) and file.endswith('.mol2'):
+            shutil.move(file, os.path.join(results_dir, file))
+            mol2_files.append(file)
+    
+    if mol2_files:
+        print(f"  Moved {len(mol2_files)} MOL2 files")
+    
+    # Move logs directory
+    if logs_dir and os.path.exists(logs_dir):
+        dest_logs = os.path.join(results_dir, 'logs')
+        shutil.move(logs_dir, dest_logs)
+        print(f"  Moved: {logs_dir}/ -> logs/")
+    
+    # Create a README file in results directory
+    readme_path = os.path.join(results_dir, 'README.txt')
+    with open(readme_path, 'w') as f:
+        f.write("="*70 + "\n")
+        f.write("ELECTROSTATIC TUNING MAP RESULTS\n")
+        f.write("="*70 + "\n\n")
+        f.write(f"Molecule:           {molecule_name}\n")
+        f.write(f"Timestamp:          {timestamp}\n")
+        f.write(f"Properties:         {', '.join(properties_to_calculate)}\n\n")
+        f.write("Files in this directory:\n")
+        f.write("-" * 70 + "\n")
+        f.write(f"  {csv_file:<40} - Summary CSV with all data\n")
+        f.write(f"  {molecule_name}_*.mol2{'':<24} - MOL2 files (raw values)\n")
+        f.write(f"  {molecule_name}_*_normalized.mol2{'':<14} - MOL2 files (normalized)\n")
+        f.write(f"  logs/{'':<46} - Individual point logs\n")
+        f.write(f"  README.txt{'':<38} - This file\n\n")
+        f.write("="*70 + "\n")
+    
+    return results_dir
 
 
 def normalize_effects(all_effects, effect_keys):
@@ -1012,7 +1139,7 @@ def normalize_effects(all_effects, effect_keys):
     
     return normalized_effects, normalization_params
 
-def create_output_files(surface_coords, all_effects, molecule_name, properties_to_calculate):
+def create_output_files(surface_coords, all_effects, molecule_name, properties_to_calculate, raw_properties):
     """
     Create MOL2 files and CSV summary for surface effects analysis.
 
@@ -1025,6 +1152,7 @@ def create_output_files(surface_coords, all_effects, molecule_name, properties_t
         all_effects (list): List of effect dictionaries for each surface point
         molecule_name (str): Base name for output files
         properties_to_calculate (list): List of calculated molecular properties
+        raw_properties (dict): Dict of baseline property values (no surface effects)
 
     Returns:
         None: Creates files directly on disk
@@ -1032,42 +1160,78 @@ def create_output_files(surface_coords, all_effects, molecule_name, properties_t
     # Gather all effect keys found in all_effects
     effect_keys = set()
     for effect in all_effects:
-        effect_keys.update(effect.keys())
+        if effect:
+            effect_keys.update(effect.keys())
     effect_keys = sorted(effect_keys)
+    
+    print(f"\nDEBUG: Found {len(effect_keys)} effect keys: {effect_keys[:5]}...")
+    print(f"DEBUG: First effect dict: {all_effects[0] if all_effects else 'None'}")
 
     # Normalize the effects
     normalized_effects, normalization_params = normalize_effects(all_effects, effect_keys)
 
     # Create MOL2 files for non-normalized values
     for key in effect_keys:
-        if key.endswith('_effect'):
-            prop_base = key.replace('_effect', '')
-            core.create_mol2_file(
-                molecule_name,
-                surface_coords,
-                [effect.get(key, 0.0) for effect in all_effects],
-                prop_base
-            )
+        prop_base = key.replace('_effect', '') if key.endswith('_effect') else key
+        
+        # Get baseline value for this property
+        baseline_value = raw_properties.get(prop_base, 0.0)
+        
+        # Create custom MOL2 with baseline in comment line
+        filename = f"{molecule_name}_{prop_base}.mol2"
+        with open(filename, 'w') as f:
+            # Header
+            f.write("@<TRIPOS>MOLECULE\n")
+            f.write(f"{prop_base} | baseline={baseline_value:.6f}\n")
+            f.write(f"{len(surface_coords):5d} 0 0 0\n")
+            f.write("SMALL\n")
+            f.write("GASTEIGER\n")
+            
+            # Atoms
+            f.write("@<TRIPOS>ATOM\n")
+            for idx, (coord, effect) in enumerate(zip(surface_coords, all_effects), 1):
+                x, y, z = coord
+                effect_value = effect.get(key, 0.0) if effect else 0.0
+                f.write(f"{idx:5d} H    {x:8.4f} {y:8.4f} {z:8.4f} H1   1 {prop_base.upper():8s} {effect_value:10.6f}\n")
+        
+        print(f"Created: {filename}")
 
     # Create MOL2 files for normalized values
     for key in effect_keys:
-        if key.endswith('_effect'):
-            prop_base = key.replace('_effect', '')
-            core.create_mol2_file(
-                molecule_name,
-                surface_coords,
-                [effect.get(key, 0.0) for effect in normalized_effects],
-                f"{prop_base}_normalized"
-            )
+        prop_base = key.replace('_effect', '') if key.endswith('_effect') else key
+        
+        # Get baseline value for this property
+        baseline_value = raw_properties.get(prop_base, 0.0)
+        
+        # Create custom MOL2 with baseline in comment line
+        filename = f"{molecule_name}_{prop_base}_normalized.mol2"
+        with open(filename, 'w') as f:
+            # Header
+            f.write("@<TRIPOS>MOLECULE\n")
+            f.write(f"{prop_base}_normalized | baseline={baseline_value:.6f}\n")
+            f.write(f"{len(surface_coords):5d} 0 0 0\n")
+            f.write("SMALL\n")
+            f.write("GASTEIGER\n")
+            
+            # Atoms
+            f.write("@<TRIPOS>ATOM\n")
+            for idx, (coord, norm_effect) in enumerate(zip(surface_coords, normalized_effects), 1):
+                x, y, z = coord
+                effect_value = norm_effect.get(key, 0.0) if norm_effect else 0.0
+                f.write(f"{idx:5d} H    {x:8.4f} {y:8.4f} {z:8.4f} H1   1 {prop_base.upper():8s} {effect_value:10.6f}\n")
+        
+        print(f"Created: {filename}")
 
-    # Create CSV summary with both original and normalized values
+    # Create CSV summary with coordinates, effects, normalized effects, AND baseline values
     csv_filename = f"{molecule_name}_tuning_summary.csv"
     with open(csv_filename, 'w', newline='') as csvfile:
-        # Create fieldnames with both original and normalized columns
+        # Create fieldnames
         fieldnames = ['point_index', 'x', 'y', 'z']
         for key in effect_keys:
-            fieldnames.append(key)
-            fieldnames.append(f"{key}_normalized")
+            prop_base = key.replace('_effect', '') if key.endswith('_effect') else key
+            fieldnames.append(key)  # Raw effect (e.g., 'gse_effect')
+            fieldnames.append(f"{key}_normalized")  # Normalized
+            fieldnames.append(f"{prop_base}_baseline")  # Baseline
         
         writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
         writer.writeheader()
@@ -1079,12 +1243,28 @@ def create_output_files(surface_coords, all_effects, molecule_name, properties_t
                 'y': coord[1],
                 'z': coord[2]
             }
+            
             for key in effect_keys:
-                row[key] = effect.get(key, 0.0)
-                row[f"{key}_normalized"] = norm_effect.get(key, 0.0)
+                prop_base = key.replace('_effect', '') if key.endswith('_effect') else key
+                
+                # Get raw effect value
+                raw_val = effect.get(key, 0.0) if effect else 0.0
+                norm_val = norm_effect.get(key, 0.0) if norm_effect else 0.0
+                base_val = raw_properties.get(prop_base, 0.0)
+                
+                # Debug first row
+                if i == 0:
+                    print(f"DEBUG Row 0: {key} = {raw_val}, normalized = {norm_val}, baseline = {base_val}")
+                
+                row[key] = raw_val
+                row[f"{key}_normalized"] = norm_val
+                row[f"{prop_base}_baseline"] = base_val
+            
             writer.writerow(row)
     
-    # Print normalization parameters for reference
+    print(f"\nCreated: {csv_filename}")
+    
+    # Print normalization parameters
     print("\nNormalization parameters (min, max):")
     for key, (min_val, max_val) in normalization_params.items():
         print(f"  {key}: ({min_val:.6f}, {max_val:.6f})")
@@ -1385,7 +1565,7 @@ def prompt_user_resume(logs_dir, metadata):
     print(f"Remaining:          {remaining}")
     print("="*70)
     
-    response = input("\nDo you want to resume this calculation? [Y/n]: ").strip().lower()
+    response = input("\nDo you want to resume this calculation? [y/n]: ").strip().lower()
     
     return response in ['', 'y', 'yes']
 
@@ -1461,7 +1641,7 @@ def main(tuning_file='tuning.in'):
     #######################################
     
     # ========================================
-    # NEW: Check for incomplete runs
+    #          Check for incomplete runs
     # ========================================
     resume_mode = False
     logs_dir = None
@@ -1533,13 +1713,36 @@ def main(tuning_file='tuning.in'):
     base_molecules = create_molecule_objects(
         input_data, basis_set, spin, method, functional, charge, 
         No_of_GPUs > 0, required_calculations, state_of_interest, triplet)
-    
+
+    # Unpack the list returned by create_molecule_objects
+    molecule_alone, anion_alone, cation_alone, td_alone = base_molecules
+
+
     base_chkfiles = {
         'neutral': 'molecule_alone.chk' if required_calculations.get('neutral') else None,
         'anion': 'anion_alone.chk' if required_calculations.get('anion') else None,
         'cation': 'cation_alone.chk' if required_calculations.get('cation') else None
     }
-
+    
+    # Calculate raw properties (baseline - no surface effects)
+    raw_properties = calculate_all_properties(
+        molecule_alone,
+        anion_mf=anion_alone,
+        cation_mf=cation_alone,
+        td_obj=td_alone,
+        triplet=triplet,
+        props_to_calc=properties_to_calculate
+    )
+    
+    print(f"\n")
+    print(f"="*60)
+    print(f"                Raw Properties (No Surface)")
+    for prop, value in raw_properties.items():
+        if prop in properties_to_calculate:
+            print(f"                {prop}: {value:.6f}")
+    print(f"="*60)
+    print(f"\n")
+    
     if calc_type == 'combined':
         print(f"Running combined calculation with all {len(surface_coords)} surface points...")
         
@@ -1597,6 +1800,9 @@ def main(tuning_file='tuning.in'):
         # Finalize summary with statistics
         finalize_summary_log(summary_file, all_effects, output_coords, [surface_charge])
         
+        # Append raw properties to summary
+        append_raw_properties_to_summary(summary_file, raw_properties)
+
     else:  # calc_type == 'separate'
         if resume_mode:
             print(f"\nResuming calculation for {len(points_to_calculate)} remaining points...")
@@ -1632,10 +1838,10 @@ def main(tuning_file='tuning.in'):
                 parallel_processes = min(No_of_CPUs if No_of_GPUs < 1 else No_of_GPUs, num_procs)
             
             if No_of_GPUs < 1:
-                ray.init(num_cpus=parallel_processes)
+                ray.init(num_cpus=parallel_processes, include_dashboard=False)
                 calculate_point_effect = calculate_point_effect_cpu
             else:
-                ray.init(num_gpus=parallel_processes)
+                ray.init(num_gpus=parallel_processes, include_dashboard=False)
                 calculate_point_effect = calculate_point_effect_gpu
             
             print(f"Using {parallel_processes} parallel processes on {'GPU' if No_of_GPUs > 0 else 'CPU'}")
@@ -1741,9 +1947,16 @@ def main(tuning_file='tuning.in'):
         # Finalize summary with statistics
         finalize_summary_log(summary_file, all_effects, output_coords, point_charges)
 
+        # Append raw properties to summary
+        append_raw_properties_to_summary(summary_file, raw_properties)
+
     # Create output files
-    create_output_files(output_coords, all_effects, molecule_name, properties_to_calculate)
+    create_output_files(output_coords, all_effects, molecule_name, properties_to_calculate, raw_properties)
     check_all_files_created(molecule_name, output_coords, properties_to_calculate, all_effects)
+
+    # Organize results into timestamped folder (BEFORE removing temp files and printing conclusion)
+    results_dir = organize_results(molecule_name, properties_to_calculate, logs_dir)
+
 
     # Remove temporary checkpoint files
     temp_files = ['molecule_alone.chk', 'anion_alone.chk', 'cation_alone.chk']

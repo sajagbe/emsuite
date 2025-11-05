@@ -1,0 +1,17 @@
+======================================================================
+ELECTROSTATIC TUNING MAP RESULTS
+======================================================================
+
+Molecule:           water
+Timestamp:          2025-11-05_04-43-33
+Properties:         osc, efl, gse, ie, homo, exe, cp, eng, nfl, gap, hard, ea, dm, lumo
+
+Files in this directory:
+----------------------------------------------------------------------
+  water_tuning_summary.csv                 - Summary CSV with all data
+  water_*.mol2                         - MOL2 files (raw values)
+  water_*_normalized.mol2               - MOL2 files (normalized)
+  logs/                                               - Individual point logs
+  README.txt                                       - This file
+
+======================================================================
