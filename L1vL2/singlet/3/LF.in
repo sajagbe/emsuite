@@ -1,6 +1,6 @@
 #Input parameters
 input_type = 'XYZ'
-input_data = 'water.xyz'
+input_data = 'LF.xyz'
 
 #QM calculation parameters
 method = 'dft'
@@ -13,10 +13,9 @@ state_of_interest = 2
 triplet = False
 
 #Surface parameters
-properties = ['all']
-scale = 1
-density = 1
-surface_file = 'water.etm'
+properties = ['exe']
+scale = 3
+density = 0.33
 surface_type = 'homogenous'
 surface_charge = 0.1
 calc_type = 'separate'
