@@ -2322,11 +2322,31 @@ def main(tuning_file='tuning.in'):
     # Unpack the list returned by create_molecule_objects
     molecule_alone, anion_alone, cation_alone, td_alone = base_molecules
 
+    # base_chkfiles = {
+    #     'neutral': 'molecule_alone.chk' if required_calculations.get('neutral') else None,
+    #     'anion': 'anion_alone.chk' if required_calculations.get('anion') else None,
+    #     'cation': 'cation_alone.chk' if required_calculations.get('cation') else None
+    # }
+    
+
+
+
+    # Use absolute paths for checkpoint files so Ray worker processes can
+    # reliably locate them even if their current working directory differs.
     base_chkfiles = {
-        'neutral': 'molecule_alone.chk' if required_calculations.get('neutral') else None,
-        'anion': 'anion_alone.chk' if required_calculations.get('anion') else None,
-        'cation': 'cation_alone.chk' if required_calculations.get('cation') else None
+        'neutral': os.path.abspath('molecule_alone.chk') if required_calculations.get('neutral') else None,
+        'anion': os.path.abspath('anion_alone.chk') if required_calculations.get('anion') else None,
+        'cation': os.path.abspath('cation_alone.chk') if required_calculations.get('cation') else None
     }
+
+    # Quick sanity check: ensure checkpoint files that should exist are present
+    missing_chk = [v for v in base_chkfiles.values() if v and not os.path.exists(v)]
+    if missing_chk:
+        raise FileNotFoundError(
+            f"Missing checkpoint file(s) required for calculation: {missing_chk}. "
+            "Make sure base calculations completed and checkpoint files were saved (e.g. 'molecule_alone.chk')."
+        )
+    
     
     
     # print(f"\nBase molecule types:")

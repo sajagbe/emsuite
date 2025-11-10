@@ -4,7 +4,7 @@ input_data = 'LF.xyz'
 
 #QM calculation parameters
 method = 'dft'
-basis_set = 'cc-pvtz'
+basis_set = 'sto-3g'
 functional = 'b3lyp'
 charge = 0
 spin = 0
