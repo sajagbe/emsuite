@@ -1,24 +1,22 @@
 #Input parameters
 input_type = 'XYZ'
-input_data = 'water.xyz'
+input_data = 'LF.xyz'
 
 #QM calculation parameters
 method = 'dft'
-basis_set = 'cc-pvtz'
-functional = 'b3lyp'
+basis_set = 'def2svp'
+functional = 'HYB_GGA_XC_WB97X_D3'
 charge = 0
 spin = 0
 solvent = None
 state_of_interest = 2
 triplet = False
+properties = ['exe']
 
 #Surface parameters
-properties = ['exe']
-scale = 1
-density = 1
+scale = 3
+density = 0.33
 surface_type = 'homogenous'
-
-surface_file = 'water.etm'
 surface_charge = 0.1
 calc_type = 'separate'
 

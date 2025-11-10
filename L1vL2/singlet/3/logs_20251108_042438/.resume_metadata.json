@@ -1,6 +1,6 @@
 {
-  "original_start": "2025-11-05T08:11:01.833503",
-  "last_updated": "2025-11-06T05:47:49.543862",
+  "original_start": "2025-11-08T04:24:38.246110",
+  "last_updated": "2025-11-08T04:24:38.246117",
   "calc_type": "separate",
   "surface_type": "homogenous",
   "total_points": 224,
@@ -10,5 +10,5 @@
   "surface_charge": 0.1,
   "completed_points": [],
   "failed_points": [],
-  "resume_count": 5
+  "resume_count": 0
 }

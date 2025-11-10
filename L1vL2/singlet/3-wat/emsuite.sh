@@ -9,15 +9,13 @@
 #SBATCH -A CHEM9C4
 #SBATCH -e %J.err
 #SBATCH -o %J.out
-#SBATCH --exclude=acidsgcn007,acidsgcn001
+#SBATCH --exclude=acidsgcn011
 #--------------------------------------------------------------#
 
 
 start=$(date +%s)
 
-emsuite LF.in << EOF
-y
-EOF
+echo "y" | emsuite LF.in 
 
 end=$(date +%s)
 runtime=$((end-start))

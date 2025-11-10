@@ -21,5 +21,5 @@ surface_charge = 0.1
 calc_type = 'separate'
 
 # Parallel processing (default: True)
-parallel = True
+parallel = False
 num_procs = 10

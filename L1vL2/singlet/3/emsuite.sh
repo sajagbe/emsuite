@@ -5,7 +5,7 @@
 #SBATCH -t 47:59:00
 #SBATCH --mem=16G 
 #SBATCH -p qGPU48
-#SBATCH --gres=gpu:3
+#SBATCH --gres=gpu:1
 #SBATCH -A CHEM9C4
 #SBATCH -e %J.err
 #SBATCH -o %J.out
@@ -15,9 +15,9 @@
 
 start=$(date +%s)
 
-emsuite LF.in <<SOA
+emsuite LF.in << EOF
 y
-SOA
+EOF
 
 end=$(date +%s)
 runtime=$((end-start))
