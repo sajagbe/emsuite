@@ -3,8 +3,8 @@ input_type = 'XYZ'
 input_data = 'water.xyz'
 
 #QM calculation parameters
-method = 'dft'
-basis_set = 'cc-pvtz'
+method = 'hf'
+#basis_set = 'cc-pvtz'
 functional = 'b3lyp'
 charge = 0
 spin = 0
@@ -20,7 +20,7 @@ surface_type = 'homogenous'
 
 surface_file = 'water.etm'
 surface_charge = 0.1
-calc_type = 'separate'
+calc_type = 'combined'
 
 # Parallel processing (default: True)
 parallel = True

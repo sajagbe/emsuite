@@ -56,8 +56,11 @@ triplet = False            # Set True for triplet excited states
 
 2. **Run the calculation**:
 
+
+Currently the only functional electrostatic map module is that for tuning, which is accessible through the `-t` input option.
+
 ```bash
-emsuite tuning.in
+emsuite -t tuning.in
 ```
 
 ## Available Properties
@@ -101,6 +104,9 @@ For each calculated property, EMSuite tuning generates:
 
 1. **MOL2 files**: `{molecule_name}_{property}.mol2` - 3D visualization files showing property effects mapped to surface coordinates
 2. **CSV summary**: `{molecule_name}_tuning_summary.csv` - Tabular data with coordinates and all property effects
+3. **Log files**: `logs/` - Calculation progress logs with resurrection capabilities for interrupted runs
+4. **Results folder**: `results_{molecule_name}_{timestamp}/` - Timestamped directory containing all output files for review
+
 
 ## Example Usage
 
