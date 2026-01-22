@@ -1,0 +1,7 @@
+@<TRIPOS>MOLECULE
+homo_normalized | baseline=-13.547519
+    1 0 0 0
+SMALL
+GASTEIGER
+@<TRIPOS>ATOM
+    1 H      0.0075   0.0679   0.0181 H1   1 HOMO       0.000000
