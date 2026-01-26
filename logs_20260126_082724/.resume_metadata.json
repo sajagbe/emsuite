@@ -1,0 +1,14 @@
+{
+  "original_start": "2026-01-26T08:27:24.040416",
+  "last_updated": "2026-01-26T08:27:24.040418",
+  "calc_type": "separate",
+  "surface_type": "homogenous",
+  "total_points": 476,
+  "properties": [
+    "gse"
+  ],
+  "surface_charge": 0.1,
+  "completed_points": [],
+  "failed_points": [],
+  "resume_count": 0
+}

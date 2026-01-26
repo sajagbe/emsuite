@@ -555,8 +555,11 @@ def log_point_result(logs_dir, point_index, coord, charge, effects, success=True
 
 @ray.remote(num_cpus=1, num_gpus=0, max_retries=0, memory=4*1024*1024*1024)
 def calculate_point_effect_cpu(base_chkfiles, coord, surface_charge, solvent, state_of_interest, triplet, properties_to_calculate, required_calculations, functional, point_index):
-    cpu_id = os.sched_getaffinity(0)
-    print(f"[Point {point_index}] Running on CPU cores: {cpu_id}, PID: {os.getpid()}")
+    try:
+        cpu_id = os.sched_getaffinity(0)
+        print(f"[Point {point_index}] Running on CPU cores: {cpu_id}, PID: {os.getpid()}")
+    except AttributeError:
+        print(f"[Point {point_index}] Running on PID: {os.getpid()}")
     
     worker_dir = f"point_{point_index}"
     os.makedirs(worker_dir, exist_ok=True)

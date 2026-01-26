@@ -96,15 +96,15 @@ Methods
    * - ``functional``
      - str
      - ``'b3lyp'``
-     - DFT functional (used for ``method='dft'`` only), functional name or code can be used as string. Extensive list available on `GitHub <https://github.com/sajagbe/emsuite/blob/main/method-info/functionals.csv>`_.
+     - DFT functional (used for ``method='dft'`` only), functional name or code can be used as string. Extensive list available on `GitHub (functionals) <https://github.com/sajagbe/emsuite/blob/main/method-info/functionals.csv>`_.
    * - ``basis_set``
      - str
      - ``'6-31G*'``
-     - Basis set, extensive list available on `GitHub <https://github.com/sajagbe/emsuite/blob/main/method-info/basis-sets>`_.
+     - Basis set, extensive list available on `GitHub (basis sets) <https://github.com/sajagbe/emsuite/blob/main/method-info/basis-sets>`_.
    * - ``solvent``
      - str or None
      - ``None``
-     - Solvent name for implicit solvation, or ``None`` for gas phase. See list of solvents on `GitHub <https://github.com/sajagbe/emsuite/blob/main/method-info/solvents.csv>`_.
+     - Solvent name for implicit solvation, or ``None`` for gas phase. See list of solvents on `GitHub (solvents) <https://github.com/sajagbe/emsuite/blob/main/method-info/solvents.csv>`_.
 
 
 Surface
