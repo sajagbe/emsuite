@@ -21,11 +21,30 @@ def main():
         help='Run electrostatic tuning calculation'
     )
     
+    calc_type.add_argument(
+        '-s', '--surface',
+        metavar='INPUT_FILE',
+        help='Generate VDW surface from input file'
+    )
+    
     args = parser.parse_args()
     
     # Route to appropriate channel
     if args.tuning:
         run_tuning(args.tuning)
+    elif args.surface:
+        run_surface(args.surface)
+
+def run_surface(input_file: str):
+    """Execute the surface generation channel."""
+    from .surface import run_surface_calculation
+    
+    input_path = Path(input_file)
+    if not input_path.exists():
+        print(f"Error: Input file '{input_path}' not found")
+        sys.exit(1)
+    
+    run_surface_calculation(str(input_path))
 
 def run_tuning(input_file: str):
     """Execute the tuning channel."""
@@ -37,7 +56,6 @@ def run_tuning(input_file: str):
         sys.exit(1)
     
     tuning_main(str(input_path))
-
 
 if __name__ == "__main__":
     main()

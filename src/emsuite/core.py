@@ -182,10 +182,13 @@ def create_molecule_object(
                 raise ValueError("Method must be 'dft' or 'hf'")
 
             # Move to GPU if available and requested
-            if gpu:
+            if gpu and GPU_AVAILABLE:
                 mf = mf.to_gpu()
+            elif gpu and not GPU_AVAILABLE:
+                print("GPU requested but not available - using CPU.")
             else:
-                print("GPU not available or not requested - using CPU.")
+                print("Using CPU as requested.")
+                
             energy = mf.kernel()
 
             # Try SOSCF if not converged
@@ -671,46 +674,6 @@ with open('td_results.pkl', 'wb') as f:
 #          Molecular File Operations         #
 ##############################################
 
-def get_vdw_surface_coordinates(xyz_file, density=1.0, scale=1.0):
-    """s
-    Generate van der Waals surface coordinates for a molecule.
-    
-    This function uses the external 'vsg' tool to generate points on the 
-    van der Waals surface of a molecule from its XYZ coordinates.
-    
-    Args:
-        xyz_file (str): Path to the XYZ file containing molecular coordinates
-        density (float, optional): Surface point density. Defaults to 1.0.
-        scale (float, optional): Scaling factor for van der Waals radii. Defaults to 1.0.
-        
-    Returns:
-        numpy.ndarray: Array of surface coordinates with shape [N, 3]
-        
-    Raises:
-        RuntimeError: If the vsg command fails
-        FileNotFoundError: If the expected surface file is not created
-        
-    Note:
-        - Requires the 'vsg' external tool to be installed and in PATH
-        - Automatically cleans up temporary surface files after reading
-        - Handles single-point surfaces by reshaping to proper dimensions
-    """
-    ret = subprocess.run(['vsg', xyz_file, '-d', str(density), '-s', str(scale), '-t'])
-    if ret.returncode != 0:
-        raise RuntimeError(f"vsg failed: {ret.stderr}")
-    base, _ = os.path.splitext(xyz_file)
-    surface_file = f"{base}_vdw_surface.txt"
-    if not os.path.isfile(surface_file):
-        raise FileNotFoundError(f"Expected surface file not found: {surface_file}")
-    coords = np.loadtxt(surface_file, dtype=float)
-    if coords.ndim == 1 and coords.size == 3:
-        coords = coords.reshape(1,3)
-    try:
-        os.remove(surface_file)
-    except OSError as e:
-        print(f"Warning: could not remove {surface_file}: {e}")
-    return coords
-
 def extract_xyz_name(xyz_filepath):
     """
     Extract a clean molecule name from an XYZ file path.
@@ -739,7 +702,8 @@ def optimize_molecule(xyz_filepath,
     original_charge=0,
     charge_change=0,
     gpu=True,
-    spin_guesses=None):
+    spin_guesses=None,
+    solvent=None):
     """
     Perform geometry optimization on a molecule and save the optimized structure.
     
@@ -759,7 +723,7 @@ def optimize_molecule(xyz_filepath,
         spin_guesses (list, optional): List of spin multiplicities to test. 
                              Defaults to [0, 1, 2, 3, 4]. Uses 2S notation not multiplicity (2S+1).
                              Important for open-shell systems.
-    
+        solvent (str, optional): Solvent name for implicit solvation. Defaults to None.
     Returns:
         str: Filename of the output XYZ file containing optimized geometry
         
@@ -790,6 +754,9 @@ def optimize_molecule(xyz_filepath,
         raise ValueError("Failed to create molecule object")
     
     # Optimize geometry
+    if solvent:
+        mf = solvate_molecule(mf, solvent=solvent)
+    
     mol_eq = optimize(mf, conv_tol=1e-7)
     coords = mol_eq.atom_coords(unit='Ang')
     atoms = [mol_eq.atom_symbol(i) for i in range(mol_eq.natm)]
