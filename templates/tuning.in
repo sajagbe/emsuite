@@ -1,0 +1,91 @@
+# =============================================================================
+#                      EMSUITE TUNING CALCULATION INPUT
+# =============================================================================
+# Run with: emsuite -t tuning.in
+# 
+# PREREQUISITE: Generate surface file first using: emsuite -s surface.in
+
+# -----------------------------------------------------------------------------
+# REQUIRED PARAMETERS
+# -----------------------------------------------------------------------------
+
+# Path to XYZ file containing molecular geometry
+molecule = 'molecule.xyz'
+
+# Path to pre-generated surface file (from emsuite -s)
+surface_file = 'molecule.surf'
+
+# -----------------------------------------------------------------------------
+# PROPERTIES TO CALCULATE
+# -----------------------------------------------------------------------------
+
+# Available properties:
+#   'gse'  - Ground state energy
+#   'homo' - HOMO energy
+#   'lumo' - LUMO energy
+#   'gap'  - HOMO-LUMO gap (requires homo, lumo)
+#   'dm'   - Dipole moment
+#   'ie'   - Ionization energy (requires cation calculation)
+#   'ea'   - Electron affinity (requires anion calculation)
+#   'cp'   - Chemical potential (requires ie, ea)
+#   'eng'  - Electronegativity (requires cp)
+#   'hard' - Chemical hardness (requires ie, ea)
+#   'efl'  - Electrophilicity (requires cp, hard)
+#   'nfl'  - Nucleophilicity (requires efl)
+#   'exe'  - Excitation energies (requires TD calculation)
+#   'osc'  - Oscillator strengths (requires TD calculation)
+#   'all'  - Calculate all properties
+
+properties = ['homo', 'lumo', 'gap']
+# properties = ['all']
+
+# -----------------------------------------------------------------------------
+# QM CALCULATION SETTINGS
+# -----------------------------------------------------------------------------
+
+# Basis set for QM calculations
+basis_set = '6-31G*'
+
+# Calculation method: 'dft' or 'hf'
+method = 'dft'
+
+# DFT functional (only for method = 'dft')
+functional = 'b3lyp'
+
+# Molecular charge
+charge = 0
+
+# Spin guesses for open-shell systems (2S notation)
+# spin_guesses = [0, 1, 2]
+
+# -----------------------------------------------------------------------------
+# SOLVATION (optional)
+# -----------------------------------------------------------------------------
+
+# Solvent for implicit solvation (None for gas phase)
+solvent = None
+# solvent = 'water'
+
+# -----------------------------------------------------------------------------
+# EXCITED STATE SETTINGS (only for exe/osc properties)
+# -----------------------------------------------------------------------------
+
+# Number of excited states to calculate
+state_of_interest = 3
+
+# Calculate triplet states
+triplet = False
+
+# -----------------------------------------------------------------------------
+# CALCULATION MODE
+# -----------------------------------------------------------------------------
+
+# Calculation type: 'separate' (per-point) or 'combined' (all charges at once)
+calculation_type = 'separate'
+
+# -----------------------------------------------------------------------------
+# PARALLELIZATION
+# -----------------------------------------------------------------------------
+
+# Number of parallel workers (None = auto-detect)
+# n_workers = 4

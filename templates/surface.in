@@ -1,0 +1,74 @@
+# =============================================================================
+#                     EMSUITE SURFACE GENERATION INPUT
+# =============================================================================
+# Generate with: emsuite -s surface.in
+
+# -----------------------------------------------------------------------------
+# REQUIRED PARAMETERS
+# -----------------------------------------------------------------------------
+
+# Input type: 'XYZ' or 'SMILES'
+input_type = 'XYZ'
+
+# Input data: path to XYZ file OR SMILES string
+input_data = 'molecule.xyz'
+# input_data = 'CCO'  # Example SMILES for ethanol
+
+# -----------------------------------------------------------------------------
+# OUTPUT OPTIONS
+# -----------------------------------------------------------------------------
+
+# Output surface file (4-column format: x, y, z, q)
+output_surf = 'molecule.surf'
+
+# Output path for optimized XYZ (optional, auto-generated if not specified)
+# optimized_xyz = 'molecule_opt.xyz'
+
+# -----------------------------------------------------------------------------
+# SURFACE GENERATION PARAMETERS
+# -----------------------------------------------------------------------------
+
+# Surface point density (points per Å²)
+density = 1.0
+
+# VDW radii scaling factor
+scale = 1.0
+
+# Surface type: 'homogenous' (uniform charge) or 'heterogenous' (per-point charges)
+surface_type = 'homogenous'
+
+# Charge for homogenous surface (ignored for heterogenous)
+surface_charge = 1.0
+
+# -----------------------------------------------------------------------------
+# GEOMETRY OPTIMIZATION (optional)
+# -----------------------------------------------------------------------------
+
+# Whether to optimize geometry (default: False for XYZ, True for SMILES)
+# optimize = True
+
+# Optimization method: 'mmff', 'uff' (for SMILES), or 'pyscf' (QM optimization)
+optimize_method = 'mmff'
+
+# -----------------------------------------------------------------------------
+# QM OPTIMIZATION SETTINGS (only used if optimize_method = 'pyscf')
+# -----------------------------------------------------------------------------
+
+# QM method: 'dft' or 'hf'
+method = 'dft'
+
+# Basis set
+basis_set = '6-31G*'
+
+# DFT functional (only for method = 'dft')
+functional = 'b3lyp'
+
+# Solvent for implicit solvation (None for gas phase)
+solvent = None
+# solvent = 'water'
+
+# Molecular charge
+charge = 0
+
+# Spin (2S notation, not multiplicity)
+spin = 0
