@@ -29,10 +29,10 @@ output_surf = 'molecule.surf'
 # -----------------------------------------------------------------------------
 
 # Surface point density (points per Å²)
-density = 1.0
+surface_density = 1.0
 
 # VDW radii scaling factor
-scale = 1.0
+surface_scale = 1.0
 
 # Surface type: 'homogenous' (uniform charge) or 'heterogenous' (per-point charges)
 surface_type = 'homogenous'

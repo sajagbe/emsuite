@@ -1,0 +1,25 @@
+input_type = 'SMILES'
+input_data = 'CCO'  
+
+
+
+surface_density = 1.0
+surface_scale = 1.0
+surface_type = 'homogenous'
+surface_charge = 1.0
+output_surf = 'CCO2.surf'
+
+
+
+optimize = True
+optimize_method = 'pyscf'
+optimized_xyz = 'CCO_opt2.xyz'
+
+
+
+method = 'dft'
+basis_set = '6-31G*'
+functional = 'b3lyp'
+solvent = None
+charge = 0
+spin = 0

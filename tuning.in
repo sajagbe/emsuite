@@ -1,27 +1,18 @@
-#Input parameters
-input_type = 'XYZ'
-input_data = 'water.xyz'
-
-#QM calculation parameters
-method = 'dft'
-basis_set = '6-31G*'
-functional = 'b3lyp'
-charge = -2
+molecule = 'CCO_opt2.xyz'
+charge = 0
 spin = 0
+
+basis_set = '6-31G*'
+method = 'dft'
+functional = 'b3lyp'
 solvent = None
-state_of_interest = 2
-triplet = False
 
-#Surface parameters
-properties = ['gse']
-scale = 1
-density = 1
-surface_type = 'homogenous'
-
-surface_file = 'water.etm'
-surface_charge = 0.1
+surface_file = 'CCO2.surf'
 calc_type = 'separate'
 
-# Parallel processing (default: True)
+properties = ['gse']
+#state_of_interest = 1
+triplet = False
+
 parallel = True
-num_procs = 10
+num_procs = 16

@@ -55,8 +55,8 @@ functional = 'b3lyp'
 # Molecular charge
 charge = 0
 
-# Spin guesses for open-shell systems (2S notation)
-# spin_guesses = [0, 1, 2]
+# Spin (2S notation, not multiplicity)
+spin = 0
 
 # -----------------------------------------------------------------------------
 # SOLVATION (optional)
@@ -71,7 +71,7 @@ solvent = None
 # -----------------------------------------------------------------------------
 
 # Number of excited states to calculate
-state_of_interest = 3
+state_of_interest = 2
 
 # Calculate triplet states
 triplet = False
@@ -81,11 +81,14 @@ triplet = False
 # -----------------------------------------------------------------------------
 
 # Calculation type: 'separate' (per-point) or 'combined' (all charges at once)
-calculation_type = 'separate'
+calc_type = 'separate'
 
 # -----------------------------------------------------------------------------
 # PARALLELIZATION
 # -----------------------------------------------------------------------------
 
-# Number of parallel workers (None = auto-detect)
-# n_workers = 4
+# Enable parallel processing (True or False)
+parallel = True
+
+# Number of parallel processes (None = auto-detect based on available GPUs/CPUs)
+# num_procs = 4

@@ -87,7 +87,7 @@ def save_surf(coords, charges, output_path, heterogenous=False):
 #         VDW Surface Generation             #
 ##############################################
 
-def get_vdw_surface_coordinates(xyz_file, density=1.0, scale=1.0):
+def get_vdw_surface_coordinates(xyz_file, surface_density=1.0, surface_scale=1.0):
     """
     Generate van der Waals surface coordinates for a molecule.
     
@@ -96,8 +96,8 @@ def get_vdw_surface_coordinates(xyz_file, density=1.0, scale=1.0):
     
     Args:
         xyz_file (str): Path to the XYZ file containing molecular coordinates
-        density (float, optional): Surface point density. Defaults to 1.0.
-        scale (float, optional): Scaling factor for van der Waals radii. Defaults to 1.0.
+        surface_density (float, optional): Surface point density. Defaults to 1.0.
+        surface_scale (float, optional): Scaling factor for van der Waals radii. Defaults to 1.0.
         
     Returns:
         numpy.ndarray: Array of surface coordinates with shape [N, 3]
@@ -110,7 +110,7 @@ def get_vdw_surface_coordinates(xyz_file, density=1.0, scale=1.0):
         - Requires the 'vsg' external tool to be installed and in PATH
         - Automatically cleans up temporary surface files after reading
     """
-    ret = subprocess.run(['vsg', xyz_file, '-d', str(density), '-s', str(scale), '-t'], 
+    ret = subprocess.run(['vsg', xyz_file, '-d', str(surface_density), '-s', str(surface_scale), '-t'], 
                          capture_output=True, text=True)
     if ret.returncode != 0:
         raise RuntimeError(f"vsg failed: {ret.stderr}")
@@ -306,137 +306,6 @@ def smiles_to_xyz(smiles, output_path, optimize=True, optimize_method='mmff',
 
 
 ##############################################
-#         Main Surface Generation            #
-##############################################
-
-def generate_surface(input_type, input_data, output_surf='surface.surf',
-                     density=1.0, scale=1.0, surface_type='homogenous',
-                     surface_charge=1.0, optimize=None, optimize_method='mmff',
-                     method='dft', basis_set='6-31G*', functional='b3lyp',
-                     solvent=None, charge=0, spin=0, optimized_xyz=None):
-    """
-    Generate VDW surface and save as surf file.
-    
-    This is the main orchestrator function that handles the complete workflow:
-    SMILES/XYZ input -> optional optimization -> VDW surface -> surf output.
-    
-    Args:
-        input_type (str): 'XYZ' or 'SMILES'
-        input_data (str): Path to XYZ file or SMILES string
-        output_surf (str): Output surf file path. Defaults to 'surface.surf'.
-        density (float): Surface point density. Defaults to 1.0.
-        scale (float): VDW radii scaling factor. Defaults to 1.0.
-        surface_type (str): 'homogenous' or 'heterogenous'. Defaults to 'homogenous'.
-        surface_charge (float): Charge for homogenous surface. Defaults to 1.0.
-        optimize (bool or None): Whether to optimize geometry. 
-            Defaults to False for XYZ, True for SMILES.
-        optimize_method (str): 'mmff', 'uff', or 'pyscf'. Defaults to 'mmff'.
-        method (str): QM method for pyscf. Defaults to 'dft'.
-        basis_set (str): Basis set for pyscf. Defaults to '6-31G*'.
-        functional (str): Functional for pyscf. Defaults to 'b3lyp'.
-        solvent (str or None): Solvent for pyscf. Defaults to None.
-        charge (int): Molecular charge. Defaults to 0.
-        spin (int): Spin (2S notation). Defaults to 0.
-        optimized_xyz (str or None): Output path for optimized XYZ file. If None, auto-generated.
-        
-    Returns:
-        str: Path to the generated surf file
-    """
-    # Set default optimize behavior based on input type
-    if optimize is None:
-        optimize = (input_type.upper() == 'SMILES')
-    
-    # Determine output directory (same as input file or current dir)
-    if input_type.upper() == 'XYZ':
-        output_dir = os.path.dirname(os.path.abspath(input_data)) or '.'
-    else:
-        output_dir = '.'
-    
-    # Make output_surf path absolute if not already
-    if not os.path.isabs(output_surf):
-        output_surf = os.path.join(output_dir, output_surf)
-    
-    # Handle input type
-    if input_type.upper() == 'SMILES':
-        # Determine XYZ output path
-        if optimized_xyz:
-            if not os.path.isabs(optimized_xyz):
-                xyz_path = os.path.join(output_dir, optimized_xyz)
-            else:
-                xyz_path = optimized_xyz
-        else:
-            base_name = f"mol_{abs(hash(input_data)) % 10000}"
-            xyz_path = os.path.join(output_dir, f"{base_name}.xyz")
-        
-        print(f"Converting SMILES to XYZ: {input_data}")
-        xyz_path = smiles_to_xyz(
-            smiles=input_data,
-            output_path=xyz_path,
-            optimize=optimize,
-            optimize_method=optimize_method,
-            method=method,
-            basis_set=basis_set,
-            functional=functional,
-            solvent=solvent,
-            charge=charge,
-            spin=spin
-        )
-        print(f"XYZ file saved: {xyz_path}")
-        
-    elif input_type.upper() == 'XYZ':
-        xyz_path = input_data
-        
-        if not os.path.exists(xyz_path):
-            raise FileNotFoundError(f"XYZ file not found: {xyz_path}")
-        
-        # Optionally optimize the XYZ geometry
-        if optimize:
-            print(f"Optimizing geometry: {xyz_path}")
-            if optimize_method.lower() == 'pyscf':
-                optimized_path = optimize_with_pyscf(
-                    xyz_path, method=method, basis_set=basis_set,
-                    functional=functional, solvent=solvent, charge=charge, spin=spin
-                )
-                # Rename to user-specified path if provided
-                if optimized_xyz:
-                    if not os.path.isabs(optimized_xyz):
-                        optimized_xyz = os.path.join(output_dir, optimized_xyz)
-                    if optimized_path != optimized_xyz:
-                        os.rename(optimized_path, optimized_xyz)
-                    xyz_path = optimized_xyz
-                else:
-                    xyz_path = optimized_path
-            else:
-                raise ValueError(
-                    f"Cannot use {optimize_method} optimization with XYZ input. "
-                    f"Use optimize_method='pyscf' or set optimize=False."
-                )
-            print(f"Optimized XYZ saved: {xyz_path}")
-    else:
-        raise ValueError(f"Invalid input_type: {input_type}. Must be 'XYZ' or 'SMILES'.")
-    
-    # Generate VDW surface
-    print(f"Generating VDW surface (density={density}, scale={scale})...")
-    coords = get_vdw_surface_coordinates(xyz_path, density=density, scale=scale)
-    print(f"Generated {len(coords)} surface points")
-    
-    # Prepare charges based on surface type
-    if surface_type.lower() == 'homogenous':
-        charges = surface_charge
-    elif surface_type.lower() == 'heterogenous':
-        charges = np.zeros(len(coords))  # Placeholder
-        print("NOTE: Heterogenous surface created with placeholder charges (0.0).")
-        print("      Please edit the surf file to set per-point charges.")
-    else:
-        raise ValueError(f"Invalid surface_type: {surface_type}. Must be 'homogenous' or 'heterogenous'.")
-    
-    # Save surf file
-    save_surf(coords, charges, output_surf, heterogenous=(surface_type.lower() == 'heterogenous'))
-    
-    return output_surf
-
-
-##############################################
 #         Input Parsing & Entry Point        #
 ##############################################
 
@@ -455,8 +324,8 @@ def parse_surface_input(input_file):
         'input_data': None,  # Required
         'output_surf': 'surface.surf',
         'optimized_xyz': None,  # Optional: custom name for optimized XYZ
-        'density': 1.0,
-        'scale': 1.0,
+        'surface_density': 1.0,
+        'surface_scale': 1.0,
         'surface_type': 'homogenous',
         'surface_charge': 1.0,
         'optimize': None,  # Auto-determined based on input_type
@@ -535,8 +404,8 @@ def run_surface_calculation(input_file):
         input_type=params['input_type'],
         input_data=params['input_data'],
         output_surf=params['output_surf'],
-        density=params['density'],
-        scale=params['scale'],
+        surface_density=params['surface_density'],
+        surface_scale=params['surface_scale'],
         surface_type=params['surface_type'],
         surface_charge=params['surface_charge'],
         optimize=params['optimize'],

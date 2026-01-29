@@ -3,8 +3,6 @@ import numpy as np
 from datetime import datetime
 from pathlib import Path
 from . import core
-from .surface import load_surf
-os.environ['HDF5_USE_FILE_LOCKING'] = 'FALSE'
 
 
 ## Suppress Ray Warnings and Logs
@@ -174,6 +172,77 @@ def calculate_all_properties(mf, anion_mf=None, cation_mf=None, td_obj=None, tri
 
     
     return results
+
+# def calculate_surface_effect_at_point(base_chkfiles, coord, surface_charge, solvent, 
+#                                       state_of_interest, triplet, properties_to_calculate, 
+#                                       required_calculations, functional, force_single_gpu=False):
+#     """
+#     Calculate the effect of a surface charge at a single coordinate point.
+    
+#     Args:
+#         base_chkfiles (dict): Dictionary with keys 'neutral', 'anion', 'cation' 
+#                              pointing to checkpoint file paths
+#         coord (array-like): 3D coordinates [x, y, z] of the surface charge
+#         surface_charge (float): Magnitude of the point charge
+#         solvent (str or None): Solvent for implicit solvation
+#         state_of_interest (int): Number of excited states for TD calculations
+#         triplet (bool): Whether to calculate triplet excited states
+#         properties_to_calculate (list): List of molecular properties to compute
+#         required_calculations (dict): Dictionary specifying needed calculations
+#         functional (str): XC functional for DFT calculations
+#         force_single_gpu (bool): Skip TD subprocess isolation (for Ray workers)
+        
+#     Returns:
+#         dict: Dictionary of property effects
+#     """
+#     # Resurrect base molecules from checkpoint files
+#     molecule_alone = core.resurrect_mol(base_chkfiles['neutral']) if base_chkfiles.get('neutral') else None
+#     anion_alone = core.resurrect_mol(base_chkfiles['anion']) if base_chkfiles.get('anion') else None
+#     cation_alone = core.resurrect_mol(base_chkfiles['cation']) if base_chkfiles.get('cation') else None
+    
+#     # Create TD object if needed - pass force_single_gpu flag
+#     td_alone = None
+#     if required_calculations.get('td', False) and molecule_alone:
+#         td_alone = core.create_td_molecule_object(
+#             molecule_alone, 
+#             nstates=state_of_interest, 
+#             triplet=triplet,
+#             force_single_gpu=force_single_gpu  
+#         )
+    
+#     # Create single-point charge array
+#     single_coord = np.array([coord])
+#     q_mm = np.array([surface_charge])
+    
+#     # Create QM/MM objects for this point
+#     molecule_wsc, anion_wsc, cation_wsc, td_wsc = create_wsc_objects(
+#         [molecule_alone, anion_alone, cation_alone, td_alone], 
+#         single_coord, q_mm, state_of_interest, triplet, required_calculations
+#     )
+    
+#     # Apply solvation if needed
+#     if solvent:
+#         all_molecules = [molecule_alone, anion_alone, cation_alone, td_alone, 
+#                        molecule_wsc, anion_wsc, cation_wsc, td_wsc]
+#         all_molecules = apply_solvation(all_molecules, solvent, state_of_interest, triplet, required_calculations)
+#         molecule_alone, anion_alone, cation_alone, td_alone, \
+#         molecule_wsc, anion_wsc, cation_wsc, td_wsc = all_molecules
+    
+#     # Calculate properties
+#     results = calculate_all_properties(molecule_alone, anion_mf=anion_alone, 
+#                                      cation_mf=cation_alone, td_obj=td_alone, 
+#                                      triplet=triplet, props_to_calc=properties_to_calculate)
+#     wsc_results = calculate_all_properties(molecule_wsc, anion_mf=anion_wsc, 
+#                                          cation_mf=cation_wsc, td_obj=td_wsc, 
+#                                          triplet=triplet, props_to_calc=properties_to_calculate)
+    
+#     # Calculate differences
+#     effects = {}
+#     for prop in results:
+#         if prop in wsc_results:
+#             effects[f'{prop}_effect'] = wsc_results[prop] - results[prop]
+    
+#     return effects
 
 
 def calculate_surface_effect_at_point(base_chkfiles, coord, surface_charge, solvent, 
@@ -486,11 +555,8 @@ def log_point_result(logs_dir, point_index, coord, charge, effects, success=True
 
 @ray.remote(num_cpus=1, num_gpus=0, max_retries=0, memory=4*1024*1024*1024)
 def calculate_point_effect_cpu(base_chkfiles, coord, surface_charge, solvent, state_of_interest, triplet, properties_to_calculate, required_calculations, functional, point_index):
-    try:
-        cpu_id = os.sched_getaffinity(0)
-        print(f"[Point {point_index}] Running on CPU cores: {cpu_id}, PID: {os.getpid()}")
-    except AttributeError:
-        print(f"[Point {point_index}] Running on PID: {os.getpid()}")
+    cpu_id = os.sched_getaffinity(0)
+    print(f"[Point {point_index}] Running on CPU cores: {cpu_id}, PID: {os.getpid()}")
     
     worker_dir = f"point_{point_index}"
     os.makedirs(worker_dir, exist_ok=True)
@@ -605,6 +671,81 @@ def calculate_point_effect_gpu(base_chkfiles, coord, surface_charge, solvent,
 ##########################################################
 #        Surface Data Loading and Validation             #
 ##########################################################
+
+def load_surface_data(surface_type, calc_type, surface_file='surface.surf', xyz_file=None, density=1.0, scale=1.0):
+    """
+    Load or generate surface coordinates and charges based on surface type.
+    
+    Args:
+        surface_type (str): 'homogenous' or 'heterogenous'
+        calc_type (str): 'separate' or 'combined'
+        surface_file (str): Path to surface file (default: 'surface.surf')
+        xyz_file (str, optional): Path to XYZ file for VDW surface generation
+        density (float): Surface point density for VDW generation
+        scale (float): Scaling factor for VDW radii
+        
+    Returns:
+        tuple: (surface_coords, surface_charges) where:
+            - surface_coords: numpy array of shape [N, 3]
+            - surface_charges: numpy array of shape [N] or None for homogenous
+            
+    Raises:
+        FileNotFoundError: If surface file is required but not found
+        ValueError: If surface_type is invalid
+    """
+    if surface_file is None:
+        surface_file = 'surface.surf'
+
+    if surface_type == 'homogenous':
+        # Check if surface file exists
+        if not os.path.exists(surface_file):
+            # Generate VDW surface and save to surface file
+            if xyz_file is None:
+                raise ValueError("xyz_file required to generate VDW surface")
+            
+            print(f"Generating VDW surface and saving to {surface_file}...")
+            coords = core.get_vdw_surface_coordinates(xyz_file, density=density, scale=scale)
+            
+            # Save to surface file (x, y, z format only)
+            with open(surface_file, 'w') as f:
+                f.write(f"{'x':<10} {'y':<10} {'z':<10}\n")
+                for coord in coords:
+                    f.write(f"{coord[0]:<10.6f} {coord[1]:<10.6f} {coord[2]:<10.6f}\n")
+        else:
+            # Load existing surface file
+            print(f"Loading surface coordinates from {surface_file}...")
+            data = np.loadtxt(surface_file, skiprows=1)
+            if data.ndim == 1:
+                data = data.reshape(1, -1)
+            coords = data[:, :3]  # Take only x, y, z columns
+        
+        # Return coords with None for charges (will be set per calculation)
+        return coords, None
+        
+    elif surface_type == 'heterogenous':
+        # Must have surface file with 4 columns
+        if not os.path.exists(surface_file):
+            raise FileNotFoundError(
+                f"For heterogenous surfaces, {surface_file} with x, y, z, q columns is required"
+            )
+        
+        print(f"Loading surface coordinates and charges from {surface_file}...")
+        data = np.loadtxt(surface_file, skiprows=1)
+        if data.ndim == 1:
+            data = data.reshape(1, -1)
+        
+        if data.shape[1] < 4:
+            raise ValueError(
+                f"{surface_file} must have 4 columns (x, y, z, q) for heterogenous surfaces"
+            )
+        
+        coords = data[:, :3]
+        charges = data[:, 3]
+        
+        return coords, charges
+    
+    else:
+        raise ValueError(f"Invalid surface_type: {surface_type}. Must be 'homogenous' or 'heterogenous'")
 
 
 def calculate_combined_surface_effect(base_chkfiles, coords, charges, solvent, state_of_interest, 
@@ -891,6 +1032,51 @@ def get_tuning_parameters(filepath='tuning.in'):
     return params
 
 
+def prepare_input_data(input_type, input_data, basis_set, method='dft', functional='b3lyp', charge=0, spin=0, gpu_available=False):
+    """
+    Prepare molecular coordinates from different input formats.
+    
+    This function handles different input types and converts them to XYZ format where necessary.
+    For XYZ file input, it simply returns the file path. For SMILES input, it generates 3D coordinates and saves
+    them in an XYZ file. For SMILES input, it performs automatic geometry optimization.
+    Dependent on global variables for optimization parameters and core module's optimize_molecule and smiles_to_xyz functions.
+    Args:
+        input_type (str): Type of input - 'xyz' for XYZ file path or 'smiles' for SMILES string
+        input_data (str): Either path to XYZ file or SMILES string
+        basis_set (str): Basis set for quantum calculations
+        method (str): Quantum calculation method (e.g., 'dft')
+        functional (str): Functional for DFT calculations
+        charge (int): Molecular charge
+        spin (int): Spin multiplicity
+        gpu_available (bool): Whether GPU is available for calculations
+        
+    Returns:
+        str: Path to XYZ file with molecular coordinates
+        
+    Raises:
+        ValueError: If input_type is not 'xyz' or 'smiles'
+        
+    Note:
+        - For SMILES input: converts to 3D coordinates and performs geometry optimization
+        - For XYZ input: returns the file path unchanged
+        - Uses global variables for optimization: basis_set, method, functional, charge, gpu_available
+    """
+    if input_type.lower() == 'xyz':
+        return input_data
+    elif input_type.lower() == 'smiles':
+        raw_xyz = core.smiles_to_xyz(input_data)
+        optimized_xyz = core.optimize_molecule(raw_xyz,
+        basis_set=basis_set,
+        method=method,
+        functional=functional,
+        original_charge=charge,
+        charge_change=0,
+        gpu=gpu_available,
+        spin_guesses=None)
+        return optimized_xyz
+    else:
+        raise ValueError("input_type must be 'xyz' or 'smiles'")
+
 
 def append_raw_properties_to_summary(summary_file, raw_properties):
     """
@@ -958,6 +1144,67 @@ def append_raw_properties_to_summary(summary_file, raw_properties):
         f.write("="*70 + "\n")
     
     print(f"Raw properties appended to: {summary_file}")
+
+# def organize_results(molecule_name, properties_to_calculate, logs_dir):
+#     """
+#     Move all output files into a timestamped results folder.
+    
+#     Args:
+#         molecule_name (str): Base name of molecule
+#         properties_to_calculate (list): List of properties that were calculated
+#         logs_dir (str): Path to logs directory
+        
+#     Returns:
+#         str: Path to created results directory
+#     """
+#     timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+#     results_dir = f"results_{molecule_name}_{timestamp}"
+    
+#     # Create results directory
+#     os.makedirs(results_dir, exist_ok=True)
+#     print(f"\nOrganizing results into: {results_dir}/")
+    
+#     # Move CSV summary file
+#     csv_file = f"{molecule_name}_tuning_summary.csv"
+#     if os.path.exists(csv_file):
+#         shutil.move(csv_file, os.path.join(results_dir, csv_file))
+#         print(f"  Moved: {csv_file}")
+    
+#     # Move all .mol2 files (scan directory for all matching files)
+#     mol2_files = []
+#     for file in os.listdir('.'):
+#         if file.startswith(molecule_name) and file.endswith('.mol2'):
+#             shutil.move(file, os.path.join(results_dir, file))
+#             mol2_files.append(file)
+    
+#     if mol2_files:
+#         print(f"  Moved {len(mol2_files)} MOL2 files")
+    
+#     # Move logs directory
+#     if logs_dir and os.path.exists(logs_dir):
+#         dest_logs = os.path.join(results_dir, 'logs')
+#         shutil.move(logs_dir, dest_logs)
+#         print(f"  Moved: {logs_dir}/ -> logs/")
+    
+#     # Create a README file in results directory
+#     readme_path = os.path.join(results_dir, 'README.txt')
+#     with open(readme_path, 'w') as f:
+#         f.write("="*70 + "\n")
+#         f.write("ELECTROSTATIC TUNING MAP RESULTS\n")
+#         f.write("="*70 + "\n\n")
+#         f.write(f"Molecule:           {molecule_name}\n")
+#         f.write(f"Timestamp:          {timestamp}\n")
+#         f.write(f"Properties:         {', '.join(properties_to_calculate)}\n\n")
+#         f.write("Files in this directory:\n")
+#         f.write("-" * 70 + "\n")
+#         f.write(f"  {csv_file:<40} - Summary CSV with all data\n")
+#         f.write(f"  {molecule_name}_*.mol2{'':<24} - MOL2 files (raw values)\n")
+#         f.write(f"  {molecule_name}_*_normalized.mol2{'':<14} - MOL2 files (normalized)\n")
+#         f.write(f"  logs/{'':<46} - Individual point logs\n")
+#         f.write(f"  README.txt{'':<38} - This file\n\n")
+#         f.write("="*70 + "\n")
+    
+#     return results_dir
 
 def organize_results(molecule_name, properties_to_calculate, logs_dir, normalization_params=None):
     """
@@ -1329,6 +1576,138 @@ def normalize_effects(all_effects, effect_keys):
     
     return normalized_effects, normalization_params
 
+# def create_output_files(surface_coords, all_effects, molecule_name, properties_to_calculate, raw_properties):
+#     """
+#     Create MOL2 files and CSV summary for surface effects analysis.
+
+#     This function scans all effect dictionaries for any key ending in '_effect'
+#     (including sX_exe_effect, tX_osc_effect, etc.) and creates output files for each.
+#     Creates both normalized and non-normalized versions.
+
+#     Args:
+#         surface_coords (numpy.ndarray): Array of surface coordinates with shape [N, 3]
+#         all_effects (list): List of effect dictionaries for each surface point
+#         molecule_name (str): Base name for output files
+#         properties_to_calculate (list): List of calculated molecular properties
+#         raw_properties (dict): Dict of baseline property values (no surface effects)
+
+#     Returns:
+#         None: Creates files directly on disk
+#     """
+#     # Gather all effect keys found in all_effects
+#     effect_keys = set()
+#     for effect in all_effects:
+#         if effect:
+#             effect_keys.update(effect.keys())
+#     effect_keys = sorted(effect_keys)
+    
+#     # print(f"\nDEBUG: Found {len(effect_keys)} effect keys: {effect_keys[:5]}...")
+#     # print(f"DEBUG: First effect dict: {all_effects[0] if all_effects else 'None'}")
+
+#     # Normalize the effects
+#     normalized_effects, normalization_params = normalize_effects(all_effects, effect_keys)
+
+#     # Create MOL2 files for non-normalized values
+#     for key in effect_keys:
+#         prop_base = key.replace('_effect', '') if key.endswith('_effect') else key
+        
+#         # Get baseline value for this property
+#         baseline_value = raw_properties.get(prop_base, 0.0)
+        
+#         # Create custom MOL2 with baseline in comment line
+#         filename = f"{molecule_name}_{prop_base}.mol2"
+#         with open(filename, 'w') as f:
+#             # Header
+#             f.write("@<TRIPOS>MOLECULE\n")
+#             f.write(f"{prop_base} | baseline={baseline_value:.6f}\n")
+#             f.write(f"{len(surface_coords):5d} 0 0 0\n")
+#             f.write("SMALL\n")
+#             f.write("GASTEIGER\n")
+            
+#             # Atoms
+#             f.write("@<TRIPOS>ATOM\n")
+#             for idx, (coord, effect) in enumerate(zip(surface_coords, all_effects), 1):
+#                 x, y, z = coord
+#                 effect_value = effect.get(key, 0.0) if effect else 0.0
+#                 f.write(f"{idx:5d} H    {x:8.4f} {y:8.4f} {z:8.4f} H1   1 {prop_base.upper():8s} {effect_value:10.6f}\n")
+        
+#         print(f"Created: {filename}")
+
+#     # Create MOL2 files for normalized values
+#     for key in effect_keys:
+#         prop_base = key.replace('_effect', '') if key.endswith('_effect') else key
+        
+#         # Get baseline value for this property
+#         baseline_value = raw_properties.get(prop_base, 0.0)
+        
+#         # Create custom MOL2 with baseline in comment line
+#         filename = f"{molecule_name}_{prop_base}_normalized.mol2"
+#         with open(filename, 'w') as f:
+#             # Header
+#             f.write("@<TRIPOS>MOLECULE\n")
+#             f.write(f"{prop_base}_normalized | baseline={baseline_value:.6f}\n")
+#             f.write(f"{len(surface_coords):5d} 0 0 0\n")
+#             f.write("SMALL\n")
+#             f.write("GASTEIGER\n")
+            
+#             # Atoms
+#             f.write("@<TRIPOS>ATOM\n")
+#             for idx, (coord, norm_effect) in enumerate(zip(surface_coords, normalized_effects), 1):
+#                 x, y, z = coord
+#                 effect_value = norm_effect.get(key, 0.0) if norm_effect else 0.0
+#                 f.write(f"{idx:5d} H    {x:8.4f} {y:8.4f} {z:8.4f} H1   1 {prop_base.upper():8s} {effect_value:10.6f}\n")
+        
+#         print(f"Created: {filename}")
+
+#     # Create CSV summary with coordinates, effects, normalized effects, AND baseline values
+#     csv_filename = f"{molecule_name}_tuning_summary.csv"
+#     with open(csv_filename, 'w', newline='') as csvfile:
+#         # Create fieldnames
+#         fieldnames = ['point_index', 'x', 'y', 'z']
+#         for key in effect_keys:
+#             prop_base = key.replace('_effect', '') if key.endswith('_effect') else key
+#             fieldnames.append(key)  # Raw effect (e.g., 'gse_effect')
+#             fieldnames.append(f"{key}_normalized")  # Normalized
+#             fieldnames.append(f"{prop_base}_baseline")  # Baseline
+        
+#         writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+#         writer.writeheader()
+        
+#         for i, (coord, effect, norm_effect) in enumerate(zip(surface_coords, all_effects, normalized_effects)):
+#             row = {
+#                 'point_index': i,
+#                 'x': coord[0],
+#                 'y': coord[1],
+#                 'z': coord[2]
+#             }
+            
+#             for key in effect_keys:
+#                 prop_base = key.replace('_effect', '') if key.endswith('_effect') else key
+                
+#                 # Get raw effect value
+#                 raw_val = effect.get(key, 0.0) if effect else 0.0
+#                 norm_val = norm_effect.get(key, 0.0) if norm_effect else 0.0
+#                 base_val = raw_properties.get(prop_base, 0.0)
+                
+#                 # # Debug first row
+#                 # if i == 0:
+#                 #     print(f"DEBUG Row 0: {key} = {raw_val}, normalized = {norm_val}, baseline = {base_val}")
+                
+#                 row[key] = raw_val
+#                 row[f"{key}_normalized"] = norm_val
+#                 row[f"{prop_base}_baseline"] = base_val
+            
+#             writer.writerow(row)
+    
+#     print(f"\nCreated: {csv_filename}")
+    
+#     # Print normalization parameters
+#     print("\nNormalization parameters (min, max):")
+#     for key, (min_val, max_val) in normalization_params.items():
+#         print(f"  {key}: ({min_val:.6f}, {max_val:.6f})")
+
+
+
 def create_output_files(surface_coords, all_effects, molecule_name, properties_to_calculate, raw_properties):
     """
     Create MOL2 files and CSV summary for surface effects analysis.
@@ -1497,23 +1876,27 @@ def startup_message():
 #        Resume/Recovery Infrastructure                  #
 ##########################################################
 
-def create_resume_metadata(logs_dir, calc_type, total_points, 
-                          properties_to_calculate):
+def create_resume_metadata(logs_dir, calc_type, surface_type, total_points, 
+                          properties_to_calculate, surface_charge=None):
     """
     Create metadata file for resume capability.
     
     Args:
         logs_dir (str): Logs directory path
         calc_type (str): 'separate' or 'combined'
+        surface_type (str): 'homogenous' or 'heterogeneous'
         total_points (int): Total number of points
         properties_to_calculate (list): Properties being calculated
+        surface_charge (float, optional): Surface charge value
     """
     metadata = {
         'original_start': datetime.now().isoformat(),
         'last_updated': datetime.now().isoformat(),
         'calc_type': calc_type,
+        'surface_type': surface_type,
         'total_points': total_points,
         'properties': sorted(properties_to_calculate),
+        'surface_charge': surface_charge,
         'completed_points': [],
         'failed_points': [],
         'resume_count': 0
@@ -1604,6 +1987,10 @@ def validate_resume_compatibility(metadata, current_params):
     if metadata['calc_type'] != current_params['calc_type']:
         checks.append(f"calc_type mismatch: {metadata['calc_type']} vs {current_params['calc_type']}")
     
+    # Check surface_type
+    if metadata['surface_type'] != current_params['surface_type']:
+        checks.append(f"surface_type mismatch: {metadata['surface_type']} vs {current_params['surface_type']}")
+    
     # Check total_points
     if metadata['total_points'] != current_params['total_points']:
         checks.append(f"total_points mismatch: {metadata['total_points']} vs {current_params['total_points']}")
@@ -1613,6 +2000,11 @@ def validate_resume_compatibility(metadata, current_params):
     new_props = set(current_params['properties'])
     if old_props != new_props:
         checks.append(f"properties mismatch: {old_props} vs {new_props}")
+    
+    # Check surface_charge for homogenous surfaces
+    if metadata['surface_type'] == 'homogenous':
+        if abs(metadata.get('surface_charge', 0) - current_params.get('surface_charge', 0)) > 1e-6:
+            checks.append(f"surface_charge mismatch: {metadata['surface_charge']} vs {current_params['surface_charge']}")
     
     if checks:
         return False, "\n".join(checks)
@@ -1757,6 +2149,7 @@ def prompt_user_resume(logs_dir, metadata):
     print(f"Original Start:     {metadata['original_start']}")
     print(f"Last Updated:       {metadata['last_updated']}")
     print(f"Calculation Type:   {metadata['calc_type']}")
+    print(f"Surface Type:       {metadata['surface_type']}")
     print(f"Total Points:       {total}")
     print(f"Completed:          {completed} ({completed/total*100:.1f}%)")
     print(f"Failed:             {failed}")
@@ -1780,30 +2173,31 @@ def main(tuning_file='tuning.in'):
     tuning_params = get_tuning_parameters(tuning_file)
     
     # Extract all parameters
-    molecule = tuning_params.get('molecule') or tuning_params.get('xyz_file')
-    if not molecule or not os.path.exists(molecule):
-        raise FileNotFoundError(f"XYZ file required: {molecule}")
+    input_type = tuning_params.get('input_type', 'smiles')
+    input_data = tuning_params.get('input_data', 'O')
     basis_set = tuning_params.get('basis_set', '6-31G*')
     method = tuning_params.get('method', 'dft')
-    functional = tuning_params.get('functional', 'b3lyp')
+    functional = tuning_params.get('functional')
     charge = tuning_params.get('charge', 0)
     spin = tuning_params.get('spin', 0)
     solvent = tuning_params.get('solvent', None)
+    density = tuning_params.get('density', 1.0)  
+    scale = tuning_params.get('scale', 1.0)
 
     # Surface calculation parameters
-    surface_file = tuning_params.get('surface_file')
-    if not surface_file or not os.path.exists(surface_file):
-        raise FileNotFoundError(f"Surface file required: {surface_file}")
+    surface_type = tuning_params.get('surface_type', 'homogenous')
+    surface_charge = tuning_params.get('surface_charge', 0.1)
+    surface_file = tuning_params.get('surface_file', None)
     calc_type = tuning_params.get('calc_type', 'separate')
     
+    # Parallel processing parameter (default: True)
+    parallel = tuning_params.get('parallel', True)
+    num_procs = tuning_params.get('num_procs', None)
+
     # Calculation specifics
     properties = tuning_params.get('properties', ['all'])
     state_of_interest = tuning_params.get('state_of_interest', 2)
     triplet = tuning_params.get('triplet', False)
-
-    # Parallel processing parameter (default: True)
-    parallel = tuning_params.get('parallel', True)
-    num_procs = tuning_params.get('num_procs', None)
 
     # Check available hardware
     No_of_GPUs = core.check_gpu_info()
@@ -1817,14 +2211,18 @@ def main(tuning_file='tuning.in'):
     print(f"Using molecular states: {required_calculations}")
 
     # Prepare input data
-    input_data = molecule
+    input_data = prepare_input_data(input_type, input_data, basis_set, method, functional, charge, spin, gpu_available=gpu_available)
     molecule_name = core.extract_xyz_name(input_data)
     
-    # Load surface data
-    surface_coords, surface_charges = load_surf(surface_file)
+    # Load surface data based on surface_type
+    surface_coords, surface_charges = load_surface_data(
+        surface_type, calc_type, surface_file=surface_file, 
+        xyz_file=input_data, density=density, scale=scale
+    )
 
     print(f"\n")
     print(f"="*60)
+    print(f"                Surface Type: {surface_type}")
     print(f"                Calculation Type: {calc_type}")
     print(f"                Number of surface points: {len(surface_coords)}")
     print(f"                Parallel Processing: {parallel}")
@@ -1852,8 +2250,10 @@ def main(tuning_file='tuning.in'):
         # Check compatibility
         current_params = {
             'calc_type': calc_type,
+            'surface_type': surface_type,
             'total_points': len(surface_coords),
             'properties': sorted(properties_to_calculate),
+            'surface_charge': surface_charge if surface_type == 'homogenous' else None
         }
         
         is_compatible, error_msg = validate_resume_compatibility(latest_metadata, current_params)
@@ -1903,8 +2303,9 @@ def main(tuning_file='tuning.in'):
         
         # Create resume metadata
         create_resume_metadata(
-            logs_dir, calc_type, len(surface_coords),
-            properties_to_calculate
+            logs_dir, calc_type, surface_type, len(surface_coords),
+            properties_to_calculate, 
+            surface_charge if surface_type == 'homogenous' else None
         )
         
         # Calculate all points
@@ -1920,6 +2321,15 @@ def main(tuning_file='tuning.in'):
 
     # Unpack the list returned by create_molecule_objects
     molecule_alone, anion_alone, cation_alone, td_alone = base_molecules
+
+    # base_chkfiles = {
+    #     'neutral': 'molecule_alone.chk' if required_calculations.get('neutral') else None,
+    #     'anion': 'anion_alone.chk' if required_calculations.get('anion') else None,
+    #     'cation': 'cation_alone.chk' if required_calculations.get('cation') else None
+    # }
+    
+
+
 
     # Use absolute paths for checkpoint files so Ray worker processes can
     # reliably locate them even if their current working directory differs.
@@ -1937,6 +2347,11 @@ def main(tuning_file='tuning.in'):
             "Make sure base calculations completed and checkpoint files were saved (e.g. 'molecule_alone.chk')."
         )
     
+    
+    
+    # print(f"\nBase molecule types:")
+    # print(f"  molecule_alone: {type(molecule_alone)}")
+    # print(f"  Has to_cpu: {hasattr(molecule_alone, 'to_cpu')}")
     
     # Calculate raw properties (baseline - no surface effects)
     raw_properties = calculate_all_properties(
@@ -1983,7 +2398,10 @@ def main(tuning_file='tuning.in'):
         if not resume_mode:
             summary_file = initialize_summary_log(logs_dir, calc_type, 1)
         
-        q_mm = surface_charges
+        if surface_type == 'homogenous':
+            q_mm = np.full(len(surface_coords), surface_charge)
+        else:
+            q_mm = surface_charges
         
         try:
             combined_effects = calculate_combined_surface_effect(
@@ -2047,7 +2465,10 @@ def main(tuning_file='tuning.in'):
             summary_file = initialize_summary_log(logs_dir, calc_type, len(surface_coords))
         
         # Determine charges for each point
-        point_charges = surface_charges.tolist()
+        if surface_type == 'homogenous':
+            point_charges = [surface_charge] * len(surface_coords)
+        else:
+            point_charges = surface_charges.tolist()
 
 
         # Initialize all_effects with existing results if resuming
@@ -2202,6 +2623,19 @@ def main(tuning_file='tuning.in'):
         # Append raw properties to summary
         append_raw_properties_to_summary(summary_file, raw_properties)
 
+    # # Create output files with ALL results (not just new ones)
+    # create_output_files(output_coords, all_effects, molecule_name, properties_to_calculate, raw_properties)
+    # check_all_files_created(molecule_name, output_coords, properties_to_calculate, all_effects)
+
+    # # Organize results into timestamped folder
+    # results_dir = organize_results(molecule_name, properties_to_calculate, logs_dir)
+
+
+    # # Remove temporary checkpoint files
+    # temp_files = ['molecule_alone.chk', 'anion_alone.chk', 'cation_alone.chk']
+    # for temp_file in temp_files:
+    #     if os.path.exists(temp_file):
+    #         os.remove(temp_file)
 
     # Create output files with ALL results (not just new ones)
     normalization_params = create_output_files(output_coords, all_effects, molecule_name, properties_to_calculate, raw_properties)
