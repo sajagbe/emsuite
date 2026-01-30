@@ -340,7 +340,7 @@ def append_point_to_summary(summary_file, point_index, coord, charge, effects,
         
         f.write("\n")
 
-def finalize_summary_log(summary_file, all_effects, surface_coords, point_charges):
+def finalize_summary_log(summary_file, all_effects):
     """
     Add final statistics section to summary file after all calculations complete.
     
@@ -549,7 +549,7 @@ def calculate_point_effect_cpu(base_chkfiles, coord, surface_charge, solvent, st
 @ray.remote(num_cpus=1, num_gpus=1, max_retries=0, memory=4*1024*1024*1024)
 def calculate_point_effect_gpu(base_chkfiles, coord, surface_charge, solvent, 
                                state_of_interest, triplet, properties_to_calculate, 
-                               required_calculations, functional, point_index):
+                               required_calculations, point_index):
     gpu_id = ray.get_gpu_ids()[0]
     os.environ['CUDA_VISIBLE_DEVICES'] = str(gpu_id)
     
