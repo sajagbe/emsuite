@@ -1,0 +1,16 @@
+{
+  "original_start": "2026-01-19T20:30:34.937502",
+  "last_updated": "2026-01-19T20:31:05.004121",
+  "calc_type": "combined",
+  "surface_type": "homogenous",
+  "total_points": 30,
+  "properties": [
+    "homo"
+  ],
+  "surface_charge": 0.1,
+  "completed_points": [
+    0
+  ],
+  "failed_points": [],
+  "resume_count": 0
+}
