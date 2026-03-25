@@ -405,6 +405,9 @@ def log_point_result(logs_dir, point_index, coord, charge, effects, success=True
     """Log individual point calculation result to structured .out file."""
     log_file = os.path.join(logs_dir, f"point_{point_index:04d}.out")
     
+    # Convert charge to scalar if it's an array
+    charge = float(charge) if np.isscalar(charge) else float(np.sum(charge))
+    
     with open(log_file, 'w') as f:
         f.write("="*70 + "\n")
         f.write(f"{'SURFACE POINT CALCULATION RESULTS':^70}\n")
@@ -1764,13 +1767,14 @@ def main(tuning_file='tuning.in'):
                 required_calculations, functional
             )
             
-            # Log combined result (individual file)
+            # Log combined result - use sum of charges for logging since it's a single combined calculation
+            total_charge = float(np.sum(q_mm))
             log_point_result(logs_dir, 0, np.mean(surface_coords, axis=0), 
-                           q_mm, combined_effects, success=True)
+                           total_charge, combined_effects, success=True)
             
             # Append to summary
             append_point_to_summary(summary_file, 0, np.mean(surface_coords, axis=0),
-                                   q_mm, combined_effects, success=True, total_points=1)
+                                   total_charge, combined_effects, success=True, total_points=1)
             
             # Update resume metadata
             update_resume_metadata(logs_dir, 0, True)
@@ -1784,12 +1788,13 @@ def main(tuning_file='tuning.in'):
             print(error_msg)
             
             # Log failure
+            total_charge = float(np.sum(q_mm))
             log_point_result(logs_dir, 0, np.mean(surface_coords, axis=0), 
-                           q_mm, None, success=False, error_msg=error_msg)
+                           total_charge, None, success=False, error_msg=error_msg)
             
             # Append failure to summary
             append_point_to_summary(summary_file, 0, np.mean(surface_coords, axis=0),
-                                   q_mm, None, success=False, 
+                                   total_charge, None, success=False, 
                                    error_msg=error_msg, total_points=1)
             
             # Update resume metadata

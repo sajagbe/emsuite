@@ -309,62 +309,6 @@ def smiles_to_xyz(smiles, output_path, optimize=True, optimize_method='mmff',
 #         Input Parsing & Entry Point        #
 ##############################################
 
-def parse_surface_input(input_file):
-    """
-    Parse a surface.in input file.
-    
-    Args:
-        input_file (str): Path to the surface input file
-        
-    Returns:
-        dict: Dictionary of parameters with defaults applied
-    """
-    defaults = {
-        'input_type': None,  # Required
-        'input_data': None,  # Required
-        'output_surf': 'surface.surf',
-        'optimized_xyz': None,  # Optional: custom name for optimized XYZ
-        'surface_density': 1.0,
-        'surface_scale': 1.0,
-        'surface_type': 'homogenous',
-        'surface_charge': 1.0,
-        'optimize': None,  # Auto-determined based on input_type
-        'optimize_method': 'mmff',
-        'method': 'dft',
-        'basis_set': '6-31G*',
-        'functional': 'b3lyp',
-        'solvent': None,
-        'charge': 0,
-        'spin': 0,
-    }
-    
-    params = defaults.copy()
-    
-    with open(input_file, 'r') as f:
-        content = f.read()
-    
-    # Execute the file content to get variables
-    local_vars = {}
-    exec(content, {}, local_vars)
-    
-    # Update params with parsed values
-    for key in defaults:
-        if key in local_vars:
-            params[key] = local_vars[key]
-    
-    # Validation
-    if params['input_type'] is None:
-        raise ValueError("Missing required parameter: input_type")
-    if params['input_data'] is None:
-        raise ValueError("Missing required parameter: input_data")
-    
-    if params['surface_type'].lower() == 'homogenous' and 'surface_charge' not in local_vars:
-        print("Warning: surface_charge not specified for homogenous surface, using default 1.0")
-    
-    return params
-
-
-
 def generate_surface(input_type, input_data, output_surf='surface.surf',
                      surface_density=1.0, surface_scale=1.0,
                      surface_type='homogenous', surface_charge=1.0,
