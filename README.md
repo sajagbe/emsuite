@@ -15,11 +15,13 @@ EMSuite is aimed at qualifying and quantifying the influence of external electro
 
 ## Features
 
-- **Multiple Input Formats**: Support for SMILES strings (with automatic QM optimization) and XYZ coordinate files
+- **Two-Stage Workflow**: Generate a VDW surface first, then run electrostatic tuning calculations
+- **Multiple Input Formats**: Support for SMILES strings (with automatic optimization) and XYZ coordinate files
 - **Comprehensive Property Calculations**: Ground state energies, orbital energies, dipole moments, ionization potentials, electron affinities, and excited state properties
 - **GPU Acceleration**: Full GPU support via GPU4PySCF for enhanced computational speed (CPU fallback immediately available).
 - **Implicit Solvation**: Built-in support for solvent effects using the PCM model.
-- **Visualization Output**: MOL2 files for 3D visualization and CSV summaries for data analysis.
+- **Visualization Output**: Raw and normalized MOL2 files for 3D visualization, plus CSV summaries.
+- **Resume Support**: Interrupted tuning runs can be resumed from log metadata.
 
 ## Installation
 
@@ -35,29 +37,62 @@ pip install emsuite[gpu]
 
 EMSuite automatically detects available hardware and uses GPU acceleration when available, falling back to CPU mode otherwise.
 
-## Quick Start
+## Command-Line Interface
 
-1. **Create a tuning input file** (`tuning.in`):
+EMSuite exposes two mutually exclusive workflows:
 
-```python
-input_type = 'SMILES'      # Or 'xyz' for coordinate files
-input_data = 'O'           # SMILES string or path to xyz file
-method = 'dft'             # HF also permissible
-basis_set = '6-31G*'       # Full list in method-info/basis-sets on GitHub
-functional = 'pbe0'        # Full list in method-info/functionals.csv on GitHub
-charge = 0                 # Molecular charge
-spin = 0                   # Spin multiplicity
-surface_charge = 1.0       # Point charge magnitude (can be fractional, e.g., 0.005)
-solvent = None             # Solvent name or None for gas phase
-properties = ['gse']       # List of properties to calculate (see below)
-state_of_interest = 1      # Number of excited states (if exe/osc requested)
-triplet = False            # Set True for triplet excited states
+```bash
+emsuite -s surface.in
+emsuite -t tuning.in
 ```
 
-2. **Run the calculation**:
+- `-s, --surface INPUT_FILE`: Generate a `.surf` file from SMILES or XYZ input.
+- `-t, --tuning INPUT_FILE`: Run electrostatic tuning using an existing XYZ structure and `.surf` file.
 
+## Quick Start
 
-Currently the only functional electrostatic map module is that for tuning, which is accessible through the `-t` input option.
+1. **Create and run surface generation input** (`surface.in`):
+
+```python
+input_type = 'SMILES'      # 'SMILES' or 'XYZ'
+input_data = 'CCO'         # SMILES string or XYZ path
+
+surface_density = 1.0
+surface_scale = 1.0
+surface_type = 'homogenous'
+surface_charge = 0.10
+output_surf = 'CCO.surf'
+
+optimize = True
+optimize_method = 'uff'    # 'mmff', 'uff', or 'pyscf'
+optimized_xyz = 'CCO_opt.xyz'
+```
+
+```bash
+emsuite -s surface.in
+```
+
+2. **Create and run tuning input** (`tuning.in`):
+
+```python
+molecule = 'CCO_opt.xyz'   # or xyz_file = 'CCO_opt.xyz'
+surface_file = 'CCO.surf'
+
+charge = 0
+spin = 0
+basis_set = '6-31G*'
+method = 'dft'
+functional = 'b3lyp'
+solvent = None
+
+calc_type = 'separate'     # 'separate' or 'combined'
+properties = ['exe']
+state_of_interest = 1
+triplet = False
+
+parallel = True
+num_procs = None           # Auto-detect if None
+```
 
 ```bash
 emsuite -t tuning.in
@@ -86,11 +121,53 @@ The following molecular properties can be calculated:
 
 Use `'all'` to calculate all available properties.
 
-## Input Options
+## Input File Reference
 
-### Input Types
-- **SMILES**: Automatically generates 3D coordinates and performs geometry optimization
-- **XYZ**: Uses provided coordinate file directly
+### surface.in (`emsuite -s surface.in`)
+
+Required keys:
+- `input_type`: `'SMILES'` or `'XYZ'`
+- `input_data`: SMILES string or XYZ file path
+
+Optional keys and defaults:
+- `output_surf = 'surface.surf'`
+- `optimized_xyz = None`
+- `surface_density = 1.0`
+- `surface_scale = 1.0`
+- `surface_type = 'homogenous'`
+- `surface_charge = 0.10`
+- `optimize = None` (auto behavior: optimize for SMILES, do not optimize for XYZ)
+- `optimize_method = 'mmff'` (`'mmff'`, `'uff'`, `'pyscf'`)
+- `method = 'dft'`
+- `basis_set = '6-31G*'`
+- `functional = 'b3lyp'`
+- `solvent = None`
+- `charge = 0`
+- `spin = 0`
+
+Notes:
+- If `input_type = 'XYZ'`, geometry optimization is only supported with `optimize_method = 'pyscf'`.
+- `surface_type = 'heterogenous'` writes zero-valued placeholder charges for manual editing.
+
+### tuning.in (`emsuite -t tuning.in`)
+
+Required keys:
+- `molecule` or `xyz_file`: Path to XYZ file
+- `surface_file`: Path to `.surf` file
+
+Optional keys and defaults:
+- `basis_set = '6-31G*'`
+- `method = 'dft'`
+- `functional = 'b3lyp'`
+- `charge = 0`
+- `spin = 0`
+- `solvent = None`
+- `calc_type = 'separate'` (`'separate'` or `'combined'`)
+- `properties = ['all']`
+- `state_of_interest = 2`
+- `triplet = False`
+- `parallel = True`
+- `num_procs = None` (auto-detect CPU/GPU worker count)
 
 ### Methods and Basis Sets
 - **Methods**: `'dft'`, `'hf'`
@@ -100,46 +177,58 @@ Use `'all'` to calculate all available properties.
 
 ## Output Files
 
-For each calculated property, EMSuite tuning generates:
+For each tuning run, EMSuite creates a timestamped results directory:
 
-1. **MOL2 files**: `{molecule_name}_{property}.mol2` - 3D visualization files showing property effects mapped to surface coordinates
-2. **CSV summary**: `{molecule_name}_tuning_summary.csv` - Tabular data with coordinates and all property effects
-3. **Log files**: `logs/` - Calculation progress logs with resurrection capabilities for interrupted runs
-4. **Results folder**: `results_{molecule_name}_{timestamp}/` - Timestamped directory containing all output files for review
+- `results_{molecule_name}_{timestamp}/`
+
+Typical contents:
+
+1. **Raw MOL2 files**: `{molecule_name}_{property}.mol2`
+2. **Normalized MOL2 files**: `{molecule_name}_{property}_normalized.mol2`
+3. **CSV summary**: `{molecule_name}_tuning_summary.csv`
+4. **Logs directory**: `logs/` containing point logs, summary output, and `.resume_metadata.json`
+5. **Run summary file**: `README.txt`
 
 
 ## Example Usage
 
-### Water molecule LUMO tuning:
+### Example A: Generate surface from SMILES (CCO)
 ```python
 input_type = 'SMILES'
-input_data = 'O'
+input_data = 'CCO'
+surface_density = 1.0
+surface_scale = 1.0
+surface_type = 'homogenous'
+surface_charge = 0.1
+output_surf = 'CCO2.surf'
+optimize = True
+optimize_method = 'uff'
+optimized_xyz = 'CCO_opt2.xyz'
+```
+
+### Example B: Run tuning on generated files
+```python
+molecule = 'CCO_opt2.xyz'
+surface_file = 'CCO2.surf'
 basis_set = '6-31G*'
+method = 'dft'
 functional = 'b3lyp'
-properties = ['lumo']
-surface_charge = 1.0
+properties = ['exe']
+calc_type = 'separate'
+parallel = True
+num_procs = 16
 ```
 
-### Benzene with multiple properties:
+### Example C: Excited-state analysis
 ```python
-input_type = 'SMILES'
-input_data = 'c1ccccc1'
-basis_set = 'def2-SVP'
-functional = 'pbe0'
-properties = ['homo', 'lumo', 'gap', 'ie', 'ea']
-solvent = 'water'
-```
-
-### Excited state analysis:
-```python
-input_type = 'xyz'
-input_data = 'molecule.xyz'
+molecule = 'molecule.xyz'
+surface_file = 'molecule.surf'
 properties = ['exe', 'osc']
 state_of_interest = 5
 triplet = True
 ```
 
-Sample Outputs for `tuning.in` in `water-test/`
+Sample inputs and outputs for tuning runs are available in `examples/tuning/CCO2-exe/`.
 
 ## Citation
 

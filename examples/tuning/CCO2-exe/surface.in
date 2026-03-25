@@ -1,0 +1,28 @@
+input_type = 'SMILES' #'SMILES' or 'XYZ'
+input_data = 'CCO'    #SMILES string or path to XYZ file
+
+
+
+surface_density = 1.0 #4 points per Å^2 means each will be separated by 0.5 Å
+surface_scale = 1.0 #vdw surace scale
+surface_type = 'homogenous' #heterogenous is in development to gather the incident charge from solvent environment potential
+surface_charge = 0.1 #elemental point charge for each surface point 
+output_surf = 'CCO2.surf'
+
+
+
+optimize = True #optimize molecule, optional for xyz file
+optimize_method = 'uff' #'mmff', 'uff', or 'pyscf'
+optimized_xyz = 'CCO_opt2.xyz'
+
+
+
+
+#Options if optimizing with ab initio methods
+
+#method = 'dft' #could be hf as well
+#basis_set = '6-31G*'
+#functional = 'b3lyp' #valid only for dft above
+#solvent = None
+#charge = 0
+#spin = 0

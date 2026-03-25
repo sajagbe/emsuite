@@ -2,15 +2,15 @@
 ELECTROSTATIC TUNING MAP RESULTS
 ======================================================================
 
-Molecule:           mol_4696_opt
-Timestamp:          2026-01-19_20-31-06
-Properties:         homo
+Molecule:           CCO_opt2
+Timestamp:          2026-03-25_02-01-42
+Properties:         exe
 
 Files in this directory:
 ----------------------------------------------------------------------
-  mol_4696_opt_tuning_summary.csv          - Summary CSV with all data
-  mol_4696_opt_*.mol2                         - MOL2 files (raw values)
-  mol_4696_opt_*_normalized.mol2               - MOL2 files (normalized)
+  CCO_opt2_tuning_summary.csv              - Summary CSV with all data
+  CCO_opt2_*.mol2                         - MOL2 files (raw values)
+  CCO_opt2_*_normalized.mol2               - MOL2 files (normalized)
   logs/                                               - Individual point logs
   README.txt                                       - This file
 
