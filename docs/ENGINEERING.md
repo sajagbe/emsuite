@@ -80,4 +80,4 @@ Migrate incrementally; tests must stay green after each move.
 - Do not pin runtime deps aggressively in a library (lockfile is for dev/apps only).
 - Do not add training/MLIP dev deps to the default install.
 - Do not grow `tuning.py` with new properties — use the property registry pattern.
-- Do not commit local research dirs (`Application-Prelims/`, `asL1/`, etc.) — they stay gitignored.
+- Do not commit local research work — use the gitignored [`dev/`](../dev/README.md) directory for protein runs, ad-hoc scripts, and local inputs.

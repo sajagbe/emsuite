@@ -1,5 +1,5 @@
 # Python
-.pytest_cache/
+__pycache__/
 *.py[cod]
 *.egg-info/
 .venv/
@@ -7,6 +7,7 @@ venv/
 dist/
 build/
 .pytest_cache/
+.ruff_cache/
 .coverage
 htmlcov/
 
@@ -29,25 +30,21 @@ htmlcov/
 *.o
 .DS_Store
 
-# Local run outputs (keep examples/ tracked intentionally)
+# Local run outputs
 td_input.pkl
 td_results.pkl
 results_*/
 
-# Local legacy / research directories (not part of the package)
-prelims/
-Application-Prelims/
-L1vL2/
-asL1/
-asL2/
-atL1/
-atL2/
-crL1/
-crL2/
-STG_LOV.py
-charge_interpolate.py
-run_vsg_for_lf_xyz.py
-surface_charges.py
+# Local development workspace (see dev/README.md)
+dev/*
+!dev/README.md
+
+# Stray root-level run files — use dev/ instead
+/*.in
+/*.xyz
+/*.surf
+/*.mol2
+/*.csv
 
 # Ignore files containing id_sajagbe
 *id_sajagbe*
