@@ -39,14 +39,25 @@ Planned (not prioritized yet):
 
 | Version | Scope |
 |---------|-------|
-| **v1.1** | Repo cleanup, unified config parser, tests, CI, importable API, package restructure |
+| **v1.1** | Repo cleanup, unified config parser, tests, CI, Ruff/pre-commit, importable API, package restructure |
 | **v2.0** | Potential + coupled channels |
 | **v2.x** | New tuning properties, MLIP engine |
+
+## Engineering standards
+
+Refoundation follows:
+
+- [uv-cookiecutter](https://github.com/jevandezande/uv-cookiecutter) — `uv`, `src/` layout, Ruff, pytest, pre-commit, GitHub Actions
+- [How to Make a Great Open-Source Scientific Project](https://rowansci.com/blog/how-to-make-a-great-open-source-scientific-project) — minimal focused libraries, clean packaging, tested and documented code
+
+See [ENGINEERING.md](ENGINEERING.md) for the concrete checklist and local dev workflow.
 
 ## Current refoundation work (in progress)
 
 - Remove local dev clutter from repository root
 - Replace `exec()` surface input parsing with safe shared parser
 - Add pytest unit tests and GitHub Actions CI
+- Add Ruff lint/format and pre-commit hooks
 - Remove unused `requests` dependency
 - Align documentation with the two-stage surface → tuning workflow
+- Incremental package restructure toward `config/`, `core/`, `engines/`, channel modules

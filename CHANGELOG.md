@@ -7,8 +7,10 @@ All notable changes to this project are documented in this file.
 ### Added
 - Shared safe config parser (`emsuite.config`) replacing `exec()` for surface inputs.
 - Unit test suite (`tests/unit/`) with 17 tests covering config, properties, surf I/O, normalization.
-- GitHub Actions workflow for unit tests.
+- GitHub Actions CI with Python 3.11/3.12 matrix and `uv` workflow.
 - `docs/ROADMAP.md` documenting three-channel architecture and property backlog.
+- `docs/ENGINEERING.md` aligned with [uv-cookiecutter](https://github.com/jevandezande/uv-cookiecutter) and [Rowan's open-source guide](https://rowansci.com/blog/how-to-make-a-great-open-source-scientific-project).
+- Ruff lint/format, pre-commit hooks, `.python-version`, and `py.typed` marker.
 
 ### Changed
 - Removed local dev clutter from repository root and `opt/`.

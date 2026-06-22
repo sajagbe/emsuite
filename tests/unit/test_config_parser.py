@@ -2,8 +2,6 @@
 
 from pathlib import Path
 
-import pytest
-
 from emsuite.config import parse_assignments, parse_config_file
 
 
@@ -29,11 +27,7 @@ def test_parse_assignments_unquoted_string():
 
 def test_parse_config_file_with_defaults(tmp_path: Path):
     config = tmp_path / "surface.in"
-    config.write_text(
-        "input_type = 'SMILES'\n"
-        "input_data = 'CCO'\n"
-        "surface_charge = 0.1\n"
-    )
+    config.write_text("input_type = 'SMILES'\ninput_data = 'CCO'\nsurface_charge = 0.1\n")
     defaults = {
         "input_type": None,
         "input_data": None,
