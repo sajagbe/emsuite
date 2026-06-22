@@ -13,7 +13,9 @@ All notable changes to this project are documented in this file.
 - Ruff lint/format, pre-commit hooks, `.python-version`, and `py.typed` marker.
 
 ### Changed
-- Removed local dev clutter from repository root and `opt/`.
+- Local protein research folders and ad-hoc scripts now live under gitignored `dev/` (see `dev/README.md`).
+- Input templates moved to `examples/templates/`; README GIF moved to `docs/_static/`.
+- Root `tuning.in`, `molecules/`, and per-folder gitignore entries removed from the repo. and `opt/`.
 - Trimmed CCO example point logs to three representative samples on disk.
 - Updated `.gitignore` for a cleaner professional layout.
 - Synced `docs/tuning/reference/inputs.rst` to current two-stage API.
