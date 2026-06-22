@@ -9,13 +9,16 @@ dependencies = [
     "pyscf>=2.10.0",
     "rdkit>=2025.3.5",
     "vdw-surfgen>=0.5.6",
-    "requests",
     "numpy",
     "ray>=2.50.1",
     "apbs-binary>=3.4.1.1",
 ]
 
 [project.optional-dependencies]
+dev = [
+    "pytest>=8.0",
+    "pytest-cov>=5.0",
+]
 gpu = [
     "gpu4pyscf-cuda12x==1.4.3",
     "gpu4pyscf-libxc-cuda12x==0.5",
@@ -29,3 +32,9 @@ emsuite = "emsuite.cli:main"
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+markers = [
+    "slow: requires PySCF QM calculation",
+]

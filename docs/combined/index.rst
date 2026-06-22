@@ -10,7 +10,9 @@ Combined
 
 .. note::
 
-   This module is under development and will be available in a future release.
+   **Not yet implemented.** The coupled channel will use potential-derived surface
+   charges as input to tuning. See :doc:`../ROADMAP`. This is distinct from
+   ``calc_type='combined'`` inside tuning.
 
 .. toctree::
    :maxdepth: 1

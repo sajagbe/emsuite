@@ -9,7 +9,11 @@ Potential
 
 .. note::
 
-   This module is under development and will be available in a future release.
+   **Not yet implemented.** This module is planned for a future release.
+   See :doc:`../ROADMAP` for the channel architecture.
+
+The **potential** module will generate electrostatic potential maps on molecular surfaces
+(for example via APBS). A CLI entry point ``emsuite -p`` will be added when this module ships.
 
 .. toctree::
    :maxdepth: 1
@@ -19,13 +23,4 @@ Potential
    how-to/index
    reference/index
    explanation/index
-
-The **potential** module will generate electrostatic potential maps 
-of chemical systems.
-
-.. code-block:: bash
-
-   emsuite -p input_file.in
-
-Check back soon for updates.
 

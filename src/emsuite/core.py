@@ -1,4 +1,4 @@
-import os, sys, time, subprocess, requests,tempfile, pickle, shutil
+import os, sys, time, subprocess, tempfile, pickle, shutil
 import numpy as np
 from rdkit import Chem
 from rdkit.Chem import AllChem
@@ -13,9 +13,6 @@ try:
 except ImportError:
     cp = None
     GPU_AVAILABLE = False
-
-OFFICE_API = "https://officeapi.akashrajpurohit.com"
-
 
 
 ##############################################
@@ -80,34 +77,6 @@ def print_startup_message():
     print(f"                   Electrostatic Map Suite")
     print(f"                    By Stephen O. Ajagbe")
     print(f"="*60)
-
-
-def print_office_quote():
-    """
-    Makes an API request to get a random quote and character from The Office TV show.
-    Also cleans up any existing quote SVG files from the current directory.
-    
-    Raises:
-        requests.exceptions.RequestException: If the API request fails
-        
-    Note:
-        Uses the Office API at https://officeapi.akashrajpurohit.com
-    """
-    print("\nFetching inspirational quote...\n")
-    url = f"{OFFICE_API}/quote/random"
-    resp = requests.get(url)
-    resp.raise_for_status()
-    data = resp.json()
-    #remove quote*.svg if it exists, * is a wildcard for any characters
-    for file in os.listdir():
-        if file.startswith("quote") and file.endswith(".svg"):
-            try:
-                os.remove(file)
-            except OSError as e:
-                print(f"Warning: could not remove {file}: {e}")
-    print(f"\n  {data['quote']} \n                     - {data['character']}\n")
-
-
 
 
 ##############################################

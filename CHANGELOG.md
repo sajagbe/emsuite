@@ -2,6 +2,25 @@
 
 All notable changes to this project are documented in this file.
 
+## [Unreleased]
+
+### Added
+- Shared safe config parser (`emsuite.config`) replacing `exec()` for surface inputs.
+- Unit test suite (`tests/unit/`) with 17 tests covering config, properties, surf I/O, normalization.
+- GitHub Actions workflow for unit tests.
+- `docs/ROADMAP.md` documenting three-channel architecture and property backlog.
+
+### Changed
+- Removed local dev clutter from repository root and `opt/`.
+- Trimmed CCO example point logs to three representative samples on disk.
+- Updated `.gitignore` for a cleaner professional layout.
+- Synced `docs/tuning/reference/inputs.rst` to current two-stage API.
+- Marked potential/combined Sphinx pages as not yet implemented.
+
+### Removed
+- `requests` dependency and Office quote Easter egg.
+- Unsafe `exec()` parsing in `surface.parse_surface_input()`.
+
 ## [1.0.5] - 2026-03-25
 
 ### Added

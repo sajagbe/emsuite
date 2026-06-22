@@ -1,4 +1,4 @@
-import csv, os, argparse, ast, sys, shutil, json, ray, logging
+import csv, os, argparse, sys, shutil, json, ray, logging
 import numpy as np
 from datetime import datetime
 from pathlib import Path
@@ -873,29 +873,13 @@ def get_tuning_parameters(filepath='tuning.in'):
     Returns:
         dict: Dictionary of tuning parameters
     """
-    if not os.path.exists(filepath):
-        return {}
-    
-    params = {}
+    from .config import parse_config_file
+
     try:
-        with open(filepath, 'r') as f:
-            for line in f:
-                line = line.strip()
-                if line and not line.startswith('#') and '=' in line:
-                    key, value = line.split('=', 1)
-                    key = key.strip()
-                    value = value.strip()
-                    
-                    # Parse value
-                    try:
-                        params[key] = ast.literal_eval(value)
-                    except (ValueError, SyntaxError):
-                        params[key] = value
-    except Exception as e:
+        return parse_config_file(filepath)
+    except OSError as e:
         print(f"Error parsing tuning.in file: {e}")
         return {}
-    
-    return params
 
 
 
@@ -1224,33 +1208,30 @@ def normalize_effects(all_effects, effect_keys):
 
         
 def check_all_files_created(molecule_name, surface_coords, properties_to_calculate, all_effects=None):
-    if len(surface_coords) == 1:
-        core.print_office_quote()
+    missing = []
+    # Use effect keys from all_effects if provided, otherwise fallback to properties_to_calculate
+    effect_keys = set()
+    if all_effects and len(all_effects) > 0:
+        for effect in all_effects:
+            effect_keys.update(effect.keys())
+        # Only check for keys ending with '_effect'
+        effect_props = [key.replace('_effect', '') for key in effect_keys if key.endswith('_effect')]
     else:
-        missing = []
-        # Use effect keys from all_effects if provided, otherwise fallback to properties_to_calculate
-        effect_keys = set()
-        if all_effects and len(all_effects) > 0:
-            for effect in all_effects:
-                effect_keys.update(effect.keys())
-            # Only check for keys ending with '_effect'
-            effect_props = [key.replace('_effect', '') for key in effect_keys if key.endswith('_effect')]
-        else:
-            effect_props = properties_to_calculate
+        effect_props = properties_to_calculate
 
-        for prop in effect_props:
-            filepath = f"{molecule_name}_{prop}.mol2"
-            if not os.path.exists(filepath):
-                missing.append(filepath)
-        
-        csv_path = f"{molecule_name}_tuning_summary.csv"
-        if not os.path.exists(csv_path):
-            missing.append(csv_path)
+    for prop in effect_props:
+        filepath = f"{molecule_name}_{prop}.mol2"
+        if not os.path.exists(filepath):
+            missing.append(filepath)
 
-        if missing:
-            print(f"Missing: {', '.join(missing)}")
-        else:
-            core.print_office_quote()
+    csv_path = f"{molecule_name}_tuning_summary.csv"
+    if not os.path.exists(csv_path):
+        missing.append(csv_path)
+
+    if missing:
+        print(f"Missing: {', '.join(missing)}")
+    else:
+        print("All expected output files were created.")
 
 #################
 # Miscellaneous #

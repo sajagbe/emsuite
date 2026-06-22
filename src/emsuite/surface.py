@@ -7,9 +7,13 @@ separated from the tuning calculations for cleaner workflow.
 
 import os
 import subprocess
+from pathlib import Path
+
 import numpy as np
 from rdkit import Chem
 from rdkit.Chem import AllChem
+
+from .config import parse_assignments, parse_config_file
 
 
 ##############################################
@@ -445,29 +449,18 @@ def parse_surface_input(input_file):
         'spin': 0,
     }
     
-    params = defaults.copy()
-    
-    with open(input_file, 'r') as f:
-        content = f.read()
-    
-    # Execute the file content to get variables
-    local_vars = {}
-    exec(content, {}, local_vars)
-    
-    # Update params with parsed values
-    for key in defaults:
-        if key in local_vars:
-            params[key] = local_vars[key]
-    
+    params = parse_config_file(input_file, defaults=defaults)
+    parsed = parse_assignments(Path(input_file).read_text())
+
     # Validation
     if params['input_type'] is None:
         raise ValueError("Missing required parameter: input_type")
     if params['input_data'] is None:
         raise ValueError("Missing required parameter: input_data")
-    
-    if params['surface_type'].lower() == 'homogenous' and 'surface_charge' not in local_vars:
+
+    if params['surface_type'].lower() == 'homogenous' and 'surface_charge' not in parsed:
         print("Warning: surface_charge not specified for homogenous surface, using default 0.10")
-    
+
     return params
 
 
