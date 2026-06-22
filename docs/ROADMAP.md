@@ -52,12 +52,12 @@ Refoundation follows:
 
 See [ENGINEERING.md](ENGINEERING.md) for the concrete checklist and local dev workflow.
 
-## Current refoundation work (in progress)
+## v1.1 refoundation status
 
-- Remove local dev clutter from repository root
-- Replace `exec()` surface input parsing with safe shared parser
-- Add pytest unit tests and GitHub Actions CI
-- Add Ruff lint/format and pre-commit hooks
-- Remove unused `requests` dependency
-- Align documentation with the two-stage surface → tuning workflow
-- Incremental package restructure toward `config/`, `core/`, `engines/`, channel modules
+**Done (local, unpushed):** dev workspace isolation, safe config parser, 17 unit tests, GitHub Actions CI, Ruff/pre-commit, cookie-cutter subpackage restructure, importable API. See [SESSION_HANDOFF.md](SESSION_HANDOFF.md).
+
+**Remaining before v1.1 release:**
+
+- End-to-end integration and regression tests
+- Extract Ray parallel workers from `tuning/runner.py`
+- Push to remote and tag v1.1.0 after testing
