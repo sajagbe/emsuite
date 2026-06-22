@@ -2,7 +2,7 @@ import argparse
 import sys
 from pathlib import Path
 
-from .core import print_startup_message
+from emsuite.core import print_startup_message
 
 
 def main():
@@ -35,7 +35,7 @@ def main():
 
 def run_surface(input_file: str):
     """Execute the surface generation channel."""
-    from .surface import run_surface_calculation
+    from emsuite.surface import run_surface_calculation
 
     input_path = Path(input_file)
     if not input_path.exists():
@@ -47,7 +47,7 @@ def run_surface(input_file: str):
 
 def run_tuning(input_file: str):
     """Execute the tuning channel."""
-    from .tuning import main as tuning_main
+    from emsuite.tuning import main as tuning_main
 
     input_path = Path(input_file)
     if not input_path.exists():

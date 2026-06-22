@@ -13,7 +13,8 @@ All notable changes to this project are documented in this file.
 - Ruff lint/format, pre-commit hooks, `.python-version`, and `py.typed` marker.
 
 ### Changed
-- Local protein research folders and ad-hoc scripts now live under gitignored `dev/` (see `dev/README.md`).
+- Cookie-cutter package restructure: `config/`, `cli/`, `core/`, `surface/`, `tuning/`, `engines/`, `potential/`, `coupled/` subpackages.
+- Importable API: `import emsuite; emsuite.run_tuning(...)`, `emsuite.run_surface_calculation(...)`.
 - Input templates moved to `examples/templates/`; README GIF moved to `docs/_static/`.
 - Root `tuning.in`, `molecules/`, and per-folder gitignore entries removed from the repo. and `opt/`.
 - Trimmed CCO example point logs to three representative samples on disk.

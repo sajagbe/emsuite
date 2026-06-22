@@ -57,20 +57,16 @@ Aligned with uv-cookiecutter `src/` layout and Rowan’s “minimal libraries”
 
 ```
 src/emsuite/
-  config/          # safe input parsing
-  core/            # shared QM primitives
-  engines/         # PySCF, MLIP (protocol)
-  surface/         # VDW surface generation
-  tuning/          # property tuning maps
-  potential/       # ESP maps (planned)
-  coupled/         # potential → tuning (planned)
-  cli/             # argparse entry points
-tests/
-  unit/
-  integration/
-  regression/
-docs/
-examples/
+  __init__.py        # version + run_surface_calculation / run_tuning exports
+  config/            # safe input parsing (parser.py)
+  cli/               # argparse entry points (main.py)
+  core/              # hardware, molecule, qmmm, excited, io
+  engines/           # Engine protocol; PySCF delegate; MLIP stub
+  surface/           # io, vdw, optimize, generate, runner
+  tuning/            # properties/, logging, output, resume, config_io, runner
+  potential/         # stub
+  coupled/           # stub
+tests/unit/
 ```
 
 Migrate incrementally; tests must stay green after each move.

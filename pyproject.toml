@@ -29,7 +29,7 @@ gpu = [
 ]
 
 [project.scripts]
-emsuite = "emsuite.cli:main"
+emsuite = "emsuite.cli.main:main"
 
 [build-system]
 requires = ["hatchling"]
