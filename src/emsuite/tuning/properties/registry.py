@@ -1,10 +1,17 @@
 """Property registry and calculation setup."""
 
+from __future__ import annotations
+
 import numpy as np
 
-from emsuite.core import find_homo_lumo_and_gap
-
 from ..constants import HARTREE_TO_EV, HARTREE_TO_KCAL
+from .excited_state import calculate_excited_state_properties
+from .ground_state import calculate_ground_state_properties
+from .interaction import interaction_energy_kcal, proton_affinity_kcal
+from .stark import compute_stark_properties
+from .thermo import calculate_thermo_properties
+from .thermo_ext import fugacity_extensions
+from .vibrational import fundamental_frequency_cm1
 
 PROPERTY_CONFIG = {
     "gse": {"deps": [], "calc": [], "unit": 1},
@@ -12,6 +19,7 @@ PROPERTY_CONFIG = {
     "lumo": {"deps": [], "calc": [], "unit": 1},
     "gap": {"deps": ["homo", "lumo"], "calc": [], "unit": 1},
     "dm": {"deps": [], "calc": [], "unit": 1},
+    "spin": {"deps": [], "calc": [], "unit": 1},
     "ie": {"deps": [], "calc": ["cation"], "unit": HARTREE_TO_KCAL},
     "ea": {"deps": [], "calc": ["anion"], "unit": HARTREE_TO_KCAL},
     "cp": {"deps": ["ie", "ea"], "calc": [], "unit": HARTREE_TO_KCAL},
@@ -19,48 +27,52 @@ PROPERTY_CONFIG = {
     "hard": {"deps": ["ie", "ea"], "calc": [], "unit": HARTREE_TO_EV},
     "efl": {"deps": ["cp", "hard"], "calc": [], "unit": HARTREE_TO_EV},
     "nfl": {"deps": ["efl"], "calc": [], "unit": HARTREE_TO_EV},
+    "fukui_plus": {"deps": ["ea"], "calc": ["anion"], "unit": HARTREE_TO_EV},
+    "fukui_minus": {"deps": ["ie"], "calc": ["cation"], "unit": HARTREE_TO_EV},
+    "fukui_spa_plus": {
+        "deps": [],
+        "calc": ["anion", "cation"],
+        "unit": 1,
+        "surface_map": True,
+    },
+    "fukui_spa_minus": {
+        "deps": [],
+        "calc": ["anion", "cation"],
+        "unit": 1,
+        "surface_map": True,
+    },
+    "freq": {"deps": [], "calc": [], "unit": 1},
+    "stark_homo": {"deps": [], "calc": [], "unit": 1},
+    "stark_lumo": {"deps": [], "calc": [], "unit": 1},
+    "stark_gap": {"deps": ["stark_homo", "stark_lumo"], "calc": [], "unit": 1},
+    "eint": {"deps": [], "calc": [], "unit": HARTREE_TO_KCAL},
+    "h2o": {"deps": [], "calc": [], "unit": HARTREE_TO_KCAL},
+    "pa": {"deps": [], "calc": ["cation"], "unit": HARTREE_TO_KCAL},
+    "efl_fug": {"deps": ["efl"], "calc": [], "unit": 1},
+    "nfl_fug": {"deps": ["nfl"], "calc": [], "unit": 1},
+    "eng_fug": {"deps": ["eng"], "calc": [], "unit": 1},
+    "ts_barrier": {"deps": [], "calc": [], "unit": HARTREE_TO_KCAL, "global": True},
     "exe": {"deps": [], "calc": ["td"], "unit": 1},
     "osc": {"deps": [], "calc": ["td"], "unit": 1},
 }
 
 
-#####################################################
-# Prepare Calculations' Dependencies on User Inputs #
-#####################################################
+def is_surface_map_property(prop: str) -> bool:
+    return bool(PROPERTY_CONFIG.get(prop, {}).get("surface_map"))
+
+
+def is_global_property(prop: str) -> bool:
+    return bool(PROPERTY_CONFIG.get(prop, {}).get("global"))
 
 
 def setup_calculation(requested_props):
-    """
-    Setup and resolve property dependencies and required calculations.
-
-    This function takes a list of requested molecular properties and determines
-    all the dependencies and quantum mechanical calculations needed to compute them.
-    It handles the dependency tree resolution and maps properties to required
-    calculations (neutral, cation, anion, TD).
-
-    Args:
-        requested_props (list): List of property names to calculate.
-                               Use 'all' to calculate all available properties.
-
-    Returns:
-        tuple: (props_needed, calcs_needed) where:
-            - props_needed (list): All properties needed including dependencies
-            - calcs_needed (dict): Dictionary mapping calculation types to boolean
-                                  (e.g., {'neutral': True, 'cation': False, ...})
-
-    Note:
-        Available properties: 'gse', 'homo', 'lumo', 'gap', 'dm', 'ie', 'ea',
-        'cp', 'eng', 'hard', 'efl', 'nfl', 'exe', 'osc' and the all encompassing 'all'.
-
-        Dependencies are automatically resolved (e.g., 'gap' requires 'homo' and 'lumo')
-    """
+    """Resolve property dependencies and required calculations."""
     if "all" in requested_props:
         requested_props = list(PROPERTY_CONFIG.keys())
 
-    # Resolve dependencies
-    props_needed = set()
+    props_needed: set[str] = set()
 
-    def add_deps(prop):
+    def add_deps(prop: str) -> None:
         if prop in props_needed:
             return
         props_needed.add(prop)
@@ -70,8 +82,7 @@ def setup_calculation(requested_props):
     for prop in requested_props:
         add_deps(prop)
 
-    # Determine required calculations
-    calcs_needed = {"neutral": True}
+    calcs_needed: dict[str, bool] = {"neutral": True}
     for prop in props_needed:
         for calc in PROPERTY_CONFIG[prop]["calc"]:
             calcs_needed[calc] = True
@@ -79,99 +90,51 @@ def setup_calculation(requested_props):
     return list(props_needed), calcs_needed
 
 
-###############################################
-# Calculate Properties from Molecular Objects #
-###############################################
-
-
 def calculate_all_properties(
-    mf, anion_mf=None, cation_mf=None, td_obj=None, triplet=False, props_to_calc=None
+    mf,
+    anion_mf=None,
+    cation_mf=None,
+    td_obj=None,
+    triplet=False,
+    props_to_calc=None,
+    probe_coord: np.ndarray | None = None,
+    probe_charge: float = 0.0,
 ):
-    """
-    Calculate a comprehensive set of molecular properties from quantum calculations.
-
-    This function computes various molecular properties including energetic,
-    electronic, and excited state properties from converged SCF objects.
-
-    Args:
-        mf (pyscf.scf or gpu4pyscf.scf object): Converged neutral molecule SCF object
-        anion_mf (pyscf.scf or gpu4pyscf.scf object, optional): Converged anion SCF object for EA calculations
-        cation_mf (pyscf.scf or gpu4pyscf.scf object, optional): Converged cation SCF object for IE calculations
-        td_obj (pyscf.tdscf or gpu4pyscf.scf object, optional): TD object for excited state properties
-        triplet (bool, optional): Whether to calculate triplet excited states. Defaults to False.
-        props_to_calc (list, optional): List of properties to calculate
-
-    Returns:
-        dict: Dictionary containing calculated properties with units:
-            - 'gse': Ground state energy (kcal/mol)
-            - 'homo'/'lumo'/'gap': Orbital energies (eV)
-            - 'dm': Dipole moment magnitude (Debye)
-            - 'ie'/'ea': Ionization/electron affinity (kcal/mol)
-            - 'cp': Chemical potential (kcal/mol)
-            - 'eng': Electronegativity (eV)
-            - 'hard': Chemical hardness (eV)
-            - 'efl'/'nfl': Electrophilicity/nucleophilicity (eV)
-            - 's1_exe'/'t1_exe': Excitation energies (eV)
-            - 's1_osc'/'t1_osc': Oscillator strengths (dimensionless)
-
-    Note:
-        - Energies are converted from Hartree using conversion constants
-        - Excited state properties are labeled with state prefix (s/t) and number
-        - Missing SCF objects will skip dependent property calculations
-    """
-    results = {}
-
-    # Handle None or empty props_to_calc
+    """Calculate molecular properties from converged SCF/TD objects."""
     if not props_to_calc:
-        return results
+        return {}
 
-    # Basic properties
-    if "gse" in props_to_calc:
-        results["gse"] = mf.e_tot * HARTREE_TO_KCAL
+    props = [p for p in props_to_calc if not is_surface_map_property(p) and not is_global_property(p)]
 
-    if any(p in props_to_calc for p in ["homo", "lumo", "gap"]):
-        homo, lumo, gap = [x * HARTREE_TO_EV for x in find_homo_lumo_and_gap(mf)]
-        results.update(
-            {
-                p: v
-                for p, v in zip(["homo", "lumo", "gap"], [homo, lumo, gap], strict=True)
-                if p in props_to_calc
-            }
-        )
+    results = calculate_ground_state_properties(mf, props)
+    results = calculate_thermo_properties(mf, anion_mf, cation_mf, props, partial=results)
+    results.update(calculate_excited_state_properties(td_obj, triplet, props))
+    results.update(fugacity_extensions(results, props))
 
-    if "dm" in props_to_calc:
-        results["dm"] = np.linalg.norm(mf.dip_moment())
+    if "fukui_plus" in props and "ea" in results:
+        results["fukui_plus"] = results["ea"] * HARTREE_TO_EV
+    if "fukui_minus" in props and "ie" in results:
+        results["fukui_minus"] = results["ie"] * HARTREE_TO_EV
 
-    # Charged state properties
-    if "ie" in props_to_calc and cation_mf:
-        results["ie"] = cation_mf.e_tot - mf.e_tot
-    if "ea" in props_to_calc and anion_mf:
-        results["ea"] = mf.e_tot - anion_mf.e_tot
+    if "freq" in props:
+        results["freq"] = fundamental_frequency_cm1(mf)
 
-    # Derived properties
-    if "cp" in props_to_calc and all(k in results for k in ["ie", "ea"]):
-        results["cp"] = -(results["ie"] + results["ea"]) / 2
-    if "eng" in props_to_calc and "cp" in results:
-        results["eng"] = -results["cp"]
-    if "hard" in props_to_calc and all(k in results for k in ["ie", "ea"]):
-        results["hard"] = (results["ie"] - results["ea"]) / 2
-    if "efl" in props_to_calc and all(k in results for k in ["cp", "hard"]):
-        results["efl"] = results["cp"] ** 2 / (2 * results["hard"]) if results["hard"] != 0 else 0
-    if "nfl" in props_to_calc and "efl" in results:
-        results["nfl"] = 1 / results["efl"] if results["efl"] != 0 else 0
+    if "eint" in props and mf is not None:
+        results["eint"] = mf.e_tot * HARTREE_TO_KCAL
 
-    # Excited state properties - only if TD object exists and exe/osc properties are requested
-    if td_obj and any(p in props_to_calc for p in ["exe", "osc"]):
-        state_prefix = "t" if triplet else "s"
+    if "h2o" in props and mf is not None:
+        results["h2o"] = mf.e_tot * HARTREE_TO_KCAL
 
-        if "exe" in props_to_calc:
-            excitation_energies = td_obj.e * HARTREE_TO_EV
-            for i, energy in enumerate(excitation_energies, 1):
-                results[f"{state_prefix}{i}_exe"] = energy
+    if "pa" in props:
+        results["pa"] = proton_affinity_kcal(mf, cation_mf)
 
-        if "osc" in props_to_calc:
-            oscillator_strengths = td_obj.oscillator_strength()
-            for i, osc in enumerate(oscillator_strengths, 1):
-                results[f"{state_prefix}{i}_osc"] = osc
+    stark = compute_stark_properties(mf, probe_coord, probe_charge, props)
+    results.update(stark)
+    if "stark_gap" in props and "stark_homo" in results and "stark_lumo" in results:
+        results["stark_gap"] = results["stark_lumo"] - results["stark_homo"]
 
     return results
+
+
+def interaction_effect_kcal(mf_alone, mf_complex) -> float:
+    return interaction_energy_kcal(mf_alone, mf_complex)

@@ -1,25 +1,17 @@
-.. emsuite documentation master file, created by
-   sphinx-quickstart on Wed Jan 14 18:18:27 2026.
-   You can adapt this file completely to your liking, but it should at least
-   contain the root `toctree` directive.
+The **potential** channel computes electrostatic potential at VDW surface points and writes
+heterogeneous ``.surf`` files for downstream tuning or coupled workflows.
 
+CLI
+---
 
-Potential
-=========
+.. code-block:: bash
 
-.. note::
+   emsuite -p potential.in
 
-   **Not yet implemented.** This module is planned for a future release.
-   See :doc:`../ROADMAP` for the channel architecture.
+Methods
+-------
 
-The **potential** module will generate electrostatic potential maps on molecular surfaces
-(for example via APBS). A CLI entry point ``emsuite -p`` will be added when this module ships.
+- ``method = 'coulomb'`` — Gasteiger partial charges (default, fast, CI-friendly)
+- ``method = 'apbs'`` — Poisson-Boltzmann via ``apbs-binary`` (falls back to Coulomb on failure)
 
-.. toctree::
-   :maxdepth: 1
-   :hidden:
-
-   tutorials/index
-   how-to/index
-   reference/index
-   explanation/index
+See :doc:`../ROADMAP` for architecture and ``examples/templates/potential.in``.

@@ -1,63 +1,60 @@
 # EMSuite Roadmap
 
-This document captures the approved direction for EMSuite beyond v1.0.5. Shipped features are documented in [README.md](../README.md).
+Approved direction for EMSuite. Shipped features are documented in [README.md](../README.md).
 
-## Three channels
+## Channels (v1.2)
 
-| Channel | Purpose | CLI | Status |
-|---------|---------|-----|--------|
-| **Surface** | Geometry + VDW envelope | `emsuite -s surface.in` | Shipped |
-| **Tuning** | Electrostatic tuning of molecular properties | `emsuite -t tuning.in` | Shipped |
-| **Potential** | Electrostatic potential maps on surfaces | `emsuite -p potential.in` | Planned |
-| **Coupled** | Potential-derived charges feed tuning | `emsuite -c coupled.in` (name TBD) | Planned |
+| Channel | Purpose | CLI |
+|---------|---------|-----|
+| **Surface** | Geometry + VDW envelope | `emsuite -s surface.in` |
+| **Tuning** | Electrostatic tuning of molecular properties | `emsuite -t tuning.in` |
+| **Potential** | ESP maps (Coulomb, APBS, bond-axis scan) | `emsuite -p potential.in` |
+| **Coupled** | Potential → tuning pipeline | `emsuite -c coupled.in` |
 
-**Naming note:** `calc_type='combined'` in tuning applies all surface charges simultaneously. The future **coupled** channel is different: it uses potential-computed heterogeneous charges as the tuning surface.
+**Naming:** `calc_type='combined'` ≠ the **coupled** channel.
 
-## Engine abstraction (planned)
+## Engines
 
-- **PySCF** — default QM engine today
-- **MLIP** — planned alternate engine for geometry, energies, and fast screening maps
+| Engine | Status |
+|--------|--------|
+| **PySCF** | Default QM (`PySCFEngine`) |
+| **MLIP/xTB** | `TBLiteEngine` via `uv sync --extra mlip` (`get_engine('mlip')`) |
 
-## Tuning property backlog
+## Tuning properties (v1.2)
 
-Existing: `gse`, `homo`, `lumo`, `gap`, `dm`, `ie`, `ea`, `cp`, `eng`, `hard`, `efl`, `nfl`, `exe`, `osc`.
+**Core (17):** `gse`, `homo`, `lumo`, `gap`, `dm`, `spin`, `ie`, `ea`, `cp`, `eng`, `hard`, `efl`, `nfl`, `fukui_plus`, `fukui_minus`, `exe`, `osc`
 
-Planned (not prioritized yet):
+**Advanced (12):** `fukui_spa_plus`, `fukui_spa_minus`, `freq`, `stark_homo`, `stark_lumo`, `stark_gap`, `eint`, `h2o`, `pa`, `efl_fug`, `nfl_fug`, `eng_fug`, `ts_barrier`
 
-- Water interaction
-- Nucleophilicity / electrophilicity fugacity extensions
-- Stark effect
-- Bond potential
-- Interaction energy
-- Spin density
-- Vibrational frequencies
-- Proton affinity map (with equilibrium H bond distance)
-- Fukui indices
-- Transition-state tuning
+Use `properties = ['all']` for the full registry.
 
-## Refoundation milestones
+### Tuning input extras
+
+| Key | Purpose |
+|-----|---------|
+| `ts_xyz` | Transition-state XYZ for `ts_barrier` baseline |
+| `fukui_projection` | `'nearest'` or `'inverse_distance'` for spatial Fukui maps |
+
+### Potential bond scan
+
+In `potential.in`:
+
+```python
+bond_scan_atoms = [0, 1]
+bond_scan_steps = 10
+bond_scan_span = 3.0
+```
+
+## Future ideas (not scheduled)
+
+Higher-accuracy MLIP models (MACE, etc.), explicit solvent MD coupling, automated TS search for `ts_barrier` effects per probe.
+
+## Version milestones
 
 | Version | Scope |
 |---------|-------|
-| **v1.1** | Repo cleanup, unified config parser, tests, CI, Ruff/pre-commit, importable API, package restructure |
-| **v2.0** | Potential + coupled channels |
-| **v2.x** | New tuning properties, MLIP engine |
+| **v1.1** | Refoundation, four channels, tests, CI |
+| **v1.2** | Advanced properties, spatial Fukui, xTB engine, bond scan |
+| **v1.x+** | Further properties and engine backends as needed |
 
-## Engineering standards
-
-Refoundation follows:
-
-- [uv-cookiecutter](https://github.com/jevandezande/uv-cookiecutter) — `uv`, `src/` layout, Ruff, pytest, pre-commit, GitHub Actions
-- [How to Make a Great Open-Source Scientific Project](https://rowansci.com/blog/how-to-make-a-great-open-source-scientific-project) — minimal focused libraries, clean packaging, tested and documented code
-
-See [ENGINEERING.md](ENGINEERING.md) for the concrete checklist and local dev workflow.
-
-## v1.1 refoundation status
-
-**Done (local, unpushed):** dev workspace isolation, safe config parser, 17 unit tests, GitHub Actions CI, Ruff/pre-commit, cookie-cutter subpackage restructure, importable API. See [SESSION_HANDOFF.md](SESSION_HANDOFF.md).
-
-**Remaining before v1.1 release:**
-
-- End-to-end integration and regression tests
-- Extract Ray parallel workers from `tuning/runner.py`
-- Push to remote and tag v1.1.0 after testing
+See [ENGINEERING.md](ENGINEERING.md) and [SESSION_HANDOFF.md](SESSION_HANDOFF.md).

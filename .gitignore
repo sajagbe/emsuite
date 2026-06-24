@@ -39,7 +39,9 @@ results_*/
 dev/*
 !dev/README.md
 
-# Stray root-level run files — use dev/ instead
+# APBS run artifact (created when testing potential channel)
+io.mc
+
 /*.in
 /*.xyz
 /*.surf

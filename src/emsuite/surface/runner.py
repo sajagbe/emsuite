@@ -3,6 +3,7 @@
 from pathlib import Path
 
 from emsuite.config import parse_assignments, parse_config_file
+from emsuite.config.schemas import validate_surface_params
 
 from .generate import generate_surface
 
@@ -39,16 +40,10 @@ def parse_surface_input(input_file):
     params = parse_config_file(input_file, defaults=defaults)
     parsed = parse_assignments(Path(input_file).read_text())
 
-    # Validation
-    if params["input_type"] is None:
-        raise ValueError("Missing required parameter: input_type")
-    if params["input_data"] is None:
-        raise ValueError("Missing required parameter: input_data")
-
     if params["surface_type"].lower() == "homogenous" and "surface_charge" not in parsed:
         print("Warning: surface_charge not specified for homogenous surface, using default 0.10")
 
-    return params
+    return validate_surface_params(params)
 
 
 def run_surface_calculation(input_file):

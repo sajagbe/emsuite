@@ -9,6 +9,8 @@ import pytest
 from emsuite.surface import run_surface_calculation
 from emsuite.tuning import main as run_tuning
 
+from .helpers import record_assertions
+
 SURFACE_IN = """\
 input_type = 'SMILES'
 input_data = 'C'
@@ -74,3 +76,11 @@ def test_methane_surface_to_tuning_smoke(tmp_path: Path, monkeypatch: pytest.Mon
     for chk in ("molecule_alone.chk", "anion_alone.chk", "cation_alone.chk"):
         assert not (tmp_path / chk).exists()
         assert not (results_dir / chk).exists()
+
+    record_assertions(
+        tmp_path,
+        surf_points=surf_point_count,
+        csv_rows=len(csv_lines) - 1,
+        properties=["homo", "lumo", "gap"],
+        results_dir=str(results_dir),
+    )

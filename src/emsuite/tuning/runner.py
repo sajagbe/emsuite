@@ -27,7 +27,15 @@ from .output import (
     create_output_files,
     organize_results,
 )
-from .properties import calculate_all_properties, setup_calculation
+from .parallel import calculate_point_effect_cpu_remote, calculate_point_effect_gpu
+from .properties import calculate_all_properties, interaction_effect_kcal, setup_calculation
+from .properties.interaction import water_probe_coords_and_charges
+from .properties.ts import ts_barrier_kcal
+from .surface_maps import (
+    precompute_surface_maps,
+    split_property_lists,
+    surface_map_effects_for_point,
+)
 from .resume import (
     create_resume_metadata,
     find_incomplete_logs,
@@ -38,6 +46,18 @@ from .resume import (
 )
 
 os.environ["HDF5_USE_FILE_LOCKING"] = "FALSE"
+
+
+def _merge_surface_map_effects(
+    effects: dict | None,
+    point_index: int,
+    map_properties: list[str],
+    surface_map_data: dict,
+) -> dict | None:
+    if effects is None or not map_properties:
+        return effects
+    effects.update(surface_map_effects_for_point(map_properties, point_index, surface_map_data))
+    return effects
 
 
 def calculate_surface_effect_at_point(
@@ -100,9 +120,13 @@ def calculate_surface_effect_at_point(
                 force_single_gpu=force_single_gpu,
             )
 
-        # Create single-point charge array
+        # Create single-point charge array (optionally include explicit water probe)
         single_coord = np.array([coord])
         q_mm = np.array([surface_charge])
+        if "h2o" in properties_to_calculate:
+            w_coords, w_charges = water_probe_coords_and_charges(np.asarray(coord))
+            single_coord = np.vstack([single_coord, w_coords])
+            q_mm = np.concatenate([q_mm, w_charges])
 
         # Create QM/MM objects for this point
         molecule_wsc, anion_wsc, cation_wsc, td_wsc = create_wsc_objects(
@@ -148,6 +172,8 @@ def calculate_surface_effect_at_point(
             td_obj=td_alone,
             triplet=triplet,
             props_to_calc=properties_to_calculate,
+            probe_coord=np.asarray(coord),
+            probe_charge=float(surface_charge),
         )
         wsc_results = calculate_all_properties(
             molecule_wsc,
@@ -156,7 +182,16 @@ def calculate_surface_effect_at_point(
             td_obj=td_wsc,
             triplet=triplet,
             props_to_calc=properties_to_calculate,
+            probe_coord=np.asarray(coord),
+            probe_charge=float(surface_charge),
         )
+
+        if "eint" in properties_to_calculate:
+            results["eint"] = 0.0
+            wsc_results["eint"] = interaction_effect_kcal(molecule_alone, molecule_wsc)
+        if "h2o" in properties_to_calculate:
+            results["h2o"] = 0.0
+            wsc_results["h2o"] = interaction_effect_kcal(molecule_alone, molecule_wsc)
 
         # Calculate differences
         effects = {}
@@ -172,153 +207,6 @@ def calculate_surface_effect_at_point(
             original_file = base_chkfiles[key]
             if os.path.exists(backup_file):
                 shutil.move(backup_file, original_file)  # Restore original
-
-
-def calculate_point_effect_cpu(
-    base_chkfiles,
-    coord,
-    surface_charge,
-    solvent,
-    state_of_interest,
-    triplet,
-    properties_to_calculate,
-    required_calculations,
-    functional,
-    point_index,
-):
-    sched_getaffinity = getattr(os, "sched_getaffinity", None)
-    if sched_getaffinity is not None:
-        cpu_id = sched_getaffinity(0)
-        print(f"[Point {point_index}] Running on CPU cores: {cpu_id}, PID: {os.getpid()}")
-    else:
-        print(f"[Point {point_index}] Running on PID: {os.getpid()}")
-
-    worker_dir = f"point_{point_index}"
-    os.makedirs(worker_dir, exist_ok=True)
-
-    worker_chkfiles = {}
-    for key, chkfile in base_chkfiles.items():
-        if chkfile:
-            worker_chkfile = os.path.join(worker_dir, os.path.basename(chkfile))
-            shutil.copy2(chkfile, worker_chkfile)
-            worker_chkfiles[key] = worker_chkfile
-        else:
-            worker_chkfiles[key] = None
-
-    original_dir = os.getcwd()
-    os.chdir(worker_dir)
-
-    try:
-        effects = calculate_surface_effect_at_point(
-            {k: os.path.basename(v) if v else None for k, v in worker_chkfiles.items()},
-            coord,
-            surface_charge,
-            solvent,
-            state_of_interest,
-            triplet,
-            properties_to_calculate,
-            required_calculations,
-            functional,
-        )
-        os.chdir(original_dir)
-        return {
-            "point_index": point_index,
-            "coord": coord,
-            "charge": surface_charge,
-            "effects": effects,
-            "success": True,
-            "error_msg": None,
-        }
-
-    except Exception as e:
-        error_msg = f"Error at point {point_index}: {e}"
-        print(error_msg)
-        os.chdir(original_dir)
-        return {
-            "point_index": point_index,
-            "coord": coord,
-            "charge": surface_charge,
-            "effects": None,
-            "success": False,
-            "error_msg": error_msg,
-        }
-
-    finally:
-        if os.path.exists(worker_dir):
-            shutil.rmtree(worker_dir, ignore_errors=True)
-
-
-@ray.remote(num_cpus=1, num_gpus=1, max_retries=0, memory=4 * 1024 * 1024 * 1024)
-def calculate_point_effect_gpu(
-    base_chkfiles,
-    coord,
-    surface_charge,
-    solvent,
-    state_of_interest,
-    triplet,
-    properties_to_calculate,
-    required_calculations,
-    point_index,
-):
-    gpu_id = ray.get_gpu_ids()[0]
-    os.environ["CUDA_VISIBLE_DEVICES"] = str(gpu_id)
-
-    print(f"Point {point_index}: Using GPU {gpu_id}, PID {os.getpid()}")
-
-    worker_dir = f"point_{point_index}"
-    os.makedirs(worker_dir, exist_ok=True)
-
-    worker_chkfiles = {}
-    for key, chkfile in base_chkfiles.items():
-        if chkfile:
-            worker_chkfile = os.path.join(worker_dir, os.path.basename(chkfile))
-            shutil.copy2(chkfile, worker_chkfile)
-            worker_chkfiles[key] = worker_chkfile
-        else:
-            worker_chkfiles[key] = None
-
-    original_dir = os.getcwd()
-    os.chdir(worker_dir)
-
-    try:
-        effects = calculate_surface_effect_at_point(
-            {k: os.path.basename(v) if v else None for k, v in worker_chkfiles.items()},
-            coord,
-            surface_charge,
-            solvent,
-            state_of_interest,
-            triplet,
-            properties_to_calculate,
-            required_calculations,
-            force_single_gpu=True,
-        )
-
-        os.chdir(original_dir)
-        return {
-            "point_index": point_index,
-            "coord": coord,
-            "charge": surface_charge,
-            "effects": effects,
-            "success": True,
-            "error_msg": None,
-        }
-
-    except Exception as e:
-        error_msg = f"Error at point {point_index}: {e}"
-        print(error_msg)
-        os.chdir(original_dir)
-        return {
-            "point_index": point_index,
-            "coord": coord,
-            "charge": surface_charge,
-            "effects": None,
-            "success": False,
-            "error_msg": error_msg,
-        }
-
-    finally:
-        if os.path.exists(worker_dir):
-            shutil.rmtree(worker_dir, ignore_errors=True)
 
 
 ##########################################################
@@ -714,7 +602,10 @@ def main(tuning_file="tuning.in"):
 
     # Resolve property dependencies and required calculations
     properties_to_calculate, required_calculations = setup_calculation(properties)
+    qm_properties, map_properties = split_property_lists(properties_to_calculate)
     print(f"Calculating Tuning of:  {properties_to_calculate}")
+    if map_properties:
+        print(f"Surface-map properties: {map_properties}")
     print(f"Using molecular states: {required_calculations}")
 
     # Prepare input data
@@ -883,6 +774,23 @@ def main(tuning_file="tuning.in"):
         props_to_calc=properties_to_calculate,
     )
 
+    ts_xyz = tuning_params.get("ts_xyz")
+    if "ts_barrier" in properties_to_calculate and ts_xyz:
+        raw_properties["ts_barrier"] = ts_barrier_kcal(
+            ts_xyz, molecule_alone, basis_set, method, functional
+        )
+
+    surface_map_data = {}
+    if map_properties:
+        surface_map_data = precompute_surface_maps(
+            molecule_alone,
+            anion_alone,
+            cation_alone,
+            surface_coords,
+            map_properties,
+            projection=tuning_params.get("fukui_projection", "nearest"),
+        )
+
     print("\n")
     print("=" * 60)
     print("                Raw Properties (No Surface)")
@@ -1042,7 +950,7 @@ def main(tuning_file="tuning.in"):
                     logging_level=logging.ERROR,
                     # log_to_driver=False
                 )
-                calculate_point_effect = calculate_point_effect_cpu
+                calculate_point_effect = calculate_point_effect_cpu_remote
             else:
                 ray.init(
                     num_gpus=parallel_processes,
@@ -1084,7 +992,9 @@ def main(tuning_file="tuning.in"):
                 # Get results and log them IMMEDIATELY after each completes
                 for result in ray.get(futures):
                     point_index = result["point_index"]
-                    all_effects[point_index] = result["effects"]
+                    all_effects[point_index] = _merge_surface_map_effects(
+                        result["effects"], point_index, map_properties, surface_map_data
+                    )
 
                     # Log individual point file
                     log_point_result(
@@ -1140,7 +1050,10 @@ def main(tuning_file="tuning.in"):
                         force_single_gpu=True,
                     )
 
-                    all_effects[point_idx] = effects  # Use point_idx
+                    all_effects[point_idx] = _merge_surface_map_effects(
+                        effects, point_idx, map_properties, surface_map_data
+                    )
+                    effects = all_effects[point_idx]
 
                     # Log individual file
                     log_point_result(

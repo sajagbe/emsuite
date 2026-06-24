@@ -70,6 +70,18 @@ Property Codes
      - Oscillator strengths
      - dimensionless
      - TD calculation
+   * - ``'spin'``
+     - Spin magnitude (√⟨S²⟩ or molecular spin)
+     - dimensionless
+     - —
+   * - ``'fukui_plus'``
+     - Nucleophilic Fukui index (from electron affinity)
+     - eV
+     - ea, anion calculation
+   * - ``'fukui_minus'``
+     - Electrophilic Fukui index (from ionization energy)
+     - eV
+     - ie, cation calculation
 
 Using Properties
 ----------------
@@ -100,6 +112,8 @@ Some properties require additional calculations:
 - ``hard`` requires ``ie`` and ``ea``
 - ``efl`` requires ``cp`` and ``hard``
 - ``nfl`` requires ``efl``
+- ``fukui_plus`` requires ``ea`` (anion calculation)
+- ``fukui_minus`` requires ``ie`` (cation calculation)
 
 **Ion calculations** (run separate SCF for cation/anion):
 

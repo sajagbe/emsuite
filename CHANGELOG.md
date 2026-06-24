@@ -4,27 +4,57 @@ All notable changes to this project are documented in this file.
 
 ## [Unreleased]
 
+_No changes yet._
+
+## [1.2.0] - 2026-06-24
+
 ### Added
+- Advanced tuning properties: spatial Fukui (`fukui_spa_*`), `freq`, Stark (`stark_*`), `eint`, `h2o`, `pa`, fugacity extensions, `ts_barrier`.
+- Bond-axis electrostatic scan in potential channel (`bond_scan_atoms` in `potential.in`).
+- `TBLiteEngine` / MLIP optional extra (`uv sync --extra mlip`) for GFN-xTB screening.
+- Property modules: `fukui_spatial`, `vibrational`, `stark`, `interaction`, `thermo_ext`, `ts`.
+- `tuning/surface_maps.py` for surface-projected property maps.
+- Traceable integration audit: `scripts/run_slow_integration_audit.py`, `tests/integration/conftest.py`, 14 slow integration tests.
+- Unit tests for v1.2 property registry, Fukui projection, and bond scan.
+- Session records: `docs/SESSION_CHANGELOG_V1.2.md`, `docs/session_records/2026-06-24T070253Z_*`.
+
+### Changed
+- Version 1.2.0 (still v1.x semver — not marketed as v2.0).
+- `MLIPEngine` delegates to TBLite when the optional dependency is installed.
+
+### Fixed
+- `mulliken_charges()` in Fukui spatial module now uses atomic charges (`pop[1]`), not AO populations.
+
+## [1.1.0] - 2026-06-24
+
+### Added
+- **Potential channel** (`emsuite -p`) — Coulomb/Gasteiger ESP maps with optional APBS fallback.
+- **Coupled channel** (`emsuite -c`) — potential-derived heterogeneous surfaces feed tuning.
 - Shared safe config parser (`emsuite.config`) replacing `exec()` for surface inputs.
-- Unit test suite (`tests/unit/`) with 17 tests covering config, properties, surf I/O, normalization.
+- Config schemas (`emsuite.config.schemas`) and `load_config` alias.
+- Unit, integration, and regression test suites (32 tests total).
 - GitHub Actions CI with Python 3.11/3.12 matrix and `uv` workflow.
-- `docs/ROADMAP.md` documenting three-channel architecture and property backlog.
-- `docs/ENGINEERING.md` aligned with [uv-cookiecutter](https://github.com/jevandezande/uv-cookiecutter) and [Rowan's open-source guide](https://rowansci.com/blog/how-to-make-a-great-open-source-scientific-project).
+- `docs/ROADMAP.md`, `docs/ENGINEERING.md`, `docs/SESSION_HANDOFF.md`.
 - Ruff lint/format, pre-commit hooks, `.python-version`, and `py.typed` marker.
+- Property modules: `ground_state`, `excited_state`, `thermo`; new properties `spin`, `fukui_plus`, `fukui_minus`.
+- Ray workers extracted to `tuning/parallel.py` (CPU `@ray.remote` fix).
+- `PySCFEngine` / `MLIPEngine` engine wrappers and `get_engine()`.
+- Example templates: `surface.in`, `tuning.in`, `potential.in`, `coupled.in`.
+- `[project.optional-dependencies] docs` extra.
 
 ### Changed
 - Cookie-cutter package restructure: `config/`, `cli/`, `core/`, `surface/`, `tuning/`, `engines/`, `potential/`, `coupled/` subpackages.
-- Importable API: `import emsuite; emsuite.run_tuning(...)`, `emsuite.run_surface_calculation(...)`.
+- Public API: `generate_surface`, `run_potential_calculation`, `run_coupled_calculation`, `run_tuning`, `load_config`.
+- CLI router adds `-p` / `-c` flags alongside `-s` / `-t`.
 - Input templates moved to `examples/templates/`; README GIF moved to `docs/_static/`.
-- Root `tuning.in`, `molecules/`, and per-folder gitignore entries removed from the repo. and `opt/`.
-- Trimmed CCO example point logs to three representative samples on disk.
-- Updated `.gitignore` for a cleaner professional layout.
-- Synced `docs/tuning/reference/inputs.rst` to current two-stage API.
-- Marked potential/combined Sphinx pages as not yet implemented.
+- Trimmed CCO example point logs to representative samples on disk.
+- Synced Sphinx tuning/potential/coupled pages to shipped API.
+- CI runs unit + regression on every push; integration `@pytest.mark.slow` on all pushes.
 
 ### Removed
 - `requests` dependency and Office quote Easter egg.
-- Unsafe `exec()` parsing in `surface.parse_surface_input()`.
+- Unsafe `exec()` parsing in surface input files.
+- Root dev clutter (`opt/`, stray `*.in` / `*.xyz` patterns gitignored).
 
 ## [1.0.5] - 2026-03-25
 
@@ -42,7 +72,4 @@ All notable changes to this project are documented in this file.
 - Clarified calc_type behavior (separate vs combined) and parallel processing controls.
 
 ### Documentation
-- Synced README command and input schema details to current runtime behavior in:
-  - src/emsuite/cli.py
-  - src/emsuite/surface.py
-  - src/emsuite/tuning.py
+- Synced README command and input schema details to current runtime behavior.

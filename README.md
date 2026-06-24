@@ -11,13 +11,13 @@ A comprehensive Python package for calculating electrostatic tuning effects on m
 
 ## Overview
 
-EMSuite is aimed at qualifying and quantifying the influence of external electrostatic fields on electronic structure and corresponding chemistry. The current implementation includes the `tuning` module, inspired by the concluding sentence of Electrostatic Spectral Tuning Maps for Biological Chromophores's ([Gozem et al., 2019](https://pubs.acs.org/doi/10.1021/acs.jpcb.9b00489)) abstract. This module extends the central approach of ESTMs to 13 new chemical properties enabling systematic exploration of supramolecular electronic influence. This approach enables the prediction and visualization of electrostatic tuning effects, which are crucial for understanding molecular behavior in different environments.
+EMSuite is aimed at qualifying and quantifying the influence of external electrostatic fields on electronic structure and corresponding chemistry. The suite provides four channels: **surface** generation, **tuning** maps for molecular properties, **potential** maps on surfaces, and a **coupled** potential→tuning pipeline. The tuning module extends the electrostatic spectral tuning approach ([Gozem et al., 2019](https://pubs.acs.org/doi/10.1021/acs.jpcb.9b00489)) to 29 molecular properties.
 
 ## Features
 
-- **Two-Stage Workflow**: Generate a VDW surface first, then run electrostatic tuning calculations
+- **Four-Channel Workflow**: Surface → tuning; or potential → coupled → tuning
 - **Multiple Input Formats**: Support for SMILES strings (with automatic optimization) and XYZ coordinate files
-- **Comprehensive Property Calculations**: Ground state energies, orbital energies, dipole moments, ionization potentials, electron affinities, and excited state properties
+- **Comprehensive Property Calculations**: Ground state, orbital, thermodynamic, reactivity, and excited-state properties
 - **GPU Acceleration**: Full GPU support via GPU4PySCF for enhanced computational speed (CPU fallback immediately available).
 - **Implicit Solvation**: Built-in support for solvent effects using the PCM model.
 - **Visualization Output**: Raw and normalized MOL2 files for 3D visualization, plus CSV summaries.
@@ -39,15 +39,32 @@ EMSuite automatically detects available hardware and uses GPU acceleration when 
 
 ## Command-Line Interface
 
-EMSuite exposes two mutually exclusive workflows:
+EMSuite exposes four mutually exclusive workflows:
 
 ```bash
-emsuite -s surface.in
-emsuite -t tuning.in
+emsuite -s surface.in      # VDW surface generation
+emsuite -t tuning.in       # Electrostatic tuning maps
+emsuite -p potential.in    # Electrostatic potential on surface
+emsuite -c coupled.in      # Potential → tuning pipeline
 ```
 
 - `-s, --surface INPUT_FILE`: Generate a `.surf` file from SMILES or XYZ input.
-- `-t, --tuning INPUT_FILE`: Run electrostatic tuning using an existing XYZ structure and `.surf` file.
+- `-t, --tuning INPUT_FILE`: Run electrostatic tuning using an XYZ structure and `.surf` file.
+- `-p, --potential INPUT_FILE`: Map electrostatic potential onto a VDW surface (Coulomb default; APBS optional).
+- `-c, --coupled INPUT_FILE`: Run potential mapping, then tuning with the heterogeneous surface.
+
+## Importable API
+
+```python
+import emsuite
+
+emsuite.run_surface_calculation("surface.in")
+emsuite.run_tuning("tuning.in")
+emsuite.run_potential_calculation("potential.in")
+emsuite.run_coupled_calculation("coupled.in")
+```
+
+Templates live in `examples/templates/`.
 
 ## Quick Start
 
@@ -116,8 +133,24 @@ The following molecular properties can be calculated:
 | `'hard'` | Chemical hardness | eV |
 | `'efl'` | Electrophilicity | eV |
 | `'nfl'` | Nucleophilicity | eV |
+| `'spin'` | Spin magnitude | dimensionless |
+| `'fukui_plus'` | Nucleophilic Fukui index | eV |
+| `'fukui_minus'` | Electrophilic Fukui index | eV |
 | `'exe'` | Excitation energies | eV |
 | `'osc'` | Oscillator strengths | dimensionless |
+| `'fukui_spa_plus'` | Spatial nucleophilic Fukui (surface map) | dimensionless |
+| `'fukui_spa_minus'` | Spatial electrophilic Fukui (surface map) | dimensionless |
+| `'freq'` | Lowest fundamental vibrational frequency | cm⁻¹ |
+| `'stark_homo'` | HOMO under probe field | eV |
+| `'stark_lumo'` | LUMO under probe field | eV |
+| `'stark_gap'` | Stark HOMO–LUMO gap | eV |
+| `'eint'` | Interaction energy (probe complex) | kcal/mol |
+| `'h2o'` | Water probe interaction energy | kcal/mol |
+| `'pa'` | Proton affinity | kcal/mol |
+| `'efl_fug'` | Electrophilicity fugacity extension | dimensionless |
+| `'nfl_fug'` | Nucleophilicity fugacity extension | dimensionless |
+| `'eng_fug'` | Electronegativity fugacity extension | dimensionless |
+| `'ts_barrier'` | Transition-state barrier (global scalar) | kcal/mol |
 
 Use `'all'` to calculate all available properties.
 
@@ -168,6 +201,30 @@ Optional keys and defaults:
 - `triplet = False`
 - `parallel = True`
 - `num_procs = None` (auto-detect CPU/GPU worker count)
+- `ts_xyz = None` (transition-state XYZ for `ts_barrier`)
+- `fukui_projection = 'nearest'` (`'nearest'` or `'inverse_distance'` for spatial Fukui maps)
+
+### potential.in (`emsuite -p potential.in`)
+
+Required keys:
+- `molecule`: Path to XYZ file
+
+Optional keys and defaults:
+- `surface_file = None` (generate VDW surface if missing)
+- `output_surf = 'potential.surf'`
+- `surface_density = 0.5`
+- `surface_scale = 1.0`
+- `method = 'coulomb'` (`'coulomb'` or `'apbs'`)
+- `pdie = 2.0`
+- `sdie = 78.54`
+- `bond_scan_atoms = None` (e.g. `[0, 1]` for bond-axis ESP scan)
+- `bond_scan_steps = 10`
+- `bond_scan_span = 3.0` (Å along bond axis)
+
+### coupled.in (`emsuite -c coupled.in`)
+
+Combines potential and tuning parameters. Required: `molecule`, `properties`.
+See `examples/templates/coupled.in` for a minimal example.
 
 ### Methods and Basis Sets
 - **Methods**: `'dft'`, `'hf'`

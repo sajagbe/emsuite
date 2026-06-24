@@ -1,0 +1,17 @@
+{
+  "run_id": "2026-06-24T070253Z",
+  "started_utc": "2026-06-24T07:02:53.737487+00:00",
+  "emsuite_version": "1.2.0",
+  "git": {
+    "commit": "4eaf65d65f78298f3006effe87862c1f0d75fe9b",
+    "branch": "main",
+    "describe": "4eaf65d-dirty"
+  },
+  "pytest_command": [
+    "python -m pytest tests/integration -v -m slow"
+  ],
+  "finished_utc": "2026-06-24T07:14:09.820547+00:00",
+  "exit_code": 0,
+  "result": "13 passed, 1 skipped (mlip optional extra not installed)",
+  "full_artifacts_path": "tests/integration_runs/LATEST/"
+}

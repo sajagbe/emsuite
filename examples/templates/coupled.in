@@ -1,0 +1,17 @@
+# Run with: emsuite -c coupled.in
+
+molecule = 'molecule.xyz'
+output_surf = 'coupled.surf'
+surface_density = 0.5
+surface_scale = 1.0
+potential_method = 'coulomb'
+
+properties = ['homo', 'lumo', 'gap']
+basis_set = 'sto-3g'
+method = 'dft'
+functional = 'b3lyp'
+charge = 0
+spin = 0
+solvent = None
+calc_type = 'separate'
+parallel = False

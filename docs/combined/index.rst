@@ -1,24 +1,17 @@
-.. emsuite documentation master file, created by
-   sphinx-quickstart on Wed Jan 14 18:18:27 2026.
-   You can adapt this file completely to your liking, but it should at least
-   contain the root `toctree` directive.
-
-
-
 Combined
 ========
 
-.. note::
+The **coupled** channel runs electrostatic potential mapping, then feeds the
+resulting heterogeneous ``.surf`` file into tuning.
 
-   **Not yet implemented.** The coupled channel will use potential-derived surface
-   charges as input to tuning. See :doc:`../ROADMAP`. This is distinct from
-   ``calc_type='combined'`` inside tuning.
+CLI
+---
 
-.. toctree::
-   :maxdepth: 1
-   :hidden:
+.. code-block:: bash
 
-   tutorials/index
-   how-to/index
-   reference/index
-   explanation/index
+   emsuite -c coupled.in
+
+This is **not** the same as ``calc_type='combined'`` inside ``tuning.in``,
+which applies all homogeneous probe charges at once.
+
+See :doc:`../ROADMAP` and ``examples/templates/coupled.in``.
