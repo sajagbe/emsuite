@@ -33,3 +33,6 @@ jobs:
 
       - name: Unit tests
         run: uv run pytest tests/unit -v --cov=emsuite --cov-report=term-missing
+
+      - name: Integration smoke test
+        run: uv run pytest tests/integration -v -m slow

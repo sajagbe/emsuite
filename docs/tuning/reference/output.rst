@@ -41,14 +41,14 @@ CSV Summary
 ^^^^^^^^^^^
 
 ``{molecule}_tuning_summary.csv``
-   Complete data table with coordinates, effects, normalized values, 
+   Complete data table with coordinates, effects, normalized values,
    and baselines for all properties.
 
 README
 ^^^^^^
 
 ``README.txt``
-   Calculation metadata including molecule name, timestamp, 
+   Calculation metadata including molecule name, timestamp,
    properties calculated, and file descriptions.
 
 Logs Directory
@@ -58,7 +58,7 @@ The ``logs/`` folder contains:
 
 ``.resume_metadata.json``
    State information for resuming interrupted calculations.
-   If a calculation is interrupted, emsuite can continue from 
+   If a calculation is interrupted, emsuite can continue from
    the last completed point.
 
 ``point_*.log``
@@ -74,7 +74,7 @@ If a calculation is interrupted, simply run the same command again:
 
    emsuite -t tuning.in
 
-emsuite detects the ``.resume_metadata.json`` file and continues 
+emsuite detects the ``.resume_metadata.json`` file and continues
 from where it left off.
 
 Example Output

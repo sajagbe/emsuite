@@ -1,7 +1,7 @@
 Your First Electrostatic Tuning Map
 ===================================
 
-In this tutorial, you will calculate the effects of placing a +1\ *e* probe charge across 
+In this tutorial, you will calculate the effects of placing a +1\ *e* probe charge across
 the VdW surface of water on the HOMO energy (in eV),  — and see the results in under 5 minutes.
 
 Preface: Creating a Molecule File
@@ -17,8 +17,8 @@ Create a file called ``water.xyz`` with these contents:
    H  0.000000  0.755453 -0.468706
    H  0.000000 -0.755453 -0.468706
 
-This is a water molecule in XYZ format. The first line is the atom count, 
-the second line is blank (or a comment), and the remaining lines are atom 
+This is a water molecule in XYZ format. The first line is the atom count,
+the second line is blank (or a comment), and the remaining lines are atom
 coordinates in Ångströms.
 
 
@@ -52,7 +52,7 @@ That's it. This tells emsuite to:
 
 .. tip::
 
-   You can also bypass this and use SMILES notation in the input file instead of XYZ files. 
+   You can also bypass this and use SMILES notation in the input file instead of XYZ files.
    For water, that would be ``input_type = 'SMILES'`` and ``input_data = 'O``.
 
 Running the Calculation
@@ -93,7 +93,7 @@ Look in the results folder. You'll find:
 
 ``water_tuning_summary.csv``
    A spreadsheet with all the data. Each row contains:
-   
+
    - X, Y, Z coordinates of a surface point
    - The change in HOMO energy (in eV) when a +1 charge is placed at that point
 
@@ -119,7 +119,7 @@ Run these commands in PyMOL's command line:
 This creates a smooth gradient:
 
 - **Red**: Negative values (property decreases)
-- **White**: Near zero (no change)  
+- **White**: Near zero (no change)
 - **Blue**: Positive values (property increases)
 
 **For non-normalized files:**
@@ -140,17 +140,17 @@ Adjust the threshold values (0.25) based on your data range.
 
 .. tip::
 
-   Check your actual data range in the CSV file to set appropriate 
+   Check your actual data range in the CSV file to set appropriate
    thresholds for non-normalized visualization.
 
 What Just Happened?
 -------------------
 
-emsuite placed a +1 point charge at ~47 positions on a surface around 
-the water molecule. At each position, it ran a quantum chemistry 
+emsuite placed a +1 point charge at ~47 positions on a surface around
+the water molecule. At each position, it ran a quantum chemistry
 calculation to measure how the HOMO energy changed.
 
-The result is an **electrostatic tuning map** — showing which regions 
+The result is an **electrostatic tuning map** — showing which regions
 around a molecule are sensitive to external charges and the relative effects of these regions.
 
 Next Steps

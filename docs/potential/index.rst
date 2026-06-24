@@ -23,4 +23,3 @@ The **potential** module will generate electrostatic potential maps on molecular
    how-to/index
    reference/index
    explanation/index
-

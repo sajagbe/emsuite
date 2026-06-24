@@ -22,4 +22,3 @@ Combined
    how-to/index
    reference/index
    explanation/index
-

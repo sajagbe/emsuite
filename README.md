@@ -75,7 +75,7 @@ emsuite -s surface.in
 2. **Create and run tuning input** (`tuning.in`):
 
 ```python
-molecule = 'CCO_opt.xyz' 
+molecule = 'CCO_opt.xyz'
 surface_file = 'CCO.surf'
 
 charge = 0

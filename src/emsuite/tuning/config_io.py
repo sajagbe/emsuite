@@ -18,5 +18,3 @@ def get_tuning_parameters(filepath="tuning.in"):
     except OSError as e:
         print(f"Error parsing tuning.in file: {e}")
         return {}
-
-

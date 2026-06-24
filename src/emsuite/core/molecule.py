@@ -301,5 +301,3 @@ def find_homo_lumo_and_gap(mf):
         if occ == 0 and energy < lumo:
             lumo = energy
     return homo, lumo, lumo - homo
-
-

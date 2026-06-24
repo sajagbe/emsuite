@@ -285,5 +285,3 @@ def prompt_user_resume(logs_dir, metadata):
     response = input("\nDo you want to resume this calculation? [y/n]: ").strip().lower()
 
     return response in ["", "y", "yes"]
-
-

@@ -10,7 +10,7 @@ Specification of input and output file formats.
 ETM File (Surface Definition)
 -----------------------------
 
-The ``.etm`` (Electrostatic Tuning Map) file defines probe positions 
+The ``.etm`` (Electrostatic Tuning Map) file defines probe positions
 around the molecule.
 
 Homogeneous Format
@@ -20,9 +20,9 @@ For uniform charge at all points (3 columns):
 
 .. code-block:: text
 
-   x          y          z         
-   0.969663   1.451681   -0.346153 
-   0.004572   -0.011758  1.637124  
+   x          y          z
+   0.969663   1.451681   -0.346153
+   0.004572   -0.011758  1.637124
    -0.393951  0.847387   1.315983
 
 - **Line 1**: Column headers (required)
@@ -47,8 +47,8 @@ For different charges at each point (4 columns):
 Auto-Generation
 ^^^^^^^^^^^^^^^
 
-If the ETM file doesn't exist and ``surface_type = 'homogenous'``, 
-emsuite auto-generates it from the molecule's VDW surface using 
+If the ETM file doesn't exist and ``surface_type = 'homogenous'``,
+emsuite auto-generates it from the molecule's VDW surface using
 the ``scale`` and ``density`` parameters.
 
 MOL2 File (Visualization)
@@ -111,7 +111,7 @@ Visualization in PyMOL
 CSV File (Data Summary)
 -----------------------
 
-``{molecule}_tuning_summary.csv`` contains all calculated data in 
+``{molecule}_tuning_summary.csv`` contains all calculated data in
 tabular format.
 
 Structure

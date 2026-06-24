@@ -181,6 +181,5 @@ Organizing results into: results_CCO_opt2_2026-03-25_01-49-17/
 Fetching inspirational quote...
 
 
-  Well, happy birthday, Jesus. Sorry that your party’s so lame. 
+  Well, happy birthday, Jesus. Sorry that your party’s so lame.
                      - Michael Scott
-

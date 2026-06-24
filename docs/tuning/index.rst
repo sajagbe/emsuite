@@ -6,7 +6,7 @@
 Tuning
 ======
 
-The **tuning** module calculates the effects of varying positions of external point charges on 
+The **tuning** module calculates the effects of varying positions of external point charges on
 molecular properties — generating electrostatic tuning maps for visualization.
 
 .. grid:: 2
@@ -44,4 +44,3 @@ molecular properties — generating electrostatic tuning maps for visualization.
    how-to/index
    reference/index
    explanation/index
-

@@ -19,7 +19,7 @@ Property Codes
      - kcal/mol
      - —
    * - ``'homo'``
-     - HOMO energy 
+     - HOMO energy
      - eV
      - —
    * - ``'lumo'``
@@ -111,7 +111,7 @@ Some properties require additional calculations:
 - ``exe`` requires TD-DFT/TD-HF
 - ``osc`` requires TD-DFT/TD-HF
 
-Dependencies are resolved automatically. If you request ``gap``, 
+Dependencies are resolved automatically. If you request ``gap``,
 emsuite will calculate ``homo`` and ``lumo`` as well.
 
 Excited State Properties

@@ -39,6 +39,7 @@ from .resume import (
 
 os.environ["HDF5_USE_FILE_LOCKING"] = "FALSE"
 
+
 def calculate_surface_effect_at_point(
     base_chkfiles,
     coord,
@@ -171,6 +172,7 @@ def calculate_surface_effect_at_point(
             original_file = base_chkfiles[key]
             if os.path.exists(backup_file):
                 shutil.move(backup_file, original_file)  # Restore original
+
 
 def calculate_point_effect_cpu(
     base_chkfiles,

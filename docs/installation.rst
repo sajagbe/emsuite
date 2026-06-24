@@ -73,7 +73,7 @@ Installs everything from CPU, plus:
     Avoid changing gpu4pyscf, cupy, and cutensor versions as they are intentionally selected to maintain mutual compatibility.
 
 .. note::
-   emsuite automatically detects your hardware. 
+   emsuite automatically detects your hardware.
    If GPU libraries are installed but no compatible GPU is found, it falls back to CPU mode.
 
 Requirements
@@ -159,4 +159,3 @@ Use ``--user`` flag or a virtual environment:
 .. code-block:: bash
 
    pip install --user emsuite
-

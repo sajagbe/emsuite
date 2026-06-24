@@ -175,5 +175,3 @@ def calculate_all_properties(
                 results[f"{state_prefix}{i}_osc"] = osc
 
     return results
-
-

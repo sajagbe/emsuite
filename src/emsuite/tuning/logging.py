@@ -234,4 +234,3 @@ def log_point_result(logs_dir, point_index, coord, charge, effects, success=True
             f.write(f"{error_msg}\n\n")
 
         f.write("\n" + "=" * 70 + "\n")
-

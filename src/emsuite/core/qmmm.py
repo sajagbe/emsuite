@@ -69,5 +69,3 @@ def create_qmmm_molecule_object(mf, coord_mm, q_mm, chkfile=None):
         else:
             print("SOSCF converged.")
     return mf_new
-
-

@@ -50,12 +50,12 @@ Excited State energies (eV)
 Summary log initialized: logs_20260325_015003/calculation_summary.out
 Using 16 parallel processes on CPU
 [36m(calculate_point_effect_cpu pid=3436382)[0m [Point 5] Running on CPU cores: {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15}, PID: 3436382
-[36m(calculate_point_effect_cpu pid=3436382)[0m 
+[36m(calculate_point_effect_cpu pid=3436382)[0m
 [36m(calculate_point_effect_cpu pid=3436382)[0m === Resurrecting molecule_alone.chk ===
 [36m(calculate_point_effect_cpu pid=3436382)[0m Loaded XC functional: b3lyp
 [36m(calculate_point_effect_cpu pid=3436382)[0m Creating DFT object with xc=b3lyp
-[36m(calculate_point_effect_cpu pid=3436382)[0m 
-[36m(calculate_point_effect_cpu pid=3436382)[0m 
+[36m(calculate_point_effect_cpu pid=3436382)[0m
+[36m(calculate_point_effect_cpu pid=3436382)[0m
 [36m(calculate_point_effect_cpu pid=3436382)[0m ******** <class 'pyscf.dft.rks.RKS'> ********
 [36m(calculate_point_effect_cpu pid=3436382)[0m method = RKS
 [36m(calculate_point_effect_cpu pid=3436382)[0m initial guess = chkfile
@@ -78,51 +78,51 @@ Using 16 parallel processes on CPU
 [36m(calculate_point_effect_cpu pid=3436382)[0m     P. J. Stephens, F. J. Devlin, C. F. Chabalowski, and M. J. Frisch.,  J. Phys. Chem. 98, 11623 (1994)
 [36m(calculate_point_effect_cpu pid=3436382)[0m small_rho_cutoff = 1e-07
 [36m(calculate_point_effect_cpu pid=3436382)[0m Set gradient conv threshold to 3.16228e-05
-[36m(calculate_point_effect_cpu pid=3436384)[0m 
-[36m(calculate_point_effect_cpu pid=3436384)[0m 
-[36m(calculate_point_effect_cpu pid=3436384)[0m 
-[36m(calculate_point_effect_cpu pid=3436390)[0m 
-[36m(calculate_point_effect_cpu pid=3436390)[0m 
-[36m(calculate_point_effect_cpu pid=3436390)[0m 
-[36m(calculate_point_effect_cpu pid=3436389)[0m 
-[36m(calculate_point_effect_cpu pid=3436389)[0m 
-[36m(calculate_point_effect_cpu pid=3436389)[0m 
-[36m(calculate_point_effect_cpu pid=3436383)[0m 
-[36m(calculate_point_effect_cpu pid=3436383)[0m 
-[36m(calculate_point_effect_cpu pid=3436383)[0m 
-[36m(calculate_point_effect_cpu pid=3436388)[0m 
-[36m(calculate_point_effect_cpu pid=3436388)[0m 
-[36m(calculate_point_effect_cpu pid=3436388)[0m 
-[36m(calculate_point_effect_cpu pid=3436379)[0m 
-[36m(calculate_point_effect_cpu pid=3436379)[0m 
-[36m(calculate_point_effect_cpu pid=3436379)[0m 
-[36m(calculate_point_effect_cpu pid=3436376)[0m 
-[36m(calculate_point_effect_cpu pid=3436376)[0m 
-[36m(calculate_point_effect_cpu pid=3436376)[0m 
-[36m(calculate_point_effect_cpu pid=3436375)[0m 
-[36m(calculate_point_effect_cpu pid=3436375)[0m 
-[36m(calculate_point_effect_cpu pid=3436375)[0m 
-[36m(calculate_point_effect_cpu pid=3436381)[0m 
-[36m(calculate_point_effect_cpu pid=3436381)[0m 
-[36m(calculate_point_effect_cpu pid=3436381)[0m 
-[36m(calculate_point_effect_cpu pid=3436387)[0m 
-[36m(calculate_point_effect_cpu pid=3436387)[0m 
-[36m(calculate_point_effect_cpu pid=3436387)[0m 
-[36m(calculate_point_effect_cpu pid=3436380)[0m 
-[36m(calculate_point_effect_cpu pid=3436380)[0m 
-[36m(calculate_point_effect_cpu pid=3436380)[0m 
-[36m(calculate_point_effect_cpu pid=3436386)[0m 
-[36m(calculate_point_effect_cpu pid=3436386)[0m 
-[36m(calculate_point_effect_cpu pid=3436386)[0m 
-[36m(calculate_point_effect_cpu pid=3436378)[0m 
-[36m(calculate_point_effect_cpu pid=3436378)[0m 
-[36m(calculate_point_effect_cpu pid=3436378)[0m 
-[36m(calculate_point_effect_cpu pid=3436377)[0m 
-[36m(calculate_point_effect_cpu pid=3436377)[0m 
-[36m(calculate_point_effect_cpu pid=3436377)[0m 
-[36m(calculate_point_effect_cpu pid=3436385)[0m 
-[36m(calculate_point_effect_cpu pid=3436385)[0m 
-[36m(calculate_point_effect_cpu pid=3436385)[0m 
+[36m(calculate_point_effect_cpu pid=3436384)[0m
+[36m(calculate_point_effect_cpu pid=3436384)[0m
+[36m(calculate_point_effect_cpu pid=3436384)[0m
+[36m(calculate_point_effect_cpu pid=3436390)[0m
+[36m(calculate_point_effect_cpu pid=3436390)[0m
+[36m(calculate_point_effect_cpu pid=3436390)[0m
+[36m(calculate_point_effect_cpu pid=3436389)[0m
+[36m(calculate_point_effect_cpu pid=3436389)[0m
+[36m(calculate_point_effect_cpu pid=3436389)[0m
+[36m(calculate_point_effect_cpu pid=3436383)[0m
+[36m(calculate_point_effect_cpu pid=3436383)[0m
+[36m(calculate_point_effect_cpu pid=3436383)[0m
+[36m(calculate_point_effect_cpu pid=3436388)[0m
+[36m(calculate_point_effect_cpu pid=3436388)[0m
+[36m(calculate_point_effect_cpu pid=3436388)[0m
+[36m(calculate_point_effect_cpu pid=3436379)[0m
+[36m(calculate_point_effect_cpu pid=3436379)[0m
+[36m(calculate_point_effect_cpu pid=3436379)[0m
+[36m(calculate_point_effect_cpu pid=3436376)[0m
+[36m(calculate_point_effect_cpu pid=3436376)[0m
+[36m(calculate_point_effect_cpu pid=3436376)[0m
+[36m(calculate_point_effect_cpu pid=3436375)[0m
+[36m(calculate_point_effect_cpu pid=3436375)[0m
+[36m(calculate_point_effect_cpu pid=3436375)[0m
+[36m(calculate_point_effect_cpu pid=3436381)[0m
+[36m(calculate_point_effect_cpu pid=3436381)[0m
+[36m(calculate_point_effect_cpu pid=3436381)[0m
+[36m(calculate_point_effect_cpu pid=3436387)[0m
+[36m(calculate_point_effect_cpu pid=3436387)[0m
+[36m(calculate_point_effect_cpu pid=3436387)[0m
+[36m(calculate_point_effect_cpu pid=3436380)[0m
+[36m(calculate_point_effect_cpu pid=3436380)[0m
+[36m(calculate_point_effect_cpu pid=3436380)[0m
+[36m(calculate_point_effect_cpu pid=3436386)[0m
+[36m(calculate_point_effect_cpu pid=3436386)[0m
+[36m(calculate_point_effect_cpu pid=3436386)[0m
+[36m(calculate_point_effect_cpu pid=3436378)[0m
+[36m(calculate_point_effect_cpu pid=3436378)[0m
+[36m(calculate_point_effect_cpu pid=3436378)[0m
+[36m(calculate_point_effect_cpu pid=3436377)[0m
+[36m(calculate_point_effect_cpu pid=3436377)[0m
+[36m(calculate_point_effect_cpu pid=3436377)[0m
+[36m(calculate_point_effect_cpu pid=3436385)[0m
+[36m(calculate_point_effect_cpu pid=3436385)[0m
+[36m(calculate_point_effect_cpu pid=3436385)[0m
 [36m(calculate_point_effect_cpu pid=3436383)[0m init E= -155.028768605456
 [36m(calculate_point_effect_cpu pid=3436383)[0m   HOMO = -0.260574538961987  LUMO = 0.0672407765319121
 [36m(calculate_point_effect_cpu pid=3436383)[0m cycle= 1 E= -155.028768605452  delta_E= 3.92e-12  |g|= 6.17e-06  |ddm|= 8.04e-06
@@ -130,8 +130,8 @@ Using 16 parallel processes on CPU
 [36m(calculate_point_effect_cpu pid=3436381)[0m converged SCF energy = -155.028768605444
 [36m(calculate_point_effect_cpu pid=3436376)[0m Resurrected CPU DFT object: <class 'pyscf.dft.rks.RKS'>, Energy: -155.02876860544364
 [36m(calculate_point_effect_cpu pid=3436376)[0m Running TDDFT in current process (force_single_gpu=b3lyp)
-[36m(calculate_point_effect_cpu pid=3436376)[0m 
-[36m(calculate_point_effect_cpu pid=3436376)[0m 
+[36m(calculate_point_effect_cpu pid=3436376)[0m
+[36m(calculate_point_effect_cpu pid=3436376)[0m
 [36m(calculate_point_effect_cpu pid=3436376)[0m ******** <class 'pyscf.tdscf.rks.TDDFT'> for <class 'pyscf.dft.rks.RKS'> ********
 [36m(calculate_point_effect_cpu pid=3436376)[0m nstates = 1 singlet
 [36m(calculate_point_effect_cpu pid=3436376)[0m deg_eia_thresh = 1.000e-03
@@ -141,72 +141,72 @@ Using 16 parallel processes on CPU
 [36m(calculate_point_effect_cpu pid=3436376)[0m eigh level_shift = 0
 [36m(calculate_point_effect_cpu pid=3436376)[0m eigh max_cycle = 100
 [36m(calculate_point_effect_cpu pid=3436376)[0m chkfile = molecule_alone.chk
-[36m(calculate_point_effect_cpu pid=3436376)[0m 
-[36m(calculate_point_effect_cpu pid=3436376)[0m 
-[36m(calculate_point_effect_cpu pid=3436375)[0m 
-[36m(calculate_point_effect_cpu pid=3436375)[0m 
-[36m(calculate_point_effect_cpu pid=3436375)[0m 
-[36m(calculate_point_effect_cpu pid=3436375)[0m 
-[36m(calculate_point_effect_cpu pid=3436382)[0m 
-[36m(calculate_point_effect_cpu pid=3436382)[0m 
-[36m(calculate_point_effect_cpu pid=3436382)[0m 
-[36m(calculate_point_effect_cpu pid=3436382)[0m 
-[36m(calculate_point_effect_cpu pid=3436381)[0m 
-[36m(calculate_point_effect_cpu pid=3436381)[0m 
-[36m(calculate_point_effect_cpu pid=3436381)[0m 
-[36m(calculate_point_effect_cpu pid=3436381)[0m 
-[36m(calculate_point_effect_cpu pid=3436387)[0m 
-[36m(calculate_point_effect_cpu pid=3436387)[0m 
-[36m(calculate_point_effect_cpu pid=3436387)[0m 
-[36m(calculate_point_effect_cpu pid=3436387)[0m 
-[36m(calculate_point_effect_cpu pid=3436384)[0m 
-[36m(calculate_point_effect_cpu pid=3436384)[0m 
-[36m(calculate_point_effect_cpu pid=3436384)[0m 
-[36m(calculate_point_effect_cpu pid=3436384)[0m 
-[36m(calculate_point_effect_cpu pid=3436380)[0m 
-[36m(calculate_point_effect_cpu pid=3436380)[0m 
-[36m(calculate_point_effect_cpu pid=3436380)[0m 
-[36m(calculate_point_effect_cpu pid=3436380)[0m 
-[36m(calculate_point_effect_cpu pid=3436390)[0m 
-[36m(calculate_point_effect_cpu pid=3436390)[0m 
-[36m(calculate_point_effect_cpu pid=3436390)[0m 
-[36m(calculate_point_effect_cpu pid=3436390)[0m 
-[36m(calculate_point_effect_cpu pid=3436389)[0m 
-[36m(calculate_point_effect_cpu pid=3436389)[0m 
-[36m(calculate_point_effect_cpu pid=3436389)[0m 
-[36m(calculate_point_effect_cpu pid=3436389)[0m 
-[36m(calculate_point_effect_cpu pid=3436383)[0m 
-[36m(calculate_point_effect_cpu pid=3436383)[0m 
-[36m(calculate_point_effect_cpu pid=3436383)[0m 
-[36m(calculate_point_effect_cpu pid=3436383)[0m 
-[36m(calculate_point_effect_cpu pid=3436386)[0m 
-[36m(calculate_point_effect_cpu pid=3436386)[0m 
-[36m(calculate_point_effect_cpu pid=3436386)[0m 
-[36m(calculate_point_effect_cpu pid=3436386)[0m 
-[36m(calculate_point_effect_cpu pid=3436378)[0m 
-[36m(calculate_point_effect_cpu pid=3436378)[0m 
-[36m(calculate_point_effect_cpu pid=3436378)[0m 
-[36m(calculate_point_effect_cpu pid=3436378)[0m 
-[36m(calculate_point_effect_cpu pid=3436388)[0m 
-[36m(calculate_point_effect_cpu pid=3436388)[0m 
-[36m(calculate_point_effect_cpu pid=3436388)[0m 
-[36m(calculate_point_effect_cpu pid=3436388)[0m 
-[36m(calculate_point_effect_cpu pid=3436379)[0m 
-[36m(calculate_point_effect_cpu pid=3436379)[0m 
-[36m(calculate_point_effect_cpu pid=3436379)[0m 
-[36m(calculate_point_effect_cpu pid=3436379)[0m 
-[36m(calculate_point_effect_cpu pid=3436377)[0m 
-[36m(calculate_point_effect_cpu pid=3436377)[0m 
-[36m(calculate_point_effect_cpu pid=3436377)[0m 
-[36m(calculate_point_effect_cpu pid=3436377)[0m 
-[36m(calculate_point_effect_cpu pid=3436385)[0m 
-[36m(calculate_point_effect_cpu pid=3436385)[0m 
-[36m(calculate_point_effect_cpu pid=3436385)[0m 
-[36m(calculate_point_effect_cpu pid=3436385)[0m 
+[36m(calculate_point_effect_cpu pid=3436376)[0m
+[36m(calculate_point_effect_cpu pid=3436376)[0m
+[36m(calculate_point_effect_cpu pid=3436375)[0m
+[36m(calculate_point_effect_cpu pid=3436375)[0m
+[36m(calculate_point_effect_cpu pid=3436375)[0m
+[36m(calculate_point_effect_cpu pid=3436375)[0m
+[36m(calculate_point_effect_cpu pid=3436382)[0m
+[36m(calculate_point_effect_cpu pid=3436382)[0m
+[36m(calculate_point_effect_cpu pid=3436382)[0m
+[36m(calculate_point_effect_cpu pid=3436382)[0m
+[36m(calculate_point_effect_cpu pid=3436381)[0m
+[36m(calculate_point_effect_cpu pid=3436381)[0m
+[36m(calculate_point_effect_cpu pid=3436381)[0m
+[36m(calculate_point_effect_cpu pid=3436381)[0m
+[36m(calculate_point_effect_cpu pid=3436387)[0m
+[36m(calculate_point_effect_cpu pid=3436387)[0m
+[36m(calculate_point_effect_cpu pid=3436387)[0m
+[36m(calculate_point_effect_cpu pid=3436387)[0m
+[36m(calculate_point_effect_cpu pid=3436384)[0m
+[36m(calculate_point_effect_cpu pid=3436384)[0m
+[36m(calculate_point_effect_cpu pid=3436384)[0m
+[36m(calculate_point_effect_cpu pid=3436384)[0m
+[36m(calculate_point_effect_cpu pid=3436380)[0m
+[36m(calculate_point_effect_cpu pid=3436380)[0m
+[36m(calculate_point_effect_cpu pid=3436380)[0m
+[36m(calculate_point_effect_cpu pid=3436380)[0m
+[36m(calculate_point_effect_cpu pid=3436390)[0m
+[36m(calculate_point_effect_cpu pid=3436390)[0m
+[36m(calculate_point_effect_cpu pid=3436390)[0m
+[36m(calculate_point_effect_cpu pid=3436390)[0m
+[36m(calculate_point_effect_cpu pid=3436389)[0m
+[36m(calculate_point_effect_cpu pid=3436389)[0m
+[36m(calculate_point_effect_cpu pid=3436389)[0m
+[36m(calculate_point_effect_cpu pid=3436389)[0m
+[36m(calculate_point_effect_cpu pid=3436383)[0m
+[36m(calculate_point_effect_cpu pid=3436383)[0m
+[36m(calculate_point_effect_cpu pid=3436383)[0m
+[36m(calculate_point_effect_cpu pid=3436383)[0m
+[36m(calculate_point_effect_cpu pid=3436386)[0m
+[36m(calculate_point_effect_cpu pid=3436386)[0m
+[36m(calculate_point_effect_cpu pid=3436386)[0m
+[36m(calculate_point_effect_cpu pid=3436386)[0m
+[36m(calculate_point_effect_cpu pid=3436378)[0m
+[36m(calculate_point_effect_cpu pid=3436378)[0m
+[36m(calculate_point_effect_cpu pid=3436378)[0m
+[36m(calculate_point_effect_cpu pid=3436378)[0m
+[36m(calculate_point_effect_cpu pid=3436388)[0m
+[36m(calculate_point_effect_cpu pid=3436388)[0m
+[36m(calculate_point_effect_cpu pid=3436388)[0m
+[36m(calculate_point_effect_cpu pid=3436388)[0m
+[36m(calculate_point_effect_cpu pid=3436379)[0m
+[36m(calculate_point_effect_cpu pid=3436379)[0m
+[36m(calculate_point_effect_cpu pid=3436379)[0m
+[36m(calculate_point_effect_cpu pid=3436379)[0m
+[36m(calculate_point_effect_cpu pid=3436377)[0m
+[36m(calculate_point_effect_cpu pid=3436377)[0m
+[36m(calculate_point_effect_cpu pid=3436377)[0m
+[36m(calculate_point_effect_cpu pid=3436377)[0m
+[36m(calculate_point_effect_cpu pid=3436385)[0m
+[36m(calculate_point_effect_cpu pid=3436385)[0m
+[36m(calculate_point_effect_cpu pid=3436385)[0m
+[36m(calculate_point_effect_cpu pid=3436385)[0m
 [36m(calculate_point_effect_cpu pid=3436375)[0m Excited State energies (eV)
 [36m(calculate_point_effect_cpu pid=3436375)[0m [7.40200813]
-[36m(calculate_point_effect_cpu pid=3436375)[0m 
-[36m(calculate_point_effect_cpu pid=3436375)[0m 
+[36m(calculate_point_effect_cpu pid=3436375)[0m
+[36m(calculate_point_effect_cpu pid=3436375)[0m
 [36m(calculate_point_effect_cpu pid=3436375)[0m ******** <class 'pyscf.qmmm.itrf.QMMMRKS'> ********
 [36m(calculate_point_effect_cpu pid=3436375)[0m method = QMMMRKS
 [36m(calculate_point_effect_cpu pid=3436375)[0m chkfile to save SCF result = molecule_alone.chk
@@ -254,56 +254,56 @@ Using 16 parallel processes on CPU
 [36m(calculate_point_effect_cpu pid=3436385)[0m eigh max_cycle = 100[32m [repeated 15x across cluster][0m
 [36m(calculate_point_effect_cpu pid=3436385)[0m chkfile = molecule_alone.chk[32m [repeated 15x across cluster][0m
 [36m(calculate_point_effect_cpu pid=3436383)[0m [7.40200813]
-[36m(calculate_point_effect_cpu pid=3436383)[0m 
-[36m(calculate_point_effect_cpu pid=3436383)[0m 
+[36m(calculate_point_effect_cpu pid=3436383)[0m
+[36m(calculate_point_effect_cpu pid=3436383)[0m
 [36m(calculate_point_effect_cpu pid=3436389)[0m [7.40200813]
-[36m(calculate_point_effect_cpu pid=3436389)[0m 
-[36m(calculate_point_effect_cpu pid=3436389)[0m 
+[36m(calculate_point_effect_cpu pid=3436389)[0m
+[36m(calculate_point_effect_cpu pid=3436389)[0m
 [36m(calculate_point_effect_cpu pid=3436378)[0m [7.40200813]
-[36m(calculate_point_effect_cpu pid=3436378)[0m 
-[36m(calculate_point_effect_cpu pid=3436378)[0m 
+[36m(calculate_point_effect_cpu pid=3436378)[0m
+[36m(calculate_point_effect_cpu pid=3436378)[0m
 [36m(calculate_point_effect_cpu pid=3436379)[0m [7.40200813]
-[36m(calculate_point_effect_cpu pid=3436379)[0m 
-[36m(calculate_point_effect_cpu pid=3436379)[0m 
+[36m(calculate_point_effect_cpu pid=3436379)[0m
+[36m(calculate_point_effect_cpu pid=3436379)[0m
 [36m(calculate_point_effect_cpu pid=3436377)[0m [7.40200813]
-[36m(calculate_point_effect_cpu pid=3436377)[0m 
-[36m(calculate_point_effect_cpu pid=3436377)[0m 
+[36m(calculate_point_effect_cpu pid=3436377)[0m
+[36m(calculate_point_effect_cpu pid=3436377)[0m
 [36m(calculate_point_effect_cpu pid=3436381)[0m [7.40200813]
-[36m(calculate_point_effect_cpu pid=3436381)[0m 
-[36m(calculate_point_effect_cpu pid=3436381)[0m 
+[36m(calculate_point_effect_cpu pid=3436381)[0m
+[36m(calculate_point_effect_cpu pid=3436381)[0m
 [36m(calculate_point_effect_cpu pid=3436383)[0m Running TDDFT in current process (force_single_gpu=False)
-[36m(calculate_point_effect_cpu pid=3436383)[0m 
-[36m(calculate_point_effect_cpu pid=3436383)[0m 
+[36m(calculate_point_effect_cpu pid=3436383)[0m
+[36m(calculate_point_effect_cpu pid=3436383)[0m
 [36m(calculate_point_effect_cpu pid=3436383)[0m ******** <class 'pyscf.tdscf.rks.TDDFT'> for <class 'pyscf.qmmm.itrf.QMMMRKS'> ********
-[36m(calculate_point_effect_cpu pid=3436383)[0m 
-[36m(calculate_point_effect_cpu pid=3436383)[0m 
-[36m(calculate_point_effect_cpu pid=3436375)[0m 
-[36m(calculate_point_effect_cpu pid=3436375)[0m 
-[36m(calculate_point_effect_cpu pid=3436375)[0m 
-[36m(calculate_point_effect_cpu pid=3436375)[0m 
+[36m(calculate_point_effect_cpu pid=3436383)[0m
+[36m(calculate_point_effect_cpu pid=3436383)[0m
+[36m(calculate_point_effect_cpu pid=3436375)[0m
+[36m(calculate_point_effect_cpu pid=3436375)[0m
+[36m(calculate_point_effect_cpu pid=3436375)[0m
+[36m(calculate_point_effect_cpu pid=3436375)[0m
 [36m(calculate_point_effect_cpu pid=3436390)[0m [7.40200813]
-[36m(calculate_point_effect_cpu pid=3436390)[0m 
-[36m(calculate_point_effect_cpu pid=3436390)[0m 
-[36m(calculate_point_effect_cpu pid=3436389)[0m 
-[36m(calculate_point_effect_cpu pid=3436389)[0m 
-[36m(calculate_point_effect_cpu pid=3436389)[0m 
-[36m(calculate_point_effect_cpu pid=3436389)[0m 
-[36m(calculate_point_effect_cpu pid=3436378)[0m 
-[36m(calculate_point_effect_cpu pid=3436378)[0m 
-[36m(calculate_point_effect_cpu pid=3436378)[0m 
-[36m(calculate_point_effect_cpu pid=3436378)[0m 
-[36m(calculate_point_effect_cpu pid=3436377)[0m 
-[36m(calculate_point_effect_cpu pid=3436377)[0m 
-[36m(calculate_point_effect_cpu pid=3436377)[0m 
-[36m(calculate_point_effect_cpu pid=3436377)[0m 
-[36m(calculate_point_effect_cpu pid=3436381)[0m 
-[36m(calculate_point_effect_cpu pid=3436381)[0m 
-[36m(calculate_point_effect_cpu pid=3436381)[0m 
-[36m(calculate_point_effect_cpu pid=3436381)[0m 
-[36m(calculate_point_effect_cpu pid=3436379)[0m 
-[36m(calculate_point_effect_cpu pid=3436379)[0m 
-[36m(calculate_point_effect_cpu pid=3436379)[0m 
-[36m(calculate_point_effect_cpu pid=3436379)[0m 
+[36m(calculate_point_effect_cpu pid=3436390)[0m
+[36m(calculate_point_effect_cpu pid=3436390)[0m
+[36m(calculate_point_effect_cpu pid=3436389)[0m
+[36m(calculate_point_effect_cpu pid=3436389)[0m
+[36m(calculate_point_effect_cpu pid=3436389)[0m
+[36m(calculate_point_effect_cpu pid=3436389)[0m
+[36m(calculate_point_effect_cpu pid=3436378)[0m
+[36m(calculate_point_effect_cpu pid=3436378)[0m
+[36m(calculate_point_effect_cpu pid=3436378)[0m
+[36m(calculate_point_effect_cpu pid=3436378)[0m
+[36m(calculate_point_effect_cpu pid=3436377)[0m
+[36m(calculate_point_effect_cpu pid=3436377)[0m
+[36m(calculate_point_effect_cpu pid=3436377)[0m
+[36m(calculate_point_effect_cpu pid=3436377)[0m
+[36m(calculate_point_effect_cpu pid=3436381)[0m
+[36m(calculate_point_effect_cpu pid=3436381)[0m
+[36m(calculate_point_effect_cpu pid=3436381)[0m
+[36m(calculate_point_effect_cpu pid=3436381)[0m
+[36m(calculate_point_effect_cpu pid=3436379)[0m
+[36m(calculate_point_effect_cpu pid=3436379)[0m
+[36m(calculate_point_effect_cpu pid=3436379)[0m
+[36m(calculate_point_effect_cpu pid=3436379)[0m
 [36m(calculate_point_effect_cpu pid=3436390)[0m Excited State energies (eV)[32m [repeated 7x across cluster][0m
 [36m(calculate_point_effect_cpu pid=3436390)[0m ******** <class 'pyscf.qmmm.itrf.QMMMRKS'> ********[32m [repeated 7x across cluster][0m
 [36m(calculate_point_effect_cpu pid=3436390)[0m method = QMMMRKS[32m [repeated 7x across cluster][0m
@@ -342,19 +342,19 @@ Using 16 parallel processes on CPU
 [36m(calculate_point_effect_cpu pid=3436379)[0m eigh max_cycle = 100[32m [repeated 7x across cluster][0m
 [36m(calculate_point_effect_cpu pid=3436379)[0m chkfile = molecule_alone.chk[32m [repeated 7x across cluster][0m
 [36m(calculate_point_effect_cpu pid=3436387)[0m [7.40200813]
-[36m(calculate_point_effect_cpu pid=3436387)[0m 
-[36m(calculate_point_effect_cpu pid=3436387)[0m 
+[36m(calculate_point_effect_cpu pid=3436387)[0m
+[36m(calculate_point_effect_cpu pid=3436387)[0m
 [36m(calculate_point_effect_cpu pid=3436379)[0m Running TDDFT in current process (force_single_gpu=False)[32m [repeated 6x across cluster][0m
 [36m(calculate_point_effect_cpu pid=3436379)[0m ******** <class 'pyscf.tdscf.rks.TDDFT'> for <class 'pyscf.qmmm.itrf.QMMMRKS'> ********[32m [repeated 6x across cluster][0m
 [36m(calculate_point_effect_cpu pid=3436386)[0m [7.40200813]
-[36m(calculate_point_effect_cpu pid=3436386)[0m 
-[36m(calculate_point_effect_cpu pid=3436386)[0m 
+[36m(calculate_point_effect_cpu pid=3436386)[0m
+[36m(calculate_point_effect_cpu pid=3436386)[0m
 [36m(calculate_point_effect_cpu pid=3436384)[0m [7.40200813]
-[36m(calculate_point_effect_cpu pid=3436384)[0m 
-[36m(calculate_point_effect_cpu pid=3436384)[0m 
+[36m(calculate_point_effect_cpu pid=3436384)[0m
+[36m(calculate_point_effect_cpu pid=3436384)[0m
 [36m(calculate_point_effect_cpu pid=3436380)[0m [7.40200813]
-[36m(calculate_point_effect_cpu pid=3436380)[0m 
-[36m(calculate_point_effect_cpu pid=3436380)[0m 
+[36m(calculate_point_effect_cpu pid=3436380)[0m
+[36m(calculate_point_effect_cpu pid=3436380)[0m
 [36m(calculate_point_effect_cpu pid=3436380)[0m Excited State energies (eV)[32m [repeated 4x across cluster][0m
 [36m(calculate_point_effect_cpu pid=3436380)[0m ******** <class 'pyscf.qmmm.itrf.QMMMRKS'> ********[32m [repeated 4x across cluster][0m
 [36m(calculate_point_effect_cpu pid=3436380)[0m method = QMMMRKS[32m [repeated 4x across cluster][0m
@@ -384,8 +384,8 @@ Using 16 parallel processes on CPU
 [36m(calculate_point_effect_cpu pid=3436386)[0m cycle= 1 E= -155.0269653018  delta_E= -0.000447  |g|= 0.0247  |ddm|= 0.119[32m [repeated 13x across cluster][0m
 [36m(calculate_point_effect_cpu pid=3436390)[0m Extra cycle  E= -155.028453704806  delta_E= 3.98e-13  |g|= 1.38e-06  |ddm|= 3.17e-06
 [36m(calculate_point_effect_cpu pid=3436390)[0m converged SCF energy = -155.028453704806
-[36m(calculate_point_effect_cpu pid=3436390)[0m 
-[36m(calculate_point_effect_cpu pid=3436390)[0m 
+[36m(calculate_point_effect_cpu pid=3436390)[0m
+[36m(calculate_point_effect_cpu pid=3436390)[0m
 [36m(calculate_point_effect_cpu pid=3436390)[0m nstates = 1 singlet
 [36m(calculate_point_effect_cpu pid=3436390)[0m deg_eia_thresh = 1.000e-03
 [36m(calculate_point_effect_cpu pid=3436390)[0m wfnsym = None
@@ -394,34 +394,34 @@ Using 16 parallel processes on CPU
 [36m(calculate_point_effect_cpu pid=3436390)[0m eigh level_shift = 0
 [36m(calculate_point_effect_cpu pid=3436390)[0m eigh max_cycle = 100
 [36m(calculate_point_effect_cpu pid=3436390)[0m chkfile = molecule_alone.chk
-[36m(calculate_point_effect_cpu pid=3436390)[0m 
-[36m(calculate_point_effect_cpu pid=3436390)[0m 
+[36m(calculate_point_effect_cpu pid=3436390)[0m
+[36m(calculate_point_effect_cpu pid=3436390)[0m
 [36m(calculate_point_effect_cpu pid=3436376)[0m [7.40200813]
-[36m(calculate_point_effect_cpu pid=3436376)[0m 
-[36m(calculate_point_effect_cpu pid=3436376)[0m 
-[36m(calculate_point_effect_cpu pid=3436387)[0m 
-[36m(calculate_point_effect_cpu pid=3436387)[0m 
-[36m(calculate_point_effect_cpu pid=3436387)[0m 
-[36m(calculate_point_effect_cpu pid=3436387)[0m 
+[36m(calculate_point_effect_cpu pid=3436376)[0m
+[36m(calculate_point_effect_cpu pid=3436376)[0m
+[36m(calculate_point_effect_cpu pid=3436387)[0m
+[36m(calculate_point_effect_cpu pid=3436387)[0m
+[36m(calculate_point_effect_cpu pid=3436387)[0m
+[36m(calculate_point_effect_cpu pid=3436387)[0m
 [36m(calculate_point_effect_cpu pid=3436382)[0m [7.40200813]
-[36m(calculate_point_effect_cpu pid=3436382)[0m 
-[36m(calculate_point_effect_cpu pid=3436382)[0m 
+[36m(calculate_point_effect_cpu pid=3436382)[0m
+[36m(calculate_point_effect_cpu pid=3436382)[0m
 [36m(calculate_point_effect_cpu pid=3436388)[0m [7.40200813]
-[36m(calculate_point_effect_cpu pid=3436388)[0m 
-[36m(calculate_point_effect_cpu pid=3436388)[0m 
+[36m(calculate_point_effect_cpu pid=3436388)[0m
+[36m(calculate_point_effect_cpu pid=3436388)[0m
 [36m(calculate_point_effect_cpu pid=3436385)[0m [7.40200813]
-[36m(calculate_point_effect_cpu pid=3436385)[0m 
-[36m(calculate_point_effect_cpu pid=3436385)[0m 
-[36m(calculate_point_effect_cpu pid=3436384)[0m 
-[36m(calculate_point_effect_cpu pid=3436384)[0m 
-[36m(calculate_point_effect_cpu pid=3436384)[0m 
-[36m(calculate_point_effect_cpu pid=3436384)[0m 
+[36m(calculate_point_effect_cpu pid=3436385)[0m
+[36m(calculate_point_effect_cpu pid=3436385)[0m
+[36m(calculate_point_effect_cpu pid=3436384)[0m
+[36m(calculate_point_effect_cpu pid=3436384)[0m
+[36m(calculate_point_effect_cpu pid=3436384)[0m
+[36m(calculate_point_effect_cpu pid=3436384)[0m
 [36m(calculate_point_effect_cpu pid=3436384)[0m Running TDDFT in current process (force_single_gpu=False)[32m [repeated 3x across cluster][0m
 [36m(calculate_point_effect_cpu pid=3436384)[0m ******** <class 'pyscf.tdscf.rks.TDDFT'> for <class 'pyscf.qmmm.itrf.QMMMRKS'> ********[32m [repeated 3x across cluster][0m
-[36m(calculate_point_effect_cpu pid=3436386)[0m 
-[36m(calculate_point_effect_cpu pid=3436386)[0m 
-[36m(calculate_point_effect_cpu pid=3436386)[0m 
-[36m(calculate_point_effect_cpu pid=3436386)[0m 
+[36m(calculate_point_effect_cpu pid=3436386)[0m
+[36m(calculate_point_effect_cpu pid=3436386)[0m
+[36m(calculate_point_effect_cpu pid=3436386)[0m
+[36m(calculate_point_effect_cpu pid=3436386)[0m
 [36m(calculate_point_effect_cpu pid=3436385)[0m Excited State energies (eV)[32m [repeated 4x across cluster][0m
 [36m(calculate_point_effect_cpu pid=3436385)[0m ******** <class 'pyscf.qmmm.itrf.QMMMRKS'> ********[32m [repeated 4x across cluster][0m
 [36m(calculate_point_effect_cpu pid=3436385)[0m method = QMMMRKS[32m [repeated 4x across cluster][0m
@@ -449,10 +449,10 @@ Using 16 parallel processes on CPU
 [36m(calculate_point_effect_cpu pid=3436385)[0m init E= -155.024800514991[32m [repeated 4x across cluster][0m
 [36m(calculate_point_effect_cpu pid=3436382)[0m   HOMO = -0.280291772859772  LUMO = 0.0489380149730669[32m [repeated 39x across cluster][0m
 [36m(calculate_point_effect_cpu pid=3436382)[0m cycle= 4 E= -155.029011994105  delta_E= -1.5e-06  |g|= 0.000123  |ddm|= 0.00207[32m [repeated 35x across cluster][0m
-[36m(calculate_point_effect_cpu pid=3436380)[0m 
-[36m(calculate_point_effect_cpu pid=3436380)[0m 
-[36m(calculate_point_effect_cpu pid=3436380)[0m 
-[36m(calculate_point_effect_cpu pid=3436380)[0m 
+[36m(calculate_point_effect_cpu pid=3436380)[0m
+[36m(calculate_point_effect_cpu pid=3436380)[0m
+[36m(calculate_point_effect_cpu pid=3436380)[0m
+[36m(calculate_point_effect_cpu pid=3436380)[0m
 [36m(calculate_point_effect_cpu pid=3436380)[0m Extra cycle  E= -155.028550006995  delta_E= -1.99e-13  |g|= 1.23e-06  |ddm|= 2.93e-06[32m [repeated 4x across cluster][0m
 [36m(calculate_point_effect_cpu pid=3436380)[0m converged SCF energy = -155.028550006995[32m [repeated 4x across cluster][0m
 [36m(calculate_point_effect_cpu pid=3436380)[0m nstates = 1 singlet[32m [repeated 4x across cluster][0m
@@ -463,22 +463,22 @@ Using 16 parallel processes on CPU
 [36m(calculate_point_effect_cpu pid=3436380)[0m eigh level_shift = 0[32m [repeated 4x across cluster][0m
 [36m(calculate_point_effect_cpu pid=3436380)[0m eigh max_cycle = 100[32m [repeated 4x across cluster][0m
 [36m(calculate_point_effect_cpu pid=3436380)[0m chkfile = molecule_alone.chk[32m [repeated 4x across cluster][0m
-[36m(calculate_point_effect_cpu pid=3436382)[0m 
-[36m(calculate_point_effect_cpu pid=3436382)[0m 
-[36m(calculate_point_effect_cpu pid=3436382)[0m 
-[36m(calculate_point_effect_cpu pid=3436382)[0m 
-[36m(calculate_point_effect_cpu pid=3436376)[0m 
-[36m(calculate_point_effect_cpu pid=3436376)[0m 
-[36m(calculate_point_effect_cpu pid=3436376)[0m 
-[36m(calculate_point_effect_cpu pid=3436376)[0m 
-[36m(calculate_point_effect_cpu pid=3436385)[0m 
-[36m(calculate_point_effect_cpu pid=3436385)[0m 
-[36m(calculate_point_effect_cpu pid=3436385)[0m 
-[36m(calculate_point_effect_cpu pid=3436385)[0m 
-[36m(calculate_point_effect_cpu pid=3436388)[0m 
-[36m(calculate_point_effect_cpu pid=3436388)[0m 
-[36m(calculate_point_effect_cpu pid=3436388)[0m 
-[36m(calculate_point_effect_cpu pid=3436388)[0m 
+[36m(calculate_point_effect_cpu pid=3436382)[0m
+[36m(calculate_point_effect_cpu pid=3436382)[0m
+[36m(calculate_point_effect_cpu pid=3436382)[0m
+[36m(calculate_point_effect_cpu pid=3436382)[0m
+[36m(calculate_point_effect_cpu pid=3436376)[0m
+[36m(calculate_point_effect_cpu pid=3436376)[0m
+[36m(calculate_point_effect_cpu pid=3436376)[0m
+[36m(calculate_point_effect_cpu pid=3436376)[0m
+[36m(calculate_point_effect_cpu pid=3436385)[0m
+[36m(calculate_point_effect_cpu pid=3436385)[0m
+[36m(calculate_point_effect_cpu pid=3436385)[0m
+[36m(calculate_point_effect_cpu pid=3436385)[0m
+[36m(calculate_point_effect_cpu pid=3436388)[0m
+[36m(calculate_point_effect_cpu pid=3436388)[0m
+[36m(calculate_point_effect_cpu pid=3436388)[0m
+[36m(calculate_point_effect_cpu pid=3436388)[0m
 [36m(calculate_point_effect_cpu pid=3436383)[0m [7.45940315]
 [36m(calculate_point_effect_cpu pid=3436388)[0m Running TDDFT in current process (force_single_gpu=False)[32m [repeated 6x across cluster][0m
 [36m(calculate_point_effect_cpu pid=3436388)[0m ******** <class 'pyscf.tdscf.rks.TDDFT'> for <class 'pyscf.qmmm.itrf.QMMMRKS'> ********[32m [repeated 6x across cluster][0m
@@ -533,16 +533,16 @@ Point 14/67: SUCCESS (14/67 total)
 Point 15/67: SUCCESS (15/67 total)
 Point 16/67: SUCCESS (16/67 total)
 [36m(calculate_point_effect_cpu pid=3436376)[0m [Point 19] Running on CPU cores: {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15}, PID: 3436376
-[36m(calculate_point_effect_cpu pid=3436376)[0m 
+[36m(calculate_point_effect_cpu pid=3436376)[0m
 [36m(calculate_point_effect_cpu pid=3436376)[0m === Resurrecting molecule_alone.chk ===
-[36m(calculate_point_effect_cpu pid=3436375)[0m 
+[36m(calculate_point_effect_cpu pid=3436375)[0m
 [36m(calculate_point_effect_cpu pid=3436375)[0m Loaded XC functional: b3lyp
 [36m(calculate_point_effect_cpu pid=3436375)[0m Creating DFT object with xc=b3lyp
-[36m(calculate_point_effect_cpu pid=3436382)[0m 
-[36m(calculate_point_effect_cpu pid=3436381)[0m 
-[36m(calculate_point_effect_cpu pid=3436387)[0m 
-[36m(calculate_point_effect_cpu pid=3436387)[0m 
-[36m(calculate_point_effect_cpu pid=3436387)[0m 
+[36m(calculate_point_effect_cpu pid=3436382)[0m
+[36m(calculate_point_effect_cpu pid=3436381)[0m
+[36m(calculate_point_effect_cpu pid=3436387)[0m
+[36m(calculate_point_effect_cpu pid=3436387)[0m
+[36m(calculate_point_effect_cpu pid=3436387)[0m
 [36m(calculate_point_effect_cpu pid=3436387)[0m ******** <class 'pyscf.dft.rks.RKS'> ********
 [36m(calculate_point_effect_cpu pid=3436387)[0m method = RKS
 [36m(calculate_point_effect_cpu pid=3436387)[0m initial guess = chkfile
@@ -565,47 +565,47 @@ Point 16/67: SUCCESS (16/67 total)
 [36m(calculate_point_effect_cpu pid=3436387)[0m     P. J. Stephens, F. J. Devlin, C. F. Chabalowski, and M. J. Frisch.,  J. Phys. Chem. 98, 11623 (1994)
 [36m(calculate_point_effect_cpu pid=3436387)[0m small_rho_cutoff = 1e-07
 [36m(calculate_point_effect_cpu pid=3436387)[0m Set gradient conv threshold to 3.16228e-05
-[36m(calculate_point_effect_cpu pid=3436384)[0m 
-[36m(calculate_point_effect_cpu pid=3436384)[0m 
-[36m(calculate_point_effect_cpu pid=3436384)[0m 
-[36m(calculate_point_effect_cpu pid=3436380)[0m 
-[36m(calculate_point_effect_cpu pid=3436380)[0m 
-[36m(calculate_point_effect_cpu pid=3436380)[0m 
-[36m(calculate_point_effect_cpu pid=3436390)[0m 
-[36m(calculate_point_effect_cpu pid=3436390)[0m 
-[36m(calculate_point_effect_cpu pid=3436390)[0m 
-[36m(calculate_point_effect_cpu pid=3436389)[0m 
-[36m(calculate_point_effect_cpu pid=3436389)[0m 
-[36m(calculate_point_effect_cpu pid=3436389)[0m 
-[36m(calculate_point_effect_cpu pid=3436383)[0m 
-[36m(calculate_point_effect_cpu pid=3436383)[0m 
-[36m(calculate_point_effect_cpu pid=3436383)[0m 
-[36m(calculate_point_effect_cpu pid=3436386)[0m 
-[36m(calculate_point_effect_cpu pid=3436386)[0m 
-[36m(calculate_point_effect_cpu pid=3436386)[0m 
-[36m(calculate_point_effect_cpu pid=3436378)[0m 
-[36m(calculate_point_effect_cpu pid=3436378)[0m 
-[36m(calculate_point_effect_cpu pid=3436378)[0m 
-[36m(calculate_point_effect_cpu pid=3436388)[0m 
-[36m(calculate_point_effect_cpu pid=3436388)[0m 
-[36m(calculate_point_effect_cpu pid=3436388)[0m 
-[36m(calculate_point_effect_cpu pid=3436379)[0m 
-[36m(calculate_point_effect_cpu pid=3436379)[0m 
-[36m(calculate_point_effect_cpu pid=3436379)[0m 
-[36m(calculate_point_effect_cpu pid=3436377)[0m 
-[36m(calculate_point_effect_cpu pid=3436377)[0m 
-[36m(calculate_point_effect_cpu pid=3436377)[0m 
-[36m(calculate_point_effect_cpu pid=3436385)[0m 
-[36m(calculate_point_effect_cpu pid=3436385)[0m 
-[36m(calculate_point_effect_cpu pid=3436385)[0m 
-[36m(calculate_point_effect_cpu pid=3436376)[0m 
-[36m(calculate_point_effect_cpu pid=3436376)[0m 
-[36m(calculate_point_effect_cpu pid=3436375)[0m 
-[36m(calculate_point_effect_cpu pid=3436375)[0m 
-[36m(calculate_point_effect_cpu pid=3436382)[0m 
-[36m(calculate_point_effect_cpu pid=3436382)[0m 
-[36m(calculate_point_effect_cpu pid=3436381)[0m 
-[36m(calculate_point_effect_cpu pid=3436381)[0m 
+[36m(calculate_point_effect_cpu pid=3436384)[0m
+[36m(calculate_point_effect_cpu pid=3436384)[0m
+[36m(calculate_point_effect_cpu pid=3436384)[0m
+[36m(calculate_point_effect_cpu pid=3436380)[0m
+[36m(calculate_point_effect_cpu pid=3436380)[0m
+[36m(calculate_point_effect_cpu pid=3436380)[0m
+[36m(calculate_point_effect_cpu pid=3436390)[0m
+[36m(calculate_point_effect_cpu pid=3436390)[0m
+[36m(calculate_point_effect_cpu pid=3436390)[0m
+[36m(calculate_point_effect_cpu pid=3436389)[0m
+[36m(calculate_point_effect_cpu pid=3436389)[0m
+[36m(calculate_point_effect_cpu pid=3436389)[0m
+[36m(calculate_point_effect_cpu pid=3436383)[0m
+[36m(calculate_point_effect_cpu pid=3436383)[0m
+[36m(calculate_point_effect_cpu pid=3436383)[0m
+[36m(calculate_point_effect_cpu pid=3436386)[0m
+[36m(calculate_point_effect_cpu pid=3436386)[0m
+[36m(calculate_point_effect_cpu pid=3436386)[0m
+[36m(calculate_point_effect_cpu pid=3436378)[0m
+[36m(calculate_point_effect_cpu pid=3436378)[0m
+[36m(calculate_point_effect_cpu pid=3436378)[0m
+[36m(calculate_point_effect_cpu pid=3436388)[0m
+[36m(calculate_point_effect_cpu pid=3436388)[0m
+[36m(calculate_point_effect_cpu pid=3436388)[0m
+[36m(calculate_point_effect_cpu pid=3436379)[0m
+[36m(calculate_point_effect_cpu pid=3436379)[0m
+[36m(calculate_point_effect_cpu pid=3436379)[0m
+[36m(calculate_point_effect_cpu pid=3436377)[0m
+[36m(calculate_point_effect_cpu pid=3436377)[0m
+[36m(calculate_point_effect_cpu pid=3436377)[0m
+[36m(calculate_point_effect_cpu pid=3436385)[0m
+[36m(calculate_point_effect_cpu pid=3436385)[0m
+[36m(calculate_point_effect_cpu pid=3436385)[0m
+[36m(calculate_point_effect_cpu pid=3436376)[0m
+[36m(calculate_point_effect_cpu pid=3436376)[0m
+[36m(calculate_point_effect_cpu pid=3436375)[0m
+[36m(calculate_point_effect_cpu pid=3436375)[0m
+[36m(calculate_point_effect_cpu pid=3436382)[0m
+[36m(calculate_point_effect_cpu pid=3436382)[0m
+[36m(calculate_point_effect_cpu pid=3436381)[0m
+[36m(calculate_point_effect_cpu pid=3436381)[0m
 [36m(calculate_point_effect_cpu pid=3436383)[0m init E= -155.028768605456
 [36m(calculate_point_effect_cpu pid=3436383)[0m   HOMO = -0.260574538961987  LUMO = 0.0672407765319121
 [36m(calculate_point_effect_cpu pid=3436375)[0m cycle= 1 E= -155.028768605452  delta_E= 3.92e-12  |g|= 6.17e-06  |ddm|= 8.04e-06
@@ -613,8 +613,8 @@ Point 16/67: SUCCESS (16/67 total)
 [36m(calculate_point_effect_cpu pid=3436383)[0m converged SCF energy = -155.028768605444
 [36m(calculate_point_effect_cpu pid=3436383)[0m Resurrected CPU DFT object: <class 'pyscf.dft.rks.RKS'>, Energy: -155.02876860544364
 [36m(calculate_point_effect_cpu pid=3436383)[0m Running TDDFT in current process (force_single_gpu=b3lyp)
-[36m(calculate_point_effect_cpu pid=3436383)[0m 
-[36m(calculate_point_effect_cpu pid=3436383)[0m 
+[36m(calculate_point_effect_cpu pid=3436383)[0m
+[36m(calculate_point_effect_cpu pid=3436383)[0m
 [36m(calculate_point_effect_cpu pid=3436383)[0m ******** <class 'pyscf.tdscf.rks.TDDFT'> for <class 'pyscf.dft.rks.RKS'> ********
 [36m(calculate_point_effect_cpu pid=3436383)[0m nstates = 1 singlet
 [36m(calculate_point_effect_cpu pid=3436383)[0m deg_eia_thresh = 1.000e-03
@@ -624,71 +624,71 @@ Point 16/67: SUCCESS (16/67 total)
 [36m(calculate_point_effect_cpu pid=3436383)[0m eigh level_shift = 0
 [36m(calculate_point_effect_cpu pid=3436383)[0m eigh max_cycle = 100
 [36m(calculate_point_effect_cpu pid=3436383)[0m chkfile = molecule_alone.chk
-[36m(calculate_point_effect_cpu pid=3436383)[0m 
-[36m(calculate_point_effect_cpu pid=3436383)[0m 
-[36m(calculate_point_effect_cpu pid=3436379)[0m 
-[36m(calculate_point_effect_cpu pid=3436379)[0m 
-[36m(calculate_point_effect_cpu pid=3436379)[0m 
-[36m(calculate_point_effect_cpu pid=3436379)[0m 
-[36m(calculate_point_effect_cpu pid=3436375)[0m 
-[36m(calculate_point_effect_cpu pid=3436375)[0m 
-[36m(calculate_point_effect_cpu pid=3436375)[0m 
-[36m(calculate_point_effect_cpu pid=3436375)[0m 
-[36m(calculate_point_effect_cpu pid=3436381)[0m 
-[36m(calculate_point_effect_cpu pid=3436381)[0m 
-[36m(calculate_point_effect_cpu pid=3436381)[0m 
-[36m(calculate_point_effect_cpu pid=3436381)[0m 
-[36m(calculate_point_effect_cpu pid=3436384)[0m 
-[36m(calculate_point_effect_cpu pid=3436384)[0m 
-[36m(calculate_point_effect_cpu pid=3436384)[0m 
-[36m(calculate_point_effect_cpu pid=3436384)[0m 
-[36m(calculate_point_effect_cpu pid=3436389)[0m 
-[36m(calculate_point_effect_cpu pid=3436389)[0m 
-[36m(calculate_point_effect_cpu pid=3436389)[0m 
-[36m(calculate_point_effect_cpu pid=3436389)[0m 
-[36m(calculate_point_effect_cpu pid=3436377)[0m 
-[36m(calculate_point_effect_cpu pid=3436377)[0m 
-[36m(calculate_point_effect_cpu pid=3436377)[0m 
-[36m(calculate_point_effect_cpu pid=3436377)[0m 
-[36m(calculate_point_effect_cpu pid=3436378)[0m 
-[36m(calculate_point_effect_cpu pid=3436378)[0m 
-[36m(calculate_point_effect_cpu pid=3436378)[0m 
-[36m(calculate_point_effect_cpu pid=3436378)[0m 
-[36m(calculate_point_effect_cpu pid=3436387)[0m 
-[36m(calculate_point_effect_cpu pid=3436387)[0m 
-[36m(calculate_point_effect_cpu pid=3436387)[0m 
-[36m(calculate_point_effect_cpu pid=3436387)[0m 
-[36m(calculate_point_effect_cpu pid=3436380)[0m 
-[36m(calculate_point_effect_cpu pid=3436380)[0m 
-[36m(calculate_point_effect_cpu pid=3436380)[0m 
-[36m(calculate_point_effect_cpu pid=3436380)[0m 
-[36m(calculate_point_effect_cpu pid=3436376)[0m 
-[36m(calculate_point_effect_cpu pid=3436376)[0m 
-[36m(calculate_point_effect_cpu pid=3436376)[0m 
-[36m(calculate_point_effect_cpu pid=3436376)[0m 
-[36m(calculate_point_effect_cpu pid=3436382)[0m 
-[36m(calculate_point_effect_cpu pid=3436382)[0m 
-[36m(calculate_point_effect_cpu pid=3436382)[0m 
-[36m(calculate_point_effect_cpu pid=3436382)[0m 
-[36m(calculate_point_effect_cpu pid=3436386)[0m 
-[36m(calculate_point_effect_cpu pid=3436386)[0m 
-[36m(calculate_point_effect_cpu pid=3436386)[0m 
-[36m(calculate_point_effect_cpu pid=3436386)[0m 
-[36m(calculate_point_effect_cpu pid=3436388)[0m 
-[36m(calculate_point_effect_cpu pid=3436388)[0m 
-[36m(calculate_point_effect_cpu pid=3436388)[0m 
-[36m(calculate_point_effect_cpu pid=3436388)[0m 
-[36m(calculate_point_effect_cpu pid=3436385)[0m 
-[36m(calculate_point_effect_cpu pid=3436385)[0m 
-[36m(calculate_point_effect_cpu pid=3436385)[0m 
-[36m(calculate_point_effect_cpu pid=3436385)[0m 
-[36m(calculate_point_effect_cpu pid=3436390)[0m 
-[36m(calculate_point_effect_cpu pid=3436390)[0m 
-[36m(calculate_point_effect_cpu pid=3436390)[0m 
-[36m(calculate_point_effect_cpu pid=3436390)[0m 
+[36m(calculate_point_effect_cpu pid=3436383)[0m
+[36m(calculate_point_effect_cpu pid=3436383)[0m
+[36m(calculate_point_effect_cpu pid=3436379)[0m
+[36m(calculate_point_effect_cpu pid=3436379)[0m
+[36m(calculate_point_effect_cpu pid=3436379)[0m
+[36m(calculate_point_effect_cpu pid=3436379)[0m
+[36m(calculate_point_effect_cpu pid=3436375)[0m
+[36m(calculate_point_effect_cpu pid=3436375)[0m
+[36m(calculate_point_effect_cpu pid=3436375)[0m
+[36m(calculate_point_effect_cpu pid=3436375)[0m
+[36m(calculate_point_effect_cpu pid=3436381)[0m
+[36m(calculate_point_effect_cpu pid=3436381)[0m
+[36m(calculate_point_effect_cpu pid=3436381)[0m
+[36m(calculate_point_effect_cpu pid=3436381)[0m
+[36m(calculate_point_effect_cpu pid=3436384)[0m
+[36m(calculate_point_effect_cpu pid=3436384)[0m
+[36m(calculate_point_effect_cpu pid=3436384)[0m
+[36m(calculate_point_effect_cpu pid=3436384)[0m
+[36m(calculate_point_effect_cpu pid=3436389)[0m
+[36m(calculate_point_effect_cpu pid=3436389)[0m
+[36m(calculate_point_effect_cpu pid=3436389)[0m
+[36m(calculate_point_effect_cpu pid=3436389)[0m
+[36m(calculate_point_effect_cpu pid=3436377)[0m
+[36m(calculate_point_effect_cpu pid=3436377)[0m
+[36m(calculate_point_effect_cpu pid=3436377)[0m
+[36m(calculate_point_effect_cpu pid=3436377)[0m
+[36m(calculate_point_effect_cpu pid=3436378)[0m
+[36m(calculate_point_effect_cpu pid=3436378)[0m
+[36m(calculate_point_effect_cpu pid=3436378)[0m
+[36m(calculate_point_effect_cpu pid=3436378)[0m
+[36m(calculate_point_effect_cpu pid=3436387)[0m
+[36m(calculate_point_effect_cpu pid=3436387)[0m
+[36m(calculate_point_effect_cpu pid=3436387)[0m
+[36m(calculate_point_effect_cpu pid=3436387)[0m
+[36m(calculate_point_effect_cpu pid=3436380)[0m
+[36m(calculate_point_effect_cpu pid=3436380)[0m
+[36m(calculate_point_effect_cpu pid=3436380)[0m
+[36m(calculate_point_effect_cpu pid=3436380)[0m
+[36m(calculate_point_effect_cpu pid=3436376)[0m
+[36m(calculate_point_effect_cpu pid=3436376)[0m
+[36m(calculate_point_effect_cpu pid=3436376)[0m
+[36m(calculate_point_effect_cpu pid=3436376)[0m
+[36m(calculate_point_effect_cpu pid=3436382)[0m
+[36m(calculate_point_effect_cpu pid=3436382)[0m
+[36m(calculate_point_effect_cpu pid=3436382)[0m
+[36m(calculate_point_effect_cpu pid=3436382)[0m
+[36m(calculate_point_effect_cpu pid=3436386)[0m
+[36m(calculate_point_effect_cpu pid=3436386)[0m
+[36m(calculate_point_effect_cpu pid=3436386)[0m
+[36m(calculate_point_effect_cpu pid=3436386)[0m
+[36m(calculate_point_effect_cpu pid=3436388)[0m
+[36m(calculate_point_effect_cpu pid=3436388)[0m
+[36m(calculate_point_effect_cpu pid=3436388)[0m
+[36m(calculate_point_effect_cpu pid=3436388)[0m
+[36m(calculate_point_effect_cpu pid=3436385)[0m
+[36m(calculate_point_effect_cpu pid=3436385)[0m
+[36m(calculate_point_effect_cpu pid=3436385)[0m
+[36m(calculate_point_effect_cpu pid=3436385)[0m
+[36m(calculate_point_effect_cpu pid=3436390)[0m
+[36m(calculate_point_effect_cpu pid=3436390)[0m
+[36m(calculate_point_effect_cpu pid=3436390)[0m
+[36m(calculate_point_effect_cpu pid=3436390)[0m
 [36m(calculate_point_effect_cpu pid=3436379)[0m [7.40200813]
-[36m(calculate_point_effect_cpu pid=3436379)[0m 
-[36m(calculate_point_effect_cpu pid=3436379)[0m 
+[36m(calculate_point_effect_cpu pid=3436379)[0m
+[36m(calculate_point_effect_cpu pid=3436379)[0m
 [36m(calculate_point_effect_cpu pid=3436379)[0m ******** <class 'pyscf.qmmm.itrf.QMMMRKS'> ********
 [36m(calculate_point_effect_cpu pid=3436379)[0m method = QMMMRKS
 [36m(calculate_point_effect_cpu pid=3436379)[0m chkfile to save SCF result = molecule_alone.chk
@@ -737,63 +737,63 @@ Point 16/67: SUCCESS (16/67 total)
 [36m(calculate_point_effect_cpu pid=3436390)[0m eigh max_cycle = 100[32m [repeated 15x across cluster][0m
 [36m(calculate_point_effect_cpu pid=3436390)[0m chkfile = molecule_alone.chk[32m [repeated 15x across cluster][0m
 [36m(calculate_point_effect_cpu pid=3436389)[0m [7.40200813]
-[36m(calculate_point_effect_cpu pid=3436389)[0m 
-[36m(calculate_point_effect_cpu pid=3436389)[0m 
+[36m(calculate_point_effect_cpu pid=3436389)[0m
+[36m(calculate_point_effect_cpu pid=3436389)[0m
 [36m(calculate_point_effect_cpu pid=3436383)[0m [7.40200813]
-[36m(calculate_point_effect_cpu pid=3436383)[0m 
-[36m(calculate_point_effect_cpu pid=3436383)[0m 
+[36m(calculate_point_effect_cpu pid=3436383)[0m
+[36m(calculate_point_effect_cpu pid=3436383)[0m
 [36m(calculate_point_effect_cpu pid=3436377)[0m [7.40200813]
-[36m(calculate_point_effect_cpu pid=3436377)[0m 
-[36m(calculate_point_effect_cpu pid=3436377)[0m 
+[36m(calculate_point_effect_cpu pid=3436377)[0m
+[36m(calculate_point_effect_cpu pid=3436377)[0m
 [36m(calculate_point_effect_cpu pid=3436375)[0m [7.40200813]
-[36m(calculate_point_effect_cpu pid=3436375)[0m 
-[36m(calculate_point_effect_cpu pid=3436375)[0m 
+[36m(calculate_point_effect_cpu pid=3436375)[0m
+[36m(calculate_point_effect_cpu pid=3436375)[0m
 [36m(calculate_point_effect_cpu pid=3436378)[0m [7.40200813]
-[36m(calculate_point_effect_cpu pid=3436378)[0m 
-[36m(calculate_point_effect_cpu pid=3436378)[0m 
+[36m(calculate_point_effect_cpu pid=3436378)[0m
+[36m(calculate_point_effect_cpu pid=3436378)[0m
 [36m(calculate_point_effect_cpu pid=3436381)[0m [7.40200813]
-[36m(calculate_point_effect_cpu pid=3436381)[0m 
-[36m(calculate_point_effect_cpu pid=3436381)[0m 
+[36m(calculate_point_effect_cpu pid=3436381)[0m
+[36m(calculate_point_effect_cpu pid=3436381)[0m
 [36m(calculate_point_effect_cpu pid=3436384)[0m [7.40200813]
-[36m(calculate_point_effect_cpu pid=3436384)[0m 
-[36m(calculate_point_effect_cpu pid=3436384)[0m 
+[36m(calculate_point_effect_cpu pid=3436384)[0m
+[36m(calculate_point_effect_cpu pid=3436384)[0m
 [36m(calculate_point_effect_cpu pid=3436389)[0m Running TDDFT in current process (force_single_gpu=False)
-[36m(calculate_point_effect_cpu pid=3436389)[0m 
-[36m(calculate_point_effect_cpu pid=3436389)[0m 
+[36m(calculate_point_effect_cpu pid=3436389)[0m
+[36m(calculate_point_effect_cpu pid=3436389)[0m
 [36m(calculate_point_effect_cpu pid=3436389)[0m ******** <class 'pyscf.tdscf.rks.TDDFT'> for <class 'pyscf.qmmm.itrf.QMMMRKS'> ********
-[36m(calculate_point_effect_cpu pid=3436389)[0m 
-[36m(calculate_point_effect_cpu pid=3436389)[0m 
-[36m(calculate_point_effect_cpu pid=3436379)[0m 
-[36m(calculate_point_effect_cpu pid=3436379)[0m 
-[36m(calculate_point_effect_cpu pid=3436379)[0m 
-[36m(calculate_point_effect_cpu pid=3436379)[0m 
-[36m(calculate_point_effect_cpu pid=3436383)[0m 
-[36m(calculate_point_effect_cpu pid=3436383)[0m 
-[36m(calculate_point_effect_cpu pid=3436383)[0m 
-[36m(calculate_point_effect_cpu pid=3436383)[0m 
-[36m(calculate_point_effect_cpu pid=3436378)[0m 
-[36m(calculate_point_effect_cpu pid=3436378)[0m 
-[36m(calculate_point_effect_cpu pid=3436378)[0m 
-[36m(calculate_point_effect_cpu pid=3436378)[0m 
-[36m(calculate_point_effect_cpu pid=3436377)[0m 
-[36m(calculate_point_effect_cpu pid=3436377)[0m 
-[36m(calculate_point_effect_cpu pid=3436377)[0m 
-[36m(calculate_point_effect_cpu pid=3436377)[0m 
-[36m(calculate_point_effect_cpu pid=3436375)[0m 
-[36m(calculate_point_effect_cpu pid=3436375)[0m 
-[36m(calculate_point_effect_cpu pid=3436375)[0m 
-[36m(calculate_point_effect_cpu pid=3436375)[0m 
-[36m(calculate_point_effect_cpu pid=3436381)[0m 
-[36m(calculate_point_effect_cpu pid=3436381)[0m 
-[36m(calculate_point_effect_cpu pid=3436381)[0m 
-[36m(calculate_point_effect_cpu pid=3436381)[0m 
-[36m(calculate_point_effect_cpu pid=3436384)[0m 
-[36m(calculate_point_effect_cpu pid=3436384)[0m 
-[36m(calculate_point_effect_cpu pid=3436384)[0m 
-[36m(calculate_point_effect_cpu pid=3436384)[0m 
+[36m(calculate_point_effect_cpu pid=3436389)[0m
+[36m(calculate_point_effect_cpu pid=3436389)[0m
+[36m(calculate_point_effect_cpu pid=3436379)[0m
+[36m(calculate_point_effect_cpu pid=3436379)[0m
+[36m(calculate_point_effect_cpu pid=3436379)[0m
+[36m(calculate_point_effect_cpu pid=3436379)[0m
+[36m(calculate_point_effect_cpu pid=3436383)[0m
+[36m(calculate_point_effect_cpu pid=3436383)[0m
+[36m(calculate_point_effect_cpu pid=3436383)[0m
+[36m(calculate_point_effect_cpu pid=3436383)[0m
+[36m(calculate_point_effect_cpu pid=3436378)[0m
+[36m(calculate_point_effect_cpu pid=3436378)[0m
+[36m(calculate_point_effect_cpu pid=3436378)[0m
+[36m(calculate_point_effect_cpu pid=3436378)[0m
+[36m(calculate_point_effect_cpu pid=3436377)[0m
+[36m(calculate_point_effect_cpu pid=3436377)[0m
+[36m(calculate_point_effect_cpu pid=3436377)[0m
+[36m(calculate_point_effect_cpu pid=3436377)[0m
+[36m(calculate_point_effect_cpu pid=3436375)[0m
+[36m(calculate_point_effect_cpu pid=3436375)[0m
+[36m(calculate_point_effect_cpu pid=3436375)[0m
+[36m(calculate_point_effect_cpu pid=3436375)[0m
+[36m(calculate_point_effect_cpu pid=3436381)[0m
+[36m(calculate_point_effect_cpu pid=3436381)[0m
+[36m(calculate_point_effect_cpu pid=3436381)[0m
+[36m(calculate_point_effect_cpu pid=3436381)[0m
+[36m(calculate_point_effect_cpu pid=3436384)[0m
+[36m(calculate_point_effect_cpu pid=3436384)[0m
+[36m(calculate_point_effect_cpu pid=3436384)[0m
+[36m(calculate_point_effect_cpu pid=3436384)[0m
 [36m(calculate_point_effect_cpu pid=3436388)[0m [7.40200813]
-[36m(calculate_point_effect_cpu pid=3436388)[0m 
-[36m(calculate_point_effect_cpu pid=3436388)[0m 
+[36m(calculate_point_effect_cpu pid=3436388)[0m
+[36m(calculate_point_effect_cpu pid=3436388)[0m
 [36m(calculate_point_effect_cpu pid=3436388)[0m ******** <class 'pyscf.qmmm.itrf.QMMMRKS'> ********[32m [repeated 8x across cluster][0m
 [36m(calculate_point_effect_cpu pid=3436388)[0m method = QMMMRKS[32m [repeated 8x across cluster][0m
 [36m(calculate_point_effect_cpu pid=3436388)[0m chkfile to save SCF result = molecule_alone.chk[32m [repeated 8x across cluster][0m
@@ -834,20 +834,20 @@ Point 16/67: SUCCESS (16/67 total)
 [36m(calculate_point_effect_cpu pid=3436384)[0m Running TDDFT in current process (force_single_gpu=False)[32m [repeated 7x across cluster][0m
 [36m(calculate_point_effect_cpu pid=3436384)[0m ******** <class 'pyscf.tdscf.rks.TDDFT'> for <class 'pyscf.qmmm.itrf.QMMMRKS'> ********[32m [repeated 7x across cluster][0m
 [36m(calculate_point_effect_cpu pid=3436380)[0m [7.40200813]
-[36m(calculate_point_effect_cpu pid=3436380)[0m 
-[36m(calculate_point_effect_cpu pid=3436380)[0m 
+[36m(calculate_point_effect_cpu pid=3436380)[0m
+[36m(calculate_point_effect_cpu pid=3436380)[0m
 [36m(calculate_point_effect_cpu pid=3436382)[0m [7.40200813]
-[36m(calculate_point_effect_cpu pid=3436382)[0m 
-[36m(calculate_point_effect_cpu pid=3436382)[0m 
+[36m(calculate_point_effect_cpu pid=3436382)[0m
+[36m(calculate_point_effect_cpu pid=3436382)[0m
 [36m(calculate_point_effect_cpu pid=3436376)[0m [7.40200813]
-[36m(calculate_point_effect_cpu pid=3436376)[0m 
-[36m(calculate_point_effect_cpu pid=3436376)[0m 
+[36m(calculate_point_effect_cpu pid=3436376)[0m
+[36m(calculate_point_effect_cpu pid=3436376)[0m
 [36m(calculate_point_effect_cpu pid=3436387)[0m [7.40200813]
-[36m(calculate_point_effect_cpu pid=3436387)[0m 
-[36m(calculate_point_effect_cpu pid=3436387)[0m 
+[36m(calculate_point_effect_cpu pid=3436387)[0m
+[36m(calculate_point_effect_cpu pid=3436387)[0m
 [36m(calculate_point_effect_cpu pid=3436385)[0m [7.40200813]
-[36m(calculate_point_effect_cpu pid=3436385)[0m 
-[36m(calculate_point_effect_cpu pid=3436385)[0m 
+[36m(calculate_point_effect_cpu pid=3436385)[0m
+[36m(calculate_point_effect_cpu pid=3436385)[0m
 [36m(calculate_point_effect_cpu pid=3436385)[0m ******** <class 'pyscf.qmmm.itrf.QMMMRKS'> ********[32m [repeated 5x across cluster][0m
 [36m(calculate_point_effect_cpu pid=3436385)[0m method = QMMMRKS[32m [repeated 5x across cluster][0m
 [36m(calculate_point_effect_cpu pid=3436385)[0m chkfile to save SCF result = molecule_alone.chk[32m [repeated 5x across cluster][0m
@@ -876,16 +876,16 @@ Point 16/67: SUCCESS (16/67 total)
 [36m(calculate_point_effect_cpu pid=3436387)[0m   HOMO = -0.280721798836216  LUMO = 0.0493632437224756[32m [repeated 10x across cluster][0m
 [36m(calculate_point_effect_cpu pid=3436388)[0m cycle= 4 E= -155.0278905088  delta_E= -3.76e-06  |g|= 0.000518  |ddm|= 0.00372[32m [repeated 5x across cluster][0m
 [36m(calculate_point_effect_cpu pid=3436386)[0m [7.40200813]
-[36m(calculate_point_effect_cpu pid=3436386)[0m 
-[36m(calculate_point_effect_cpu pid=3436386)[0m 
+[36m(calculate_point_effect_cpu pid=3436386)[0m
+[36m(calculate_point_effect_cpu pid=3436386)[0m
 [36m(calculate_point_effect_cpu pid=3436390)[0m [7.40200813]
-[36m(calculate_point_effect_cpu pid=3436390)[0m 
-[36m(calculate_point_effect_cpu pid=3436390)[0m 
+[36m(calculate_point_effect_cpu pid=3436390)[0m
+[36m(calculate_point_effect_cpu pid=3436390)[0m
 [36m(calculate_point_effect_cpu pid=3436388)[0m Extra cycle  E= -155.027890568143  delta_E= -2.84e-13  |g|= 1.16e-06  |ddm|= 3.29e-06
 [36m(calculate_point_effect_cpu pid=3436388)[0m converged SCF energy = -155.027890568143
 [36m(calculate_point_effect_cpu pid=3436388)[0m Running TDDFT in current process (force_single_gpu=False)
-[36m(calculate_point_effect_cpu pid=3436388)[0m 
-[36m(calculate_point_effect_cpu pid=3436388)[0m 
+[36m(calculate_point_effect_cpu pid=3436388)[0m
+[36m(calculate_point_effect_cpu pid=3436388)[0m
 [36m(calculate_point_effect_cpu pid=3436388)[0m ******** <class 'pyscf.tdscf.rks.TDDFT'> for <class 'pyscf.qmmm.itrf.QMMMRKS'> ********
 [36m(calculate_point_effect_cpu pid=3436388)[0m nstates = 1 singlet
 [36m(calculate_point_effect_cpu pid=3436388)[0m deg_eia_thresh = 1.000e-03
@@ -895,24 +895,24 @@ Point 16/67: SUCCESS (16/67 total)
 [36m(calculate_point_effect_cpu pid=3436388)[0m eigh level_shift = 0
 [36m(calculate_point_effect_cpu pid=3436388)[0m eigh max_cycle = 100
 [36m(calculate_point_effect_cpu pid=3436388)[0m chkfile = molecule_alone.chk
-[36m(calculate_point_effect_cpu pid=3436388)[0m 
-[36m(calculate_point_effect_cpu pid=3436388)[0m 
-[36m(calculate_point_effect_cpu pid=3436380)[0m 
-[36m(calculate_point_effect_cpu pid=3436380)[0m 
-[36m(calculate_point_effect_cpu pid=3436380)[0m 
-[36m(calculate_point_effect_cpu pid=3436380)[0m 
-[36m(calculate_point_effect_cpu pid=3436382)[0m 
-[36m(calculate_point_effect_cpu pid=3436382)[0m 
-[36m(calculate_point_effect_cpu pid=3436382)[0m 
-[36m(calculate_point_effect_cpu pid=3436382)[0m 
-[36m(calculate_point_effect_cpu pid=3436376)[0m 
-[36m(calculate_point_effect_cpu pid=3436376)[0m 
-[36m(calculate_point_effect_cpu pid=3436376)[0m 
-[36m(calculate_point_effect_cpu pid=3436376)[0m 
-[36m(calculate_point_effect_cpu pid=3436387)[0m 
-[36m(calculate_point_effect_cpu pid=3436387)[0m 
-[36m(calculate_point_effect_cpu pid=3436387)[0m 
-[36m(calculate_point_effect_cpu pid=3436387)[0m 
+[36m(calculate_point_effect_cpu pid=3436388)[0m
+[36m(calculate_point_effect_cpu pid=3436388)[0m
+[36m(calculate_point_effect_cpu pid=3436380)[0m
+[36m(calculate_point_effect_cpu pid=3436380)[0m
+[36m(calculate_point_effect_cpu pid=3436380)[0m
+[36m(calculate_point_effect_cpu pid=3436380)[0m
+[36m(calculate_point_effect_cpu pid=3436382)[0m
+[36m(calculate_point_effect_cpu pid=3436382)[0m
+[36m(calculate_point_effect_cpu pid=3436382)[0m
+[36m(calculate_point_effect_cpu pid=3436382)[0m
+[36m(calculate_point_effect_cpu pid=3436376)[0m
+[36m(calculate_point_effect_cpu pid=3436376)[0m
+[36m(calculate_point_effect_cpu pid=3436376)[0m
+[36m(calculate_point_effect_cpu pid=3436376)[0m
+[36m(calculate_point_effect_cpu pid=3436387)[0m
+[36m(calculate_point_effect_cpu pid=3436387)[0m
+[36m(calculate_point_effect_cpu pid=3436387)[0m
+[36m(calculate_point_effect_cpu pid=3436387)[0m
 [36m(calculate_point_effect_cpu pid=3436390)[0m ******** <class 'pyscf.qmmm.itrf.QMMMRKS'> ********[32m [repeated 2x across cluster][0m
 [36m(calculate_point_effect_cpu pid=3436390)[0m method = QMMMRKS[32m [repeated 2x across cluster][0m
 [36m(calculate_point_effect_cpu pid=3436390)[0m chkfile to save SCF result = molecule_alone.chk[32m [repeated 2x across cluster][0m
@@ -940,18 +940,18 @@ Point 16/67: SUCCESS (16/67 total)
 [36m(calculate_point_effect_cpu pid=3436390)[0m init E= -155.028219532984[32m [repeated 3x across cluster][0m
 [36m(calculate_point_effect_cpu pid=3436390)[0m   HOMO = -0.283037724658694  LUMO = 0.0481073112145752[32m [repeated 50x across cluster][0m
 [36m(calculate_point_effect_cpu pid=3436390)[0m cycle= 4 E= -155.028760457932  delta_E= -1.39e-06  |g|= 0.000218  |ddm|= 0.00215[32m [repeated 47x across cluster][0m
-[36m(calculate_point_effect_cpu pid=3436385)[0m 
-[36m(calculate_point_effect_cpu pid=3436385)[0m 
-[36m(calculate_point_effect_cpu pid=3436385)[0m 
-[36m(calculate_point_effect_cpu pid=3436385)[0m 
-[36m(calculate_point_effect_cpu pid=3436386)[0m 
-[36m(calculate_point_effect_cpu pid=3436386)[0m 
-[36m(calculate_point_effect_cpu pid=3436386)[0m 
-[36m(calculate_point_effect_cpu pid=3436386)[0m 
-[36m(calculate_point_effect_cpu pid=3436390)[0m 
-[36m(calculate_point_effect_cpu pid=3436390)[0m 
-[36m(calculate_point_effect_cpu pid=3436390)[0m 
-[36m(calculate_point_effect_cpu pid=3436390)[0m 
+[36m(calculate_point_effect_cpu pid=3436385)[0m
+[36m(calculate_point_effect_cpu pid=3436385)[0m
+[36m(calculate_point_effect_cpu pid=3436385)[0m
+[36m(calculate_point_effect_cpu pid=3436385)[0m
+[36m(calculate_point_effect_cpu pid=3436386)[0m
+[36m(calculate_point_effect_cpu pid=3436386)[0m
+[36m(calculate_point_effect_cpu pid=3436386)[0m
+[36m(calculate_point_effect_cpu pid=3436386)[0m
+[36m(calculate_point_effect_cpu pid=3436390)[0m
+[36m(calculate_point_effect_cpu pid=3436390)[0m
+[36m(calculate_point_effect_cpu pid=3436390)[0m
+[36m(calculate_point_effect_cpu pid=3436390)[0m
 [36m(calculate_point_effect_cpu pid=3436390)[0m Extra cycle  E= -155.028760469597  delta_E= -5.68e-14  |g|= 2.41e-06  |ddm|= 5.95e-06[32m [repeated 7x across cluster][0m
 [36m(calculate_point_effect_cpu pid=3436390)[0m converged SCF energy = -155.028760469597[32m [repeated 7x across cluster][0m
 [36m(calculate_point_effect_cpu pid=3436390)[0m Running TDDFT in current process (force_single_gpu=False)[32m [repeated 7x across cluster][0m
@@ -1004,12 +1004,12 @@ Point 30/67: SUCCESS (30/67 total)
 Point 31/67: SUCCESS (31/67 total)
 Point 32/67: SUCCESS (32/67 total)
 [36m(calculate_point_effect_cpu pid=3436376)[0m [Point 35] Running on CPU cores: {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15}, PID: 3436376
-[36m(calculate_point_effect_cpu pid=3436376)[0m 
+[36m(calculate_point_effect_cpu pid=3436376)[0m
 [36m(calculate_point_effect_cpu pid=3436376)[0m === Resurrecting molecule_alone.chk ===
 [36m(calculate_point_effect_cpu pid=3436376)[0m Loaded XC functional: b3lyp
 [36m(calculate_point_effect_cpu pid=3436376)[0m Creating DFT object with xc=b3lyp
-[36m(calculate_point_effect_cpu pid=3436376)[0m 
-[36m(calculate_point_effect_cpu pid=3436376)[0m 
+[36m(calculate_point_effect_cpu pid=3436376)[0m
+[36m(calculate_point_effect_cpu pid=3436376)[0m
 [36m(calculate_point_effect_cpu pid=3436376)[0m ******** <class 'pyscf.dft.rks.RKS'> ********
 [36m(calculate_point_effect_cpu pid=3436376)[0m method = RKS
 [36m(calculate_point_effect_cpu pid=3436376)[0m initial guess = chkfile
@@ -1032,53 +1032,53 @@ Point 32/67: SUCCESS (32/67 total)
 [36m(calculate_point_effect_cpu pid=3436376)[0m     P. J. Stephens, F. J. Devlin, C. F. Chabalowski, and M. J. Frisch.,  J. Phys. Chem. 98, 11623 (1994)
 [36m(calculate_point_effect_cpu pid=3436376)[0m small_rho_cutoff = 1e-07
 [36m(calculate_point_effect_cpu pid=3436376)[0m Set gradient conv threshold to 3.16228e-05
-[36m(calculate_point_effect_cpu pid=3436375)[0m 
-[36m(calculate_point_effect_cpu pid=3436375)[0m 
-[36m(calculate_point_effect_cpu pid=3436375)[0m 
-[36m(calculate_point_effect_cpu pid=3436382)[0m 
-[36m(calculate_point_effect_cpu pid=3436382)[0m 
-[36m(calculate_point_effect_cpu pid=3436382)[0m 
-[36m(calculate_point_effect_cpu pid=3436381)[0m 
-[36m(calculate_point_effect_cpu pid=3436381)[0m 
-[36m(calculate_point_effect_cpu pid=3436381)[0m 
-[36m(calculate_point_effect_cpu pid=3436387)[0m 
-[36m(calculate_point_effect_cpu pid=3436387)[0m 
-[36m(calculate_point_effect_cpu pid=3436387)[0m 
-[36m(calculate_point_effect_cpu pid=3436384)[0m 
-[36m(calculate_point_effect_cpu pid=3436384)[0m 
-[36m(calculate_point_effect_cpu pid=3436384)[0m 
-[36m(calculate_point_effect_cpu pid=3436380)[0m 
-[36m(calculate_point_effect_cpu pid=3436380)[0m 
-[36m(calculate_point_effect_cpu pid=3436380)[0m 
-[36m(calculate_point_effect_cpu pid=3436390)[0m 
-[36m(calculate_point_effect_cpu pid=3436390)[0m 
-[36m(calculate_point_effect_cpu pid=3436390)[0m 
-[36m(calculate_point_effect_cpu pid=3436389)[0m 
-[36m(calculate_point_effect_cpu pid=3436389)[0m 
-[36m(calculate_point_effect_cpu pid=3436389)[0m 
-[36m(calculate_point_effect_cpu pid=3436383)[0m 
-[36m(calculate_point_effect_cpu pid=3436383)[0m 
-[36m(calculate_point_effect_cpu pid=3436383)[0m 
-[36m(calculate_point_effect_cpu pid=3436386)[0m 
-[36m(calculate_point_effect_cpu pid=3436386)[0m 
-[36m(calculate_point_effect_cpu pid=3436386)[0m 
+[36m(calculate_point_effect_cpu pid=3436375)[0m
+[36m(calculate_point_effect_cpu pid=3436375)[0m
+[36m(calculate_point_effect_cpu pid=3436375)[0m
+[36m(calculate_point_effect_cpu pid=3436382)[0m
+[36m(calculate_point_effect_cpu pid=3436382)[0m
+[36m(calculate_point_effect_cpu pid=3436382)[0m
+[36m(calculate_point_effect_cpu pid=3436381)[0m
+[36m(calculate_point_effect_cpu pid=3436381)[0m
+[36m(calculate_point_effect_cpu pid=3436381)[0m
+[36m(calculate_point_effect_cpu pid=3436387)[0m
+[36m(calculate_point_effect_cpu pid=3436387)[0m
+[36m(calculate_point_effect_cpu pid=3436387)[0m
+[36m(calculate_point_effect_cpu pid=3436384)[0m
+[36m(calculate_point_effect_cpu pid=3436384)[0m
+[36m(calculate_point_effect_cpu pid=3436384)[0m
+[36m(calculate_point_effect_cpu pid=3436380)[0m
+[36m(calculate_point_effect_cpu pid=3436380)[0m
+[36m(calculate_point_effect_cpu pid=3436380)[0m
+[36m(calculate_point_effect_cpu pid=3436390)[0m
+[36m(calculate_point_effect_cpu pid=3436390)[0m
+[36m(calculate_point_effect_cpu pid=3436390)[0m
+[36m(calculate_point_effect_cpu pid=3436389)[0m
+[36m(calculate_point_effect_cpu pid=3436389)[0m
+[36m(calculate_point_effect_cpu pid=3436389)[0m
+[36m(calculate_point_effect_cpu pid=3436383)[0m
+[36m(calculate_point_effect_cpu pid=3436383)[0m
+[36m(calculate_point_effect_cpu pid=3436383)[0m
+[36m(calculate_point_effect_cpu pid=3436386)[0m
+[36m(calculate_point_effect_cpu pid=3436386)[0m
+[36m(calculate_point_effect_cpu pid=3436386)[0m
 [36m(calculate_point_effect_cpu pid=3436386)[0m chkfile to save SCF result = /tmp/tmpkcwz_osa.chk
-[36m(calculate_point_effect_cpu pid=3436378)[0m 
-[36m(calculate_point_effect_cpu pid=3436378)[0m 
-[36m(calculate_point_effect_cpu pid=3436378)[0m 
+[36m(calculate_point_effect_cpu pid=3436378)[0m
+[36m(calculate_point_effect_cpu pid=3436378)[0m
+[36m(calculate_point_effect_cpu pid=3436378)[0m
 [36m(calculate_point_effect_cpu pid=3436378)[0m chkfile to save SCF result = /tmp/tmpsvecgimz.chk
-[36m(calculate_point_effect_cpu pid=3436388)[0m 
-[36m(calculate_point_effect_cpu pid=3436388)[0m 
-[36m(calculate_point_effect_cpu pid=3436388)[0m 
-[36m(calculate_point_effect_cpu pid=3436379)[0m 
-[36m(calculate_point_effect_cpu pid=3436379)[0m 
-[36m(calculate_point_effect_cpu pid=3436379)[0m 
-[36m(calculate_point_effect_cpu pid=3436377)[0m 
-[36m(calculate_point_effect_cpu pid=3436377)[0m 
-[36m(calculate_point_effect_cpu pid=3436377)[0m 
-[36m(calculate_point_effect_cpu pid=3436385)[0m 
-[36m(calculate_point_effect_cpu pid=3436385)[0m 
-[36m(calculate_point_effect_cpu pid=3436385)[0m 
+[36m(calculate_point_effect_cpu pid=3436388)[0m
+[36m(calculate_point_effect_cpu pid=3436388)[0m
+[36m(calculate_point_effect_cpu pid=3436388)[0m
+[36m(calculate_point_effect_cpu pid=3436379)[0m
+[36m(calculate_point_effect_cpu pid=3436379)[0m
+[36m(calculate_point_effect_cpu pid=3436379)[0m
+[36m(calculate_point_effect_cpu pid=3436377)[0m
+[36m(calculate_point_effect_cpu pid=3436377)[0m
+[36m(calculate_point_effect_cpu pid=3436377)[0m
+[36m(calculate_point_effect_cpu pid=3436385)[0m
+[36m(calculate_point_effect_cpu pid=3436385)[0m
+[36m(calculate_point_effect_cpu pid=3436385)[0m
 [36m(calculate_point_effect_cpu pid=3436387)[0m init E= -155.028768605456
 [36m(calculate_point_effect_cpu pid=3436384)[0m   HOMO = -0.260574538961987  LUMO = 0.0672407765319121
 [36m(calculate_point_effect_cpu pid=3436375)[0m cycle= 1 E= -155.028768605452  delta_E= 3.92e-12  |g|= 6.17e-06  |ddm|= 8.04e-06
@@ -1087,8 +1087,8 @@ Point 32/67: SUCCESS (32/67 total)
 [36m(calculate_point_effect_cpu pid=3436384)[0m converged SCF energy = -155.028768605444
 [36m(calculate_point_effect_cpu pid=3436384)[0m Resurrected CPU DFT object: <class 'pyscf.dft.rks.RKS'>, Energy: -155.02876860544364
 [36m(calculate_point_effect_cpu pid=3436384)[0m Running TDDFT in current process (force_single_gpu=b3lyp)
-[36m(calculate_point_effect_cpu pid=3436384)[0m 
-[36m(calculate_point_effect_cpu pid=3436384)[0m 
+[36m(calculate_point_effect_cpu pid=3436384)[0m
+[36m(calculate_point_effect_cpu pid=3436384)[0m
 [36m(calculate_point_effect_cpu pid=3436384)[0m ******** <class 'pyscf.tdscf.rks.TDDFT'> for <class 'pyscf.dft.rks.RKS'> ********
 [36m(calculate_point_effect_cpu pid=3436384)[0m nstates = 1 singlet
 [36m(calculate_point_effect_cpu pid=3436384)[0m deg_eia_thresh = 1.000e-03
@@ -1098,72 +1098,72 @@ Point 32/67: SUCCESS (32/67 total)
 [36m(calculate_point_effect_cpu pid=3436384)[0m eigh level_shift = 0
 [36m(calculate_point_effect_cpu pid=3436384)[0m eigh max_cycle = 100
 [36m(calculate_point_effect_cpu pid=3436384)[0m chkfile = molecule_alone.chk
-[36m(calculate_point_effect_cpu pid=3436384)[0m 
-[36m(calculate_point_effect_cpu pid=3436384)[0m 
-[36m(calculate_point_effect_cpu pid=3436383)[0m 
-[36m(calculate_point_effect_cpu pid=3436383)[0m 
-[36m(calculate_point_effect_cpu pid=3436383)[0m 
-[36m(calculate_point_effect_cpu pid=3436383)[0m 
-[36m(calculate_point_effect_cpu pid=3436377)[0m 
-[36m(calculate_point_effect_cpu pid=3436377)[0m 
-[36m(calculate_point_effect_cpu pid=3436377)[0m 
-[36m(calculate_point_effect_cpu pid=3436377)[0m 
-[36m(calculate_point_effect_cpu pid=3436375)[0m 
-[36m(calculate_point_effect_cpu pid=3436375)[0m 
-[36m(calculate_point_effect_cpu pid=3436375)[0m 
-[36m(calculate_point_effect_cpu pid=3436375)[0m 
-[36m(calculate_point_effect_cpu pid=3436381)[0m 
-[36m(calculate_point_effect_cpu pid=3436381)[0m 
-[36m(calculate_point_effect_cpu pid=3436381)[0m 
-[36m(calculate_point_effect_cpu pid=3436381)[0m 
-[36m(calculate_point_effect_cpu pid=3436389)[0m 
-[36m(calculate_point_effect_cpu pid=3436389)[0m 
-[36m(calculate_point_effect_cpu pid=3436389)[0m 
-[36m(calculate_point_effect_cpu pid=3436389)[0m 
-[36m(calculate_point_effect_cpu pid=3436378)[0m 
-[36m(calculate_point_effect_cpu pid=3436378)[0m 
-[36m(calculate_point_effect_cpu pid=3436378)[0m 
-[36m(calculate_point_effect_cpu pid=3436378)[0m 
-[36m(calculate_point_effect_cpu pid=3436387)[0m 
-[36m(calculate_point_effect_cpu pid=3436387)[0m 
-[36m(calculate_point_effect_cpu pid=3436387)[0m 
-[36m(calculate_point_effect_cpu pid=3436387)[0m 
-[36m(calculate_point_effect_cpu pid=3436379)[0m 
-[36m(calculate_point_effect_cpu pid=3436379)[0m 
-[36m(calculate_point_effect_cpu pid=3436379)[0m 
-[36m(calculate_point_effect_cpu pid=3436379)[0m 
-[36m(calculate_point_effect_cpu pid=3436376)[0m 
-[36m(calculate_point_effect_cpu pid=3436376)[0m 
-[36m(calculate_point_effect_cpu pid=3436376)[0m 
-[36m(calculate_point_effect_cpu pid=3436376)[0m 
-[36m(calculate_point_effect_cpu pid=3436382)[0m 
-[36m(calculate_point_effect_cpu pid=3436382)[0m 
-[36m(calculate_point_effect_cpu pid=3436382)[0m 
-[36m(calculate_point_effect_cpu pid=3436382)[0m 
-[36m(calculate_point_effect_cpu pid=3436390)[0m 
-[36m(calculate_point_effect_cpu pid=3436390)[0m 
-[36m(calculate_point_effect_cpu pid=3436390)[0m 
-[36m(calculate_point_effect_cpu pid=3436390)[0m 
-[36m(calculate_point_effect_cpu pid=3436386)[0m 
-[36m(calculate_point_effect_cpu pid=3436386)[0m 
-[36m(calculate_point_effect_cpu pid=3436386)[0m 
-[36m(calculate_point_effect_cpu pid=3436386)[0m 
-[36m(calculate_point_effect_cpu pid=3436388)[0m 
-[36m(calculate_point_effect_cpu pid=3436388)[0m 
-[36m(calculate_point_effect_cpu pid=3436388)[0m 
-[36m(calculate_point_effect_cpu pid=3436388)[0m 
-[36m(calculate_point_effect_cpu pid=3436380)[0m 
-[36m(calculate_point_effect_cpu pid=3436380)[0m 
-[36m(calculate_point_effect_cpu pid=3436380)[0m 
-[36m(calculate_point_effect_cpu pid=3436380)[0m 
-[36m(calculate_point_effect_cpu pid=3436385)[0m 
-[36m(calculate_point_effect_cpu pid=3436385)[0m 
-[36m(calculate_point_effect_cpu pid=3436385)[0m 
-[36m(calculate_point_effect_cpu pid=3436385)[0m 
+[36m(calculate_point_effect_cpu pid=3436384)[0m
+[36m(calculate_point_effect_cpu pid=3436384)[0m
+[36m(calculate_point_effect_cpu pid=3436383)[0m
+[36m(calculate_point_effect_cpu pid=3436383)[0m
+[36m(calculate_point_effect_cpu pid=3436383)[0m
+[36m(calculate_point_effect_cpu pid=3436383)[0m
+[36m(calculate_point_effect_cpu pid=3436377)[0m
+[36m(calculate_point_effect_cpu pid=3436377)[0m
+[36m(calculate_point_effect_cpu pid=3436377)[0m
+[36m(calculate_point_effect_cpu pid=3436377)[0m
+[36m(calculate_point_effect_cpu pid=3436375)[0m
+[36m(calculate_point_effect_cpu pid=3436375)[0m
+[36m(calculate_point_effect_cpu pid=3436375)[0m
+[36m(calculate_point_effect_cpu pid=3436375)[0m
+[36m(calculate_point_effect_cpu pid=3436381)[0m
+[36m(calculate_point_effect_cpu pid=3436381)[0m
+[36m(calculate_point_effect_cpu pid=3436381)[0m
+[36m(calculate_point_effect_cpu pid=3436381)[0m
+[36m(calculate_point_effect_cpu pid=3436389)[0m
+[36m(calculate_point_effect_cpu pid=3436389)[0m
+[36m(calculate_point_effect_cpu pid=3436389)[0m
+[36m(calculate_point_effect_cpu pid=3436389)[0m
+[36m(calculate_point_effect_cpu pid=3436378)[0m
+[36m(calculate_point_effect_cpu pid=3436378)[0m
+[36m(calculate_point_effect_cpu pid=3436378)[0m
+[36m(calculate_point_effect_cpu pid=3436378)[0m
+[36m(calculate_point_effect_cpu pid=3436387)[0m
+[36m(calculate_point_effect_cpu pid=3436387)[0m
+[36m(calculate_point_effect_cpu pid=3436387)[0m
+[36m(calculate_point_effect_cpu pid=3436387)[0m
+[36m(calculate_point_effect_cpu pid=3436379)[0m
+[36m(calculate_point_effect_cpu pid=3436379)[0m
+[36m(calculate_point_effect_cpu pid=3436379)[0m
+[36m(calculate_point_effect_cpu pid=3436379)[0m
+[36m(calculate_point_effect_cpu pid=3436376)[0m
+[36m(calculate_point_effect_cpu pid=3436376)[0m
+[36m(calculate_point_effect_cpu pid=3436376)[0m
+[36m(calculate_point_effect_cpu pid=3436376)[0m
+[36m(calculate_point_effect_cpu pid=3436382)[0m
+[36m(calculate_point_effect_cpu pid=3436382)[0m
+[36m(calculate_point_effect_cpu pid=3436382)[0m
+[36m(calculate_point_effect_cpu pid=3436382)[0m
+[36m(calculate_point_effect_cpu pid=3436390)[0m
+[36m(calculate_point_effect_cpu pid=3436390)[0m
+[36m(calculate_point_effect_cpu pid=3436390)[0m
+[36m(calculate_point_effect_cpu pid=3436390)[0m
+[36m(calculate_point_effect_cpu pid=3436386)[0m
+[36m(calculate_point_effect_cpu pid=3436386)[0m
+[36m(calculate_point_effect_cpu pid=3436386)[0m
+[36m(calculate_point_effect_cpu pid=3436386)[0m
+[36m(calculate_point_effect_cpu pid=3436388)[0m
+[36m(calculate_point_effect_cpu pid=3436388)[0m
+[36m(calculate_point_effect_cpu pid=3436388)[0m
+[36m(calculate_point_effect_cpu pid=3436388)[0m
+[36m(calculate_point_effect_cpu pid=3436380)[0m
+[36m(calculate_point_effect_cpu pid=3436380)[0m
+[36m(calculate_point_effect_cpu pid=3436380)[0m
+[36m(calculate_point_effect_cpu pid=3436380)[0m
+[36m(calculate_point_effect_cpu pid=3436385)[0m
+[36m(calculate_point_effect_cpu pid=3436385)[0m
+[36m(calculate_point_effect_cpu pid=3436385)[0m
+[36m(calculate_point_effect_cpu pid=3436385)[0m
 [36m(calculate_point_effect_cpu pid=3436381)[0m Excited State energies (eV)
 [36m(calculate_point_effect_cpu pid=3436381)[0m [7.40200813]
-[36m(calculate_point_effect_cpu pid=3436381)[0m 
-[36m(calculate_point_effect_cpu pid=3436381)[0m 
+[36m(calculate_point_effect_cpu pid=3436381)[0m
+[36m(calculate_point_effect_cpu pid=3436381)[0m
 [36m(calculate_point_effect_cpu pid=3436381)[0m ******** <class 'pyscf.qmmm.itrf.QMMMRKS'> ********
 [36m(calculate_point_effect_cpu pid=3436381)[0m method = QMMMRKS
 [36m(calculate_point_effect_cpu pid=3436381)[0m chkfile to save SCF result = molecule_alone.chk
@@ -1211,48 +1211,48 @@ Point 32/67: SUCCESS (32/67 total)
 [36m(calculate_point_effect_cpu pid=3436385)[0m eigh max_cycle = 100[32m [repeated 15x across cluster][0m
 [36m(calculate_point_effect_cpu pid=3436385)[0m chkfile = molecule_alone.chk[32m [repeated 15x across cluster][0m
 [36m(calculate_point_effect_cpu pid=3436384)[0m [7.40200813]
-[36m(calculate_point_effect_cpu pid=3436384)[0m 
-[36m(calculate_point_effect_cpu pid=3436384)[0m 
+[36m(calculate_point_effect_cpu pid=3436384)[0m
+[36m(calculate_point_effect_cpu pid=3436384)[0m
 [36m(calculate_point_effect_cpu pid=3436379)[0m [7.40200813]
-[36m(calculate_point_effect_cpu pid=3436379)[0m 
-[36m(calculate_point_effect_cpu pid=3436379)[0m 
+[36m(calculate_point_effect_cpu pid=3436379)[0m
+[36m(calculate_point_effect_cpu pid=3436379)[0m
 [36m(calculate_point_effect_cpu pid=3436383)[0m [7.40200813]
-[36m(calculate_point_effect_cpu pid=3436383)[0m 
-[36m(calculate_point_effect_cpu pid=3436383)[0m 
+[36m(calculate_point_effect_cpu pid=3436383)[0m
+[36m(calculate_point_effect_cpu pid=3436383)[0m
 [36m(calculate_point_effect_cpu pid=3436377)[0m [7.40200813]
-[36m(calculate_point_effect_cpu pid=3436377)[0m 
-[36m(calculate_point_effect_cpu pid=3436377)[0m 
+[36m(calculate_point_effect_cpu pid=3436377)[0m
+[36m(calculate_point_effect_cpu pid=3436377)[0m
 [36m(calculate_point_effect_cpu pid=3436389)[0m [7.40200813]
-[36m(calculate_point_effect_cpu pid=3436389)[0m 
-[36m(calculate_point_effect_cpu pid=3436389)[0m 
+[36m(calculate_point_effect_cpu pid=3436389)[0m
+[36m(calculate_point_effect_cpu pid=3436389)[0m
 [36m(calculate_point_effect_cpu pid=3436378)[0m [7.40200813]
-[36m(calculate_point_effect_cpu pid=3436378)[0m 
-[36m(calculate_point_effect_cpu pid=3436378)[0m 
+[36m(calculate_point_effect_cpu pid=3436378)[0m
+[36m(calculate_point_effect_cpu pid=3436378)[0m
 [36m(calculate_point_effect_cpu pid=3436375)[0m [7.40200813]
-[36m(calculate_point_effect_cpu pid=3436375)[0m 
-[36m(calculate_point_effect_cpu pid=3436375)[0m 
+[36m(calculate_point_effect_cpu pid=3436375)[0m
+[36m(calculate_point_effect_cpu pid=3436375)[0m
 [36m(calculate_point_effect_cpu pid=3436381)[0m Running TDDFT in current process (force_single_gpu=False)
-[36m(calculate_point_effect_cpu pid=3436381)[0m 
-[36m(calculate_point_effect_cpu pid=3436381)[0m 
+[36m(calculate_point_effect_cpu pid=3436381)[0m
+[36m(calculate_point_effect_cpu pid=3436381)[0m
 [36m(calculate_point_effect_cpu pid=3436381)[0m ******** <class 'pyscf.tdscf.rks.TDDFT'> for <class 'pyscf.qmmm.itrf.QMMMRKS'> ********
-[36m(calculate_point_effect_cpu pid=3436381)[0m 
-[36m(calculate_point_effect_cpu pid=3436381)[0m 
-[36m(calculate_point_effect_cpu pid=3436379)[0m 
-[36m(calculate_point_effect_cpu pid=3436379)[0m 
-[36m(calculate_point_effect_cpu pid=3436379)[0m 
-[36m(calculate_point_effect_cpu pid=3436379)[0m 
-[36m(calculate_point_effect_cpu pid=3436383)[0m 
-[36m(calculate_point_effect_cpu pid=3436383)[0m 
-[36m(calculate_point_effect_cpu pid=3436383)[0m 
-[36m(calculate_point_effect_cpu pid=3436383)[0m 
-[36m(calculate_point_effect_cpu pid=3436377)[0m 
-[36m(calculate_point_effect_cpu pid=3436377)[0m 
-[36m(calculate_point_effect_cpu pid=3436377)[0m 
-[36m(calculate_point_effect_cpu pid=3436377)[0m 
-[36m(calculate_point_effect_cpu pid=3436378)[0m 
-[36m(calculate_point_effect_cpu pid=3436378)[0m 
-[36m(calculate_point_effect_cpu pid=3436378)[0m 
-[36m(calculate_point_effect_cpu pid=3436378)[0m 
+[36m(calculate_point_effect_cpu pid=3436381)[0m
+[36m(calculate_point_effect_cpu pid=3436381)[0m
+[36m(calculate_point_effect_cpu pid=3436379)[0m
+[36m(calculate_point_effect_cpu pid=3436379)[0m
+[36m(calculate_point_effect_cpu pid=3436379)[0m
+[36m(calculate_point_effect_cpu pid=3436379)[0m
+[36m(calculate_point_effect_cpu pid=3436383)[0m
+[36m(calculate_point_effect_cpu pid=3436383)[0m
+[36m(calculate_point_effect_cpu pid=3436383)[0m
+[36m(calculate_point_effect_cpu pid=3436383)[0m
+[36m(calculate_point_effect_cpu pid=3436377)[0m
+[36m(calculate_point_effect_cpu pid=3436377)[0m
+[36m(calculate_point_effect_cpu pid=3436377)[0m
+[36m(calculate_point_effect_cpu pid=3436377)[0m
+[36m(calculate_point_effect_cpu pid=3436378)[0m
+[36m(calculate_point_effect_cpu pid=3436378)[0m
+[36m(calculate_point_effect_cpu pid=3436378)[0m
+[36m(calculate_point_effect_cpu pid=3436378)[0m
 [36m(calculate_point_effect_cpu pid=3436375)[0m Excited State energies (eV)[32m [repeated 7x across cluster][0m
 [36m(calculate_point_effect_cpu pid=3436375)[0m ******** <class 'pyscf.qmmm.itrf.QMMMRKS'> ********[32m [repeated 7x across cluster][0m
 [36m(calculate_point_effect_cpu pid=3436375)[0m method = QMMMRKS[32m [repeated 7x across cluster][0m
@@ -1290,26 +1290,26 @@ Point 32/67: SUCCESS (32/67 total)
 [36m(calculate_point_effect_cpu pid=3436378)[0m eigh level_shift = 0[32m [repeated 5x across cluster][0m
 [36m(calculate_point_effect_cpu pid=3436378)[0m eigh max_cycle = 100[32m [repeated 5x across cluster][0m
 [36m(calculate_point_effect_cpu pid=3436378)[0m chkfile = molecule_alone.chk[32m [repeated 5x across cluster][0m
-[36m(calculate_point_effect_cpu pid=3436389)[0m 
-[36m(calculate_point_effect_cpu pid=3436389)[0m 
-[36m(calculate_point_effect_cpu pid=3436389)[0m 
-[36m(calculate_point_effect_cpu pid=3436389)[0m 
-[36m(calculate_point_effect_cpu pid=3436375)[0m 
-[36m(calculate_point_effect_cpu pid=3436375)[0m 
-[36m(calculate_point_effect_cpu pid=3436375)[0m 
-[36m(calculate_point_effect_cpu pid=3436375)[0m 
-[36m(calculate_point_effect_cpu pid=3436384)[0m 
-[36m(calculate_point_effect_cpu pid=3436384)[0m 
-[36m(calculate_point_effect_cpu pid=3436384)[0m 
-[36m(calculate_point_effect_cpu pid=3436384)[0m 
+[36m(calculate_point_effect_cpu pid=3436389)[0m
+[36m(calculate_point_effect_cpu pid=3436389)[0m
+[36m(calculate_point_effect_cpu pid=3436389)[0m
+[36m(calculate_point_effect_cpu pid=3436389)[0m
+[36m(calculate_point_effect_cpu pid=3436375)[0m
+[36m(calculate_point_effect_cpu pid=3436375)[0m
+[36m(calculate_point_effect_cpu pid=3436375)[0m
+[36m(calculate_point_effect_cpu pid=3436375)[0m
+[36m(calculate_point_effect_cpu pid=3436384)[0m
+[36m(calculate_point_effect_cpu pid=3436384)[0m
+[36m(calculate_point_effect_cpu pid=3436384)[0m
+[36m(calculate_point_effect_cpu pid=3436384)[0m
 [36m(calculate_point_effect_cpu pid=3436384)[0m Running TDDFT in current process (force_single_gpu=False)[32m [repeated 7x across cluster][0m
 [36m(calculate_point_effect_cpu pid=3436384)[0m ******** <class 'pyscf.tdscf.rks.TDDFT'> for <class 'pyscf.qmmm.itrf.QMMMRKS'> ********[32m [repeated 7x across cluster][0m
 [36m(calculate_point_effect_cpu pid=3436386)[0m [7.40200813]
-[36m(calculate_point_effect_cpu pid=3436386)[0m 
-[36m(calculate_point_effect_cpu pid=3436386)[0m 
+[36m(calculate_point_effect_cpu pid=3436386)[0m
+[36m(calculate_point_effect_cpu pid=3436386)[0m
 [36m(calculate_point_effect_cpu pid=3436387)[0m [7.40200813]
-[36m(calculate_point_effect_cpu pid=3436387)[0m 
-[36m(calculate_point_effect_cpu pid=3436387)[0m 
+[36m(calculate_point_effect_cpu pid=3436387)[0m
+[36m(calculate_point_effect_cpu pid=3436387)[0m
 [36m(calculate_point_effect_cpu pid=3436387)[0m Excited State energies (eV)[32m [repeated 2x across cluster][0m
 [36m(calculate_point_effect_cpu pid=3436387)[0m ******** <class 'pyscf.qmmm.itrf.QMMMRKS'> ********[32m [repeated 2x across cluster][0m
 [36m(calculate_point_effect_cpu pid=3436387)[0m method = QMMMRKS[32m [repeated 2x across cluster][0m
@@ -1348,26 +1348,26 @@ Point 32/67: SUCCESS (32/67 total)
 [36m(calculate_point_effect_cpu pid=3436384)[0m chkfile = molecule_alone.chk[32m [repeated 3x across cluster][0m
 [36m(calculate_point_effect_cpu pid=3436386)[0m init E= -155.031494339917
 [36m(calculate_point_effect_cpu pid=3436376)[0m [7.40200813]
-[36m(calculate_point_effect_cpu pid=3436376)[0m 
-[36m(calculate_point_effect_cpu pid=3436376)[0m 
+[36m(calculate_point_effect_cpu pid=3436376)[0m
+[36m(calculate_point_effect_cpu pid=3436376)[0m
 [36m(calculate_point_effect_cpu pid=3436390)[0m [7.40200813]
-[36m(calculate_point_effect_cpu pid=3436390)[0m 
-[36m(calculate_point_effect_cpu pid=3436390)[0m 
+[36m(calculate_point_effect_cpu pid=3436390)[0m
+[36m(calculate_point_effect_cpu pid=3436390)[0m
 [36m(calculate_point_effect_cpu pid=3436388)[0m [7.40200813]
-[36m(calculate_point_effect_cpu pid=3436388)[0m 
-[36m(calculate_point_effect_cpu pid=3436388)[0m 
+[36m(calculate_point_effect_cpu pid=3436388)[0m
+[36m(calculate_point_effect_cpu pid=3436388)[0m
 [36m(calculate_point_effect_cpu pid=3436387)[0m Running TDDFT in current process (force_single_gpu=False)
-[36m(calculate_point_effect_cpu pid=3436387)[0m 
-[36m(calculate_point_effect_cpu pid=3436387)[0m 
+[36m(calculate_point_effect_cpu pid=3436387)[0m
+[36m(calculate_point_effect_cpu pid=3436387)[0m
 [36m(calculate_point_effect_cpu pid=3436387)[0m ******** <class 'pyscf.tdscf.rks.TDDFT'> for <class 'pyscf.qmmm.itrf.QMMMRKS'> ********
-[36m(calculate_point_effect_cpu pid=3436387)[0m 
-[36m(calculate_point_effect_cpu pid=3436387)[0m 
+[36m(calculate_point_effect_cpu pid=3436387)[0m
+[36m(calculate_point_effect_cpu pid=3436387)[0m
 [36m(calculate_point_effect_cpu pid=3436382)[0m [7.40200813]
-[36m(calculate_point_effect_cpu pid=3436382)[0m 
-[36m(calculate_point_effect_cpu pid=3436382)[0m 
+[36m(calculate_point_effect_cpu pid=3436382)[0m
+[36m(calculate_point_effect_cpu pid=3436382)[0m
 [36m(calculate_point_effect_cpu pid=3436380)[0m [7.40200813]
-[36m(calculate_point_effect_cpu pid=3436380)[0m 
-[36m(calculate_point_effect_cpu pid=3436380)[0m 
+[36m(calculate_point_effect_cpu pid=3436380)[0m
+[36m(calculate_point_effect_cpu pid=3436380)[0m
 [36m(calculate_point_effect_cpu pid=3436380)[0m Excited State energies (eV)[32m [repeated 5x across cluster][0m
 [36m(calculate_point_effect_cpu pid=3436380)[0m ******** <class 'pyscf.qmmm.itrf.QMMMRKS'> ********[32m [repeated 5x across cluster][0m
 [36m(calculate_point_effect_cpu pid=3436380)[0m method = QMMMRKS[32m [repeated 5x across cluster][0m
@@ -1406,12 +1406,12 @@ Point 32/67: SUCCESS (32/67 total)
 [36m(calculate_point_effect_cpu pid=3436387)[0m chkfile = molecule_alone.chk
 [36m(calculate_point_effect_cpu pid=3436382)[0m init E= -155.035576629377[32m [repeated 5x across cluster][0m
 [36m(calculate_point_effect_cpu pid=3436385)[0m [7.40200813]
-[36m(calculate_point_effect_cpu pid=3436385)[0m 
-[36m(calculate_point_effect_cpu pid=3436385)[0m 
+[36m(calculate_point_effect_cpu pid=3436385)[0m
+[36m(calculate_point_effect_cpu pid=3436385)[0m
 [36m(calculate_point_effect_cpu pid=3436386)[0m Extra cycle  E= -155.031956514222  delta_E= -8.53e-13  |g|= 1.79e-06  |ddm|= 5.63e-06
 [36m(calculate_point_effect_cpu pid=3436386)[0m converged SCF energy = -155.031956514222
-[36m(calculate_point_effect_cpu pid=3436386)[0m 
-[36m(calculate_point_effect_cpu pid=3436386)[0m 
+[36m(calculate_point_effect_cpu pid=3436386)[0m
+[36m(calculate_point_effect_cpu pid=3436386)[0m
 [36m(calculate_point_effect_cpu pid=3436386)[0m nstates = 1 singlet
 [36m(calculate_point_effect_cpu pid=3436386)[0m deg_eia_thresh = 1.000e-03
 [36m(calculate_point_effect_cpu pid=3436386)[0m wfnsym = None
@@ -1420,26 +1420,26 @@ Point 32/67: SUCCESS (32/67 total)
 [36m(calculate_point_effect_cpu pid=3436386)[0m eigh level_shift = 0
 [36m(calculate_point_effect_cpu pid=3436386)[0m eigh max_cycle = 100
 [36m(calculate_point_effect_cpu pid=3436386)[0m chkfile = molecule_alone.chk
-[36m(calculate_point_effect_cpu pid=3436386)[0m 
-[36m(calculate_point_effect_cpu pid=3436386)[0m 
-[36m(calculate_point_effect_cpu pid=3436376)[0m 
-[36m(calculate_point_effect_cpu pid=3436376)[0m 
-[36m(calculate_point_effect_cpu pid=3436376)[0m 
-[36m(calculate_point_effect_cpu pid=3436376)[0m 
-[36m(calculate_point_effect_cpu pid=3436390)[0m 
-[36m(calculate_point_effect_cpu pid=3436390)[0m 
-[36m(calculate_point_effect_cpu pid=3436390)[0m 
-[36m(calculate_point_effect_cpu pid=3436390)[0m 
+[36m(calculate_point_effect_cpu pid=3436386)[0m
+[36m(calculate_point_effect_cpu pid=3436386)[0m
+[36m(calculate_point_effect_cpu pid=3436376)[0m
+[36m(calculate_point_effect_cpu pid=3436376)[0m
+[36m(calculate_point_effect_cpu pid=3436376)[0m
+[36m(calculate_point_effect_cpu pid=3436376)[0m
+[36m(calculate_point_effect_cpu pid=3436390)[0m
+[36m(calculate_point_effect_cpu pid=3436390)[0m
+[36m(calculate_point_effect_cpu pid=3436390)[0m
+[36m(calculate_point_effect_cpu pid=3436390)[0m
 [36m(calculate_point_effect_cpu pid=3436390)[0m Running TDDFT in current process (force_single_gpu=False)[32m [repeated 3x across cluster][0m
 [36m(calculate_point_effect_cpu pid=3436390)[0m ******** <class 'pyscf.tdscf.rks.TDDFT'> for <class 'pyscf.qmmm.itrf.QMMMRKS'> ********[32m [repeated 3x across cluster][0m
-[36m(calculate_point_effect_cpu pid=3436388)[0m 
-[36m(calculate_point_effect_cpu pid=3436388)[0m 
-[36m(calculate_point_effect_cpu pid=3436388)[0m 
-[36m(calculate_point_effect_cpu pid=3436388)[0m 
-[36m(calculate_point_effect_cpu pid=3436382)[0m 
-[36m(calculate_point_effect_cpu pid=3436382)[0m 
-[36m(calculate_point_effect_cpu pid=3436382)[0m 
-[36m(calculate_point_effect_cpu pid=3436382)[0m 
+[36m(calculate_point_effect_cpu pid=3436388)[0m
+[36m(calculate_point_effect_cpu pid=3436388)[0m
+[36m(calculate_point_effect_cpu pid=3436388)[0m
+[36m(calculate_point_effect_cpu pid=3436388)[0m
+[36m(calculate_point_effect_cpu pid=3436382)[0m
+[36m(calculate_point_effect_cpu pid=3436382)[0m
+[36m(calculate_point_effect_cpu pid=3436382)[0m
+[36m(calculate_point_effect_cpu pid=3436382)[0m
 [36m(calculate_point_effect_cpu pid=3436385)[0m Excited State energies (eV)
 [36m(calculate_point_effect_cpu pid=3436385)[0m ******** <class 'pyscf.qmmm.itrf.QMMMRKS'> ********
 [36m(calculate_point_effect_cpu pid=3436385)[0m method = QMMMRKS
@@ -1467,10 +1467,10 @@ Point 32/67: SUCCESS (32/67 total)
 [36m(calculate_point_effect_cpu pid=3436380)[0m   HOMO = -0.277566709006587  LUMO = 0.0496225544870926[32m [repeated 39x across cluster][0m
 [36m(calculate_point_effect_cpu pid=3436380)[0m cycle= 7 E= -155.027564209216  delta_E= -9.12e-11  |g|= 2.18e-06  |ddm|= 2.09e-05[32m [repeated 37x across cluster][0m
 [36m(calculate_point_effect_cpu pid=3436385)[0m init E= -155.028004310128[32m [repeated 2x across cluster][0m
-[36m(calculate_point_effect_cpu pid=3436380)[0m 
-[36m(calculate_point_effect_cpu pid=3436380)[0m 
-[36m(calculate_point_effect_cpu pid=3436380)[0m 
-[36m(calculate_point_effect_cpu pid=3436380)[0m 
+[36m(calculate_point_effect_cpu pid=3436380)[0m
+[36m(calculate_point_effect_cpu pid=3436380)[0m
+[36m(calculate_point_effect_cpu pid=3436380)[0m
+[36m(calculate_point_effect_cpu pid=3436380)[0m
 [36m(calculate_point_effect_cpu pid=3436385)[0m Extra cycle  E= -155.028451774928  delta_E= -2.5e-12  |g|= 2.15e-06  |ddm|= 6.96e-06[32m [repeated 6x across cluster][0m
 [36m(calculate_point_effect_cpu pid=3436380)[0m converged SCF energy = -155.027564209216[32m [repeated 5x across cluster][0m
 [36m(calculate_point_effect_cpu pid=3436380)[0m nstates = 1 singlet[32m [repeated 5x across cluster][0m
@@ -1481,10 +1481,10 @@ Point 32/67: SUCCESS (32/67 total)
 [36m(calculate_point_effect_cpu pid=3436380)[0m eigh level_shift = 0[32m [repeated 5x across cluster][0m
 [36m(calculate_point_effect_cpu pid=3436380)[0m eigh max_cycle = 100[32m [repeated 5x across cluster][0m
 [36m(calculate_point_effect_cpu pid=3436380)[0m chkfile = molecule_alone.chk[32m [repeated 5x across cluster][0m
-[36m(calculate_point_effect_cpu pid=3436385)[0m 
-[36m(calculate_point_effect_cpu pid=3436385)[0m 
-[36m(calculate_point_effect_cpu pid=3436385)[0m 
-[36m(calculate_point_effect_cpu pid=3436385)[0m 
+[36m(calculate_point_effect_cpu pid=3436385)[0m
+[36m(calculate_point_effect_cpu pid=3436385)[0m
+[36m(calculate_point_effect_cpu pid=3436385)[0m
+[36m(calculate_point_effect_cpu pid=3436385)[0m
 [36m(calculate_point_effect_cpu pid=3436377)[0m Excited State energies (eV)
 [36m(calculate_point_effect_cpu pid=3436377)[0m [7.46844092]
 [36m(calculate_point_effect_cpu pid=3436385)[0m Running TDDFT in current process (force_single_gpu=False)[32m [repeated 4x across cluster][0m
@@ -1539,13 +1539,13 @@ Point 46/67: SUCCESS (46/67 total)
 Point 47/67: SUCCESS (47/67 total)
 Point 48/67: SUCCESS (48/67 total)
 [36m(calculate_point_effect_cpu pid=3436376)[0m [Point 50] Running on CPU cores: {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15}, PID: 3436376
-[36m(calculate_point_effect_cpu pid=3436376)[0m 
+[36m(calculate_point_effect_cpu pid=3436376)[0m
 [36m(calculate_point_effect_cpu pid=3436376)[0m === Resurrecting molecule_alone.chk ===
 [36m(calculate_point_effect_cpu pid=3436376)[0m Loaded XC functional: b3lyp
 [36m(calculate_point_effect_cpu pid=3436376)[0m Creating DFT object with xc=b3lyp
-[36m(calculate_point_effect_cpu pid=3436375)[0m 
-[36m(calculate_point_effect_cpu pid=3436375)[0m 
-[36m(calculate_point_effect_cpu pid=3436375)[0m 
+[36m(calculate_point_effect_cpu pid=3436375)[0m
+[36m(calculate_point_effect_cpu pid=3436375)[0m
+[36m(calculate_point_effect_cpu pid=3436375)[0m
 [36m(calculate_point_effect_cpu pid=3436375)[0m ******** <class 'pyscf.dft.rks.RKS'> ********
 [36m(calculate_point_effect_cpu pid=3436375)[0m method = RKS
 [36m(calculate_point_effect_cpu pid=3436375)[0m initial guess = chkfile
@@ -1568,51 +1568,51 @@ Point 48/67: SUCCESS (48/67 total)
 [36m(calculate_point_effect_cpu pid=3436375)[0m     P. J. Stephens, F. J. Devlin, C. F. Chabalowski, and M. J. Frisch.,  J. Phys. Chem. 98, 11623 (1994)
 [36m(calculate_point_effect_cpu pid=3436375)[0m small_rho_cutoff = 1e-07
 [36m(calculate_point_effect_cpu pid=3436375)[0m Set gradient conv threshold to 3.16228e-05
-[36m(calculate_point_effect_cpu pid=3436382)[0m 
-[36m(calculate_point_effect_cpu pid=3436382)[0m 
-[36m(calculate_point_effect_cpu pid=3436382)[0m 
-[36m(calculate_point_effect_cpu pid=3436381)[0m 
-[36m(calculate_point_effect_cpu pid=3436381)[0m 
-[36m(calculate_point_effect_cpu pid=3436381)[0m 
-[36m(calculate_point_effect_cpu pid=3436387)[0m 
-[36m(calculate_point_effect_cpu pid=3436387)[0m 
-[36m(calculate_point_effect_cpu pid=3436387)[0m 
-[36m(calculate_point_effect_cpu pid=3436384)[0m 
-[36m(calculate_point_effect_cpu pid=3436384)[0m 
-[36m(calculate_point_effect_cpu pid=3436384)[0m 
-[36m(calculate_point_effect_cpu pid=3436380)[0m 
-[36m(calculate_point_effect_cpu pid=3436380)[0m 
-[36m(calculate_point_effect_cpu pid=3436380)[0m 
-[36m(calculate_point_effect_cpu pid=3436390)[0m 
-[36m(calculate_point_effect_cpu pid=3436390)[0m 
-[36m(calculate_point_effect_cpu pid=3436390)[0m 
-[36m(calculate_point_effect_cpu pid=3436389)[0m 
-[36m(calculate_point_effect_cpu pid=3436389)[0m 
-[36m(calculate_point_effect_cpu pid=3436389)[0m 
-[36m(calculate_point_effect_cpu pid=3436383)[0m 
-[36m(calculate_point_effect_cpu pid=3436383)[0m 
-[36m(calculate_point_effect_cpu pid=3436383)[0m 
-[36m(calculate_point_effect_cpu pid=3436386)[0m 
-[36m(calculate_point_effect_cpu pid=3436386)[0m 
-[36m(calculate_point_effect_cpu pid=3436386)[0m 
-[36m(calculate_point_effect_cpu pid=3436378)[0m 
-[36m(calculate_point_effect_cpu pid=3436378)[0m 
-[36m(calculate_point_effect_cpu pid=3436378)[0m 
-[36m(calculate_point_effect_cpu pid=3436388)[0m 
-[36m(calculate_point_effect_cpu pid=3436388)[0m 
-[36m(calculate_point_effect_cpu pid=3436388)[0m 
-[36m(calculate_point_effect_cpu pid=3436379)[0m 
-[36m(calculate_point_effect_cpu pid=3436379)[0m 
-[36m(calculate_point_effect_cpu pid=3436379)[0m 
-[36m(calculate_point_effect_cpu pid=3436377)[0m 
-[36m(calculate_point_effect_cpu pid=3436377)[0m 
-[36m(calculate_point_effect_cpu pid=3436377)[0m 
+[36m(calculate_point_effect_cpu pid=3436382)[0m
+[36m(calculate_point_effect_cpu pid=3436382)[0m
+[36m(calculate_point_effect_cpu pid=3436382)[0m
+[36m(calculate_point_effect_cpu pid=3436381)[0m
+[36m(calculate_point_effect_cpu pid=3436381)[0m
+[36m(calculate_point_effect_cpu pid=3436381)[0m
+[36m(calculate_point_effect_cpu pid=3436387)[0m
+[36m(calculate_point_effect_cpu pid=3436387)[0m
+[36m(calculate_point_effect_cpu pid=3436387)[0m
+[36m(calculate_point_effect_cpu pid=3436384)[0m
+[36m(calculate_point_effect_cpu pid=3436384)[0m
+[36m(calculate_point_effect_cpu pid=3436384)[0m
+[36m(calculate_point_effect_cpu pid=3436380)[0m
+[36m(calculate_point_effect_cpu pid=3436380)[0m
+[36m(calculate_point_effect_cpu pid=3436380)[0m
+[36m(calculate_point_effect_cpu pid=3436390)[0m
+[36m(calculate_point_effect_cpu pid=3436390)[0m
+[36m(calculate_point_effect_cpu pid=3436390)[0m
+[36m(calculate_point_effect_cpu pid=3436389)[0m
+[36m(calculate_point_effect_cpu pid=3436389)[0m
+[36m(calculate_point_effect_cpu pid=3436389)[0m
+[36m(calculate_point_effect_cpu pid=3436383)[0m
+[36m(calculate_point_effect_cpu pid=3436383)[0m
+[36m(calculate_point_effect_cpu pid=3436383)[0m
+[36m(calculate_point_effect_cpu pid=3436386)[0m
+[36m(calculate_point_effect_cpu pid=3436386)[0m
+[36m(calculate_point_effect_cpu pid=3436386)[0m
+[36m(calculate_point_effect_cpu pid=3436378)[0m
+[36m(calculate_point_effect_cpu pid=3436378)[0m
+[36m(calculate_point_effect_cpu pid=3436378)[0m
+[36m(calculate_point_effect_cpu pid=3436388)[0m
+[36m(calculate_point_effect_cpu pid=3436388)[0m
+[36m(calculate_point_effect_cpu pid=3436388)[0m
+[36m(calculate_point_effect_cpu pid=3436379)[0m
+[36m(calculate_point_effect_cpu pid=3436379)[0m
+[36m(calculate_point_effect_cpu pid=3436379)[0m
+[36m(calculate_point_effect_cpu pid=3436377)[0m
+[36m(calculate_point_effect_cpu pid=3436377)[0m
+[36m(calculate_point_effect_cpu pid=3436377)[0m
 [36m(calculate_point_effect_cpu pid=3436377)[0m chkfile to save SCF result = /tmp/tmpjuulnwkx.chk
-[36m(calculate_point_effect_cpu pid=3436385)[0m 
-[36m(calculate_point_effect_cpu pid=3436385)[0m 
-[36m(calculate_point_effect_cpu pid=3436385)[0m 
-[36m(calculate_point_effect_cpu pid=3436376)[0m 
-[36m(calculate_point_effect_cpu pid=3436376)[0m 
+[36m(calculate_point_effect_cpu pid=3436385)[0m
+[36m(calculate_point_effect_cpu pid=3436385)[0m
+[36m(calculate_point_effect_cpu pid=3436385)[0m
+[36m(calculate_point_effect_cpu pid=3436376)[0m
+[36m(calculate_point_effect_cpu pid=3436376)[0m
 [36m(calculate_point_effect_cpu pid=3436381)[0m init E= -155.028768605456
 [36m(calculate_point_effect_cpu pid=3436381)[0m   HOMO = -0.260574538961987  LUMO = 0.0672407765319121
 [36m(calculate_point_effect_cpu pid=3436381)[0m cycle= 1 E= -155.028768605452  delta_E= 3.92e-12  |g|= 6.17e-06  |ddm|= 8.04e-06
@@ -1620,8 +1620,8 @@ Point 48/67: SUCCESS (48/67 total)
 [36m(calculate_point_effect_cpu pid=3436381)[0m converged SCF energy = -155.028768605444
 [36m(calculate_point_effect_cpu pid=3436381)[0m Resurrected CPU DFT object: <class 'pyscf.dft.rks.RKS'>, Energy: -155.02876860544364
 [36m(calculate_point_effect_cpu pid=3436381)[0m Running TDDFT in current process (force_single_gpu=b3lyp)
-[36m(calculate_point_effect_cpu pid=3436381)[0m 
-[36m(calculate_point_effect_cpu pid=3436381)[0m 
+[36m(calculate_point_effect_cpu pid=3436381)[0m
+[36m(calculate_point_effect_cpu pid=3436381)[0m
 [36m(calculate_point_effect_cpu pid=3436381)[0m ******** <class 'pyscf.tdscf.rks.TDDFT'> for <class 'pyscf.dft.rks.RKS'> ********
 [36m(calculate_point_effect_cpu pid=3436381)[0m nstates = 1 singlet
 [36m(calculate_point_effect_cpu pid=3436381)[0m deg_eia_thresh = 1.000e-03
@@ -1631,71 +1631,71 @@ Point 48/67: SUCCESS (48/67 total)
 [36m(calculate_point_effect_cpu pid=3436381)[0m eigh level_shift = 0
 [36m(calculate_point_effect_cpu pid=3436381)[0m eigh max_cycle = 100
 [36m(calculate_point_effect_cpu pid=3436381)[0m chkfile = molecule_alone.chk
-[36m(calculate_point_effect_cpu pid=3436381)[0m 
-[36m(calculate_point_effect_cpu pid=3436381)[0m 
-[36m(calculate_point_effect_cpu pid=3436387)[0m 
-[36m(calculate_point_effect_cpu pid=3436387)[0m 
-[36m(calculate_point_effect_cpu pid=3436387)[0m 
-[36m(calculate_point_effect_cpu pid=3436387)[0m 
-[36m(calculate_point_effect_cpu pid=3436380)[0m 
-[36m(calculate_point_effect_cpu pid=3436380)[0m 
-[36m(calculate_point_effect_cpu pid=3436380)[0m 
-[36m(calculate_point_effect_cpu pid=3436380)[0m 
-[36m(calculate_point_effect_cpu pid=3436389)[0m 
-[36m(calculate_point_effect_cpu pid=3436389)[0m 
-[36m(calculate_point_effect_cpu pid=3436389)[0m 
-[36m(calculate_point_effect_cpu pid=3436389)[0m 
-[36m(calculate_point_effect_cpu pid=3436383)[0m 
-[36m(calculate_point_effect_cpu pid=3436383)[0m 
-[36m(calculate_point_effect_cpu pid=3436383)[0m 
-[36m(calculate_point_effect_cpu pid=3436383)[0m 
-[36m(calculate_point_effect_cpu pid=3436378)[0m 
-[36m(calculate_point_effect_cpu pid=3436378)[0m 
-[36m(calculate_point_effect_cpu pid=3436378)[0m 
-[36m(calculate_point_effect_cpu pid=3436378)[0m 
-[36m(calculate_point_effect_cpu pid=3436379)[0m 
-[36m(calculate_point_effect_cpu pid=3436379)[0m 
-[36m(calculate_point_effect_cpu pid=3436379)[0m 
-[36m(calculate_point_effect_cpu pid=3436379)[0m 
-[36m(calculate_point_effect_cpu pid=3436385)[0m 
-[36m(calculate_point_effect_cpu pid=3436385)[0m 
-[36m(calculate_point_effect_cpu pid=3436385)[0m 
-[36m(calculate_point_effect_cpu pid=3436385)[0m 
-[36m(calculate_point_effect_cpu pid=3436375)[0m 
-[36m(calculate_point_effect_cpu pid=3436375)[0m 
-[36m(calculate_point_effect_cpu pid=3436375)[0m 
-[36m(calculate_point_effect_cpu pid=3436375)[0m 
-[36m(calculate_point_effect_cpu pid=3436388)[0m 
-[36m(calculate_point_effect_cpu pid=3436388)[0m 
-[36m(calculate_point_effect_cpu pid=3436388)[0m 
-[36m(calculate_point_effect_cpu pid=3436388)[0m 
-[36m(calculate_point_effect_cpu pid=3436376)[0m 
-[36m(calculate_point_effect_cpu pid=3436376)[0m 
-[36m(calculate_point_effect_cpu pid=3436376)[0m 
-[36m(calculate_point_effect_cpu pid=3436376)[0m 
-[36m(calculate_point_effect_cpu pid=3436382)[0m 
-[36m(calculate_point_effect_cpu pid=3436382)[0m 
-[36m(calculate_point_effect_cpu pid=3436382)[0m 
-[36m(calculate_point_effect_cpu pid=3436382)[0m 
-[36m(calculate_point_effect_cpu pid=3436384)[0m 
-[36m(calculate_point_effect_cpu pid=3436384)[0m 
-[36m(calculate_point_effect_cpu pid=3436384)[0m 
-[36m(calculate_point_effect_cpu pid=3436384)[0m 
-[36m(calculate_point_effect_cpu pid=3436390)[0m 
-[36m(calculate_point_effect_cpu pid=3436390)[0m 
-[36m(calculate_point_effect_cpu pid=3436390)[0m 
-[36m(calculate_point_effect_cpu pid=3436390)[0m 
-[36m(calculate_point_effect_cpu pid=3436386)[0m 
-[36m(calculate_point_effect_cpu pid=3436386)[0m 
-[36m(calculate_point_effect_cpu pid=3436386)[0m 
-[36m(calculate_point_effect_cpu pid=3436386)[0m 
-[36m(calculate_point_effect_cpu pid=3436377)[0m 
-[36m(calculate_point_effect_cpu pid=3436377)[0m 
-[36m(calculate_point_effect_cpu pid=3436377)[0m 
-[36m(calculate_point_effect_cpu pid=3436377)[0m 
+[36m(calculate_point_effect_cpu pid=3436381)[0m
+[36m(calculate_point_effect_cpu pid=3436381)[0m
+[36m(calculate_point_effect_cpu pid=3436387)[0m
+[36m(calculate_point_effect_cpu pid=3436387)[0m
+[36m(calculate_point_effect_cpu pid=3436387)[0m
+[36m(calculate_point_effect_cpu pid=3436387)[0m
+[36m(calculate_point_effect_cpu pid=3436380)[0m
+[36m(calculate_point_effect_cpu pid=3436380)[0m
+[36m(calculate_point_effect_cpu pid=3436380)[0m
+[36m(calculate_point_effect_cpu pid=3436380)[0m
+[36m(calculate_point_effect_cpu pid=3436389)[0m
+[36m(calculate_point_effect_cpu pid=3436389)[0m
+[36m(calculate_point_effect_cpu pid=3436389)[0m
+[36m(calculate_point_effect_cpu pid=3436389)[0m
+[36m(calculate_point_effect_cpu pid=3436383)[0m
+[36m(calculate_point_effect_cpu pid=3436383)[0m
+[36m(calculate_point_effect_cpu pid=3436383)[0m
+[36m(calculate_point_effect_cpu pid=3436383)[0m
+[36m(calculate_point_effect_cpu pid=3436378)[0m
+[36m(calculate_point_effect_cpu pid=3436378)[0m
+[36m(calculate_point_effect_cpu pid=3436378)[0m
+[36m(calculate_point_effect_cpu pid=3436378)[0m
+[36m(calculate_point_effect_cpu pid=3436379)[0m
+[36m(calculate_point_effect_cpu pid=3436379)[0m
+[36m(calculate_point_effect_cpu pid=3436379)[0m
+[36m(calculate_point_effect_cpu pid=3436379)[0m
+[36m(calculate_point_effect_cpu pid=3436385)[0m
+[36m(calculate_point_effect_cpu pid=3436385)[0m
+[36m(calculate_point_effect_cpu pid=3436385)[0m
+[36m(calculate_point_effect_cpu pid=3436385)[0m
+[36m(calculate_point_effect_cpu pid=3436375)[0m
+[36m(calculate_point_effect_cpu pid=3436375)[0m
+[36m(calculate_point_effect_cpu pid=3436375)[0m
+[36m(calculate_point_effect_cpu pid=3436375)[0m
+[36m(calculate_point_effect_cpu pid=3436388)[0m
+[36m(calculate_point_effect_cpu pid=3436388)[0m
+[36m(calculate_point_effect_cpu pid=3436388)[0m
+[36m(calculate_point_effect_cpu pid=3436388)[0m
+[36m(calculate_point_effect_cpu pid=3436376)[0m
+[36m(calculate_point_effect_cpu pid=3436376)[0m
+[36m(calculate_point_effect_cpu pid=3436376)[0m
+[36m(calculate_point_effect_cpu pid=3436376)[0m
+[36m(calculate_point_effect_cpu pid=3436382)[0m
+[36m(calculate_point_effect_cpu pid=3436382)[0m
+[36m(calculate_point_effect_cpu pid=3436382)[0m
+[36m(calculate_point_effect_cpu pid=3436382)[0m
+[36m(calculate_point_effect_cpu pid=3436384)[0m
+[36m(calculate_point_effect_cpu pid=3436384)[0m
+[36m(calculate_point_effect_cpu pid=3436384)[0m
+[36m(calculate_point_effect_cpu pid=3436384)[0m
+[36m(calculate_point_effect_cpu pid=3436390)[0m
+[36m(calculate_point_effect_cpu pid=3436390)[0m
+[36m(calculate_point_effect_cpu pid=3436390)[0m
+[36m(calculate_point_effect_cpu pid=3436390)[0m
+[36m(calculate_point_effect_cpu pid=3436386)[0m
+[36m(calculate_point_effect_cpu pid=3436386)[0m
+[36m(calculate_point_effect_cpu pid=3436386)[0m
+[36m(calculate_point_effect_cpu pid=3436386)[0m
+[36m(calculate_point_effect_cpu pid=3436377)[0m
+[36m(calculate_point_effect_cpu pid=3436377)[0m
+[36m(calculate_point_effect_cpu pid=3436377)[0m
+[36m(calculate_point_effect_cpu pid=3436377)[0m
 [36m(calculate_point_effect_cpu pid=3436381)[0m [7.40200813]
-[36m(calculate_point_effect_cpu pid=3436381)[0m 
-[36m(calculate_point_effect_cpu pid=3436381)[0m 
+[36m(calculate_point_effect_cpu pid=3436381)[0m
+[36m(calculate_point_effect_cpu pid=3436381)[0m
 [36m(calculate_point_effect_cpu pid=3436381)[0m ******** <class 'pyscf.qmmm.itrf.QMMMRKS'> ********
 [36m(calculate_point_effect_cpu pid=3436381)[0m method = QMMMRKS
 [36m(calculate_point_effect_cpu pid=3436381)[0m chkfile to save SCF result = molecule_alone.chk
@@ -1745,40 +1745,40 @@ Point 48/67: SUCCESS (48/67 total)
 [36m(calculate_point_effect_cpu pid=3436377)[0m chkfile = molecule_alone.chk[32m [repeated 15x across cluster][0m
 [36m(calculate_point_effect_cpu pid=3436389)[0m Excited State energies (eV)
 [36m(calculate_point_effect_cpu pid=3436389)[0m [7.40200813]
-[36m(calculate_point_effect_cpu pid=3436389)[0m 
-[36m(calculate_point_effect_cpu pid=3436389)[0m 
+[36m(calculate_point_effect_cpu pid=3436389)[0m
+[36m(calculate_point_effect_cpu pid=3436389)[0m
 [36m(calculate_point_effect_cpu pid=3436379)[0m [7.40200813]
-[36m(calculate_point_effect_cpu pid=3436379)[0m 
-[36m(calculate_point_effect_cpu pid=3436379)[0m 
+[36m(calculate_point_effect_cpu pid=3436379)[0m
+[36m(calculate_point_effect_cpu pid=3436379)[0m
 [36m(calculate_point_effect_cpu pid=3436383)[0m [7.40200813]
-[36m(calculate_point_effect_cpu pid=3436383)[0m 
-[36m(calculate_point_effect_cpu pid=3436383)[0m 
+[36m(calculate_point_effect_cpu pid=3436383)[0m
+[36m(calculate_point_effect_cpu pid=3436383)[0m
 [36m(calculate_point_effect_cpu pid=3436375)[0m [7.40200813]
-[36m(calculate_point_effect_cpu pid=3436375)[0m 
-[36m(calculate_point_effect_cpu pid=3436375)[0m 
+[36m(calculate_point_effect_cpu pid=3436375)[0m
+[36m(calculate_point_effect_cpu pid=3436375)[0m
 [36m(calculate_point_effect_cpu pid=3436387)[0m [7.40200813]
-[36m(calculate_point_effect_cpu pid=3436387)[0m 
-[36m(calculate_point_effect_cpu pid=3436387)[0m 
+[36m(calculate_point_effect_cpu pid=3436387)[0m
+[36m(calculate_point_effect_cpu pid=3436387)[0m
 [36m(calculate_point_effect_cpu pid=3436378)[0m [7.40200813]
-[36m(calculate_point_effect_cpu pid=3436378)[0m 
-[36m(calculate_point_effect_cpu pid=3436378)[0m 
+[36m(calculate_point_effect_cpu pid=3436378)[0m
+[36m(calculate_point_effect_cpu pid=3436378)[0m
 [36m(calculate_point_effect_cpu pid=3436377)[0m [7.40200813]
-[36m(calculate_point_effect_cpu pid=3436377)[0m 
-[36m(calculate_point_effect_cpu pid=3436377)[0m 
+[36m(calculate_point_effect_cpu pid=3436377)[0m
+[36m(calculate_point_effect_cpu pid=3436377)[0m
 [36m(calculate_point_effect_cpu pid=3436381)[0m Running TDDFT in current process (force_single_gpu=False)
-[36m(calculate_point_effect_cpu pid=3436381)[0m 
-[36m(calculate_point_effect_cpu pid=3436381)[0m 
+[36m(calculate_point_effect_cpu pid=3436381)[0m
+[36m(calculate_point_effect_cpu pid=3436381)[0m
 [36m(calculate_point_effect_cpu pid=3436381)[0m ******** <class 'pyscf.tdscf.rks.TDDFT'> for <class 'pyscf.qmmm.itrf.QMMMRKS'> ********
-[36m(calculate_point_effect_cpu pid=3436381)[0m 
-[36m(calculate_point_effect_cpu pid=3436381)[0m 
-[36m(calculate_point_effect_cpu pid=3436379)[0m 
-[36m(calculate_point_effect_cpu pid=3436379)[0m 
-[36m(calculate_point_effect_cpu pid=3436379)[0m 
-[36m(calculate_point_effect_cpu pid=3436379)[0m 
-[36m(calculate_point_effect_cpu pid=3436389)[0m 
-[36m(calculate_point_effect_cpu pid=3436389)[0m 
-[36m(calculate_point_effect_cpu pid=3436389)[0m 
-[36m(calculate_point_effect_cpu pid=3436389)[0m 
+[36m(calculate_point_effect_cpu pid=3436381)[0m
+[36m(calculate_point_effect_cpu pid=3436381)[0m
+[36m(calculate_point_effect_cpu pid=3436379)[0m
+[36m(calculate_point_effect_cpu pid=3436379)[0m
+[36m(calculate_point_effect_cpu pid=3436379)[0m
+[36m(calculate_point_effect_cpu pid=3436379)[0m
+[36m(calculate_point_effect_cpu pid=3436389)[0m
+[36m(calculate_point_effect_cpu pid=3436389)[0m
+[36m(calculate_point_effect_cpu pid=3436389)[0m
+[36m(calculate_point_effect_cpu pid=3436389)[0m
 [36m(calculate_point_effect_cpu pid=3436377)[0m ******** <class 'pyscf.qmmm.itrf.QMMMRKS'> ********[32m [repeated 7x across cluster][0m
 [36m(calculate_point_effect_cpu pid=3436377)[0m method = QMMMRKS[32m [repeated 7x across cluster][0m
 [36m(calculate_point_effect_cpu pid=3436377)[0m chkfile to save SCF result = molecule_alone.chk[32m [repeated 7x across cluster][0m
@@ -1815,30 +1815,30 @@ Point 48/67: SUCCESS (48/67 total)
 [36m(calculate_point_effect_cpu pid=3436389)[0m eigh level_shift = 0[32m [repeated 3x across cluster][0m
 [36m(calculate_point_effect_cpu pid=3436389)[0m eigh max_cycle = 100[32m [repeated 3x across cluster][0m
 [36m(calculate_point_effect_cpu pid=3436389)[0m chkfile = molecule_alone.chk[32m [repeated 3x across cluster][0m
-[36m(calculate_point_effect_cpu pid=3436383)[0m 
-[36m(calculate_point_effect_cpu pid=3436383)[0m 
-[36m(calculate_point_effect_cpu pid=3436383)[0m 
-[36m(calculate_point_effect_cpu pid=3436383)[0m 
-[36m(calculate_point_effect_cpu pid=3436375)[0m 
-[36m(calculate_point_effect_cpu pid=3436375)[0m 
-[36m(calculate_point_effect_cpu pid=3436375)[0m 
-[36m(calculate_point_effect_cpu pid=3436375)[0m 
-[36m(calculate_point_effect_cpu pid=3436387)[0m 
-[36m(calculate_point_effect_cpu pid=3436387)[0m 
-[36m(calculate_point_effect_cpu pid=3436387)[0m 
-[36m(calculate_point_effect_cpu pid=3436387)[0m 
-[36m(calculate_point_effect_cpu pid=3436378)[0m 
-[36m(calculate_point_effect_cpu pid=3436378)[0m 
-[36m(calculate_point_effect_cpu pid=3436378)[0m 
-[36m(calculate_point_effect_cpu pid=3436378)[0m 
+[36m(calculate_point_effect_cpu pid=3436383)[0m
+[36m(calculate_point_effect_cpu pid=3436383)[0m
+[36m(calculate_point_effect_cpu pid=3436383)[0m
+[36m(calculate_point_effect_cpu pid=3436383)[0m
+[36m(calculate_point_effect_cpu pid=3436375)[0m
+[36m(calculate_point_effect_cpu pid=3436375)[0m
+[36m(calculate_point_effect_cpu pid=3436375)[0m
+[36m(calculate_point_effect_cpu pid=3436375)[0m
+[36m(calculate_point_effect_cpu pid=3436387)[0m
+[36m(calculate_point_effect_cpu pid=3436387)[0m
+[36m(calculate_point_effect_cpu pid=3436387)[0m
+[36m(calculate_point_effect_cpu pid=3436387)[0m
+[36m(calculate_point_effect_cpu pid=3436378)[0m
+[36m(calculate_point_effect_cpu pid=3436378)[0m
+[36m(calculate_point_effect_cpu pid=3436378)[0m
+[36m(calculate_point_effect_cpu pid=3436378)[0m
 [36m(calculate_point_effect_cpu pid=3436377)[0m Excited State energies (eV)[32m [repeated 6x across cluster][0m
-[36m(calculate_point_effect_cpu pid=3436377)[0m 
-[36m(calculate_point_effect_cpu pid=3436377)[0m 
-[36m(calculate_point_effect_cpu pid=3436377)[0m 
-[36m(calculate_point_effect_cpu pid=3436377)[0m 
+[36m(calculate_point_effect_cpu pid=3436377)[0m
+[36m(calculate_point_effect_cpu pid=3436377)[0m
+[36m(calculate_point_effect_cpu pid=3436377)[0m
+[36m(calculate_point_effect_cpu pid=3436377)[0m
 [36m(calculate_point_effect_cpu pid=3436385)[0m [7.40200813]
-[36m(calculate_point_effect_cpu pid=3436385)[0m 
-[36m(calculate_point_effect_cpu pid=3436385)[0m 
+[36m(calculate_point_effect_cpu pid=3436385)[0m
+[36m(calculate_point_effect_cpu pid=3436385)[0m
 [36m(calculate_point_effect_cpu pid=3436377)[0m Running TDDFT in current process (force_single_gpu=False)[32m [repeated 7x across cluster][0m
 [36m(calculate_point_effect_cpu pid=3436377)[0m ******** <class 'pyscf.tdscf.rks.TDDFT'> for <class 'pyscf.qmmm.itrf.QMMMRKS'> ********[32m [repeated 7x across cluster][0m
 [36m(calculate_point_effect_cpu pid=3436385)[0m ******** <class 'pyscf.qmmm.itrf.QMMMRKS'> ********
@@ -1880,8 +1880,8 @@ Point 48/67: SUCCESS (48/67 total)
 [36m(calculate_point_effect_cpu pid=3436385)[0m init E= -155.027744225137
 [36m(calculate_point_effect_cpu pid=3436388)[0m Excited State energies (eV)
 [36m(calculate_point_effect_cpu pid=3436388)[0m [7.40200813]
-[36m(calculate_point_effect_cpu pid=3436388)[0m 
-[36m(calculate_point_effect_cpu pid=3436388)[0m 
+[36m(calculate_point_effect_cpu pid=3436388)[0m
+[36m(calculate_point_effect_cpu pid=3436388)[0m
 [36m(calculate_point_effect_cpu pid=3436388)[0m ******** <class 'pyscf.qmmm.itrf.QMMMRKS'> ********
 [36m(calculate_point_effect_cpu pid=3436388)[0m method = QMMMRKS
 [36m(calculate_point_effect_cpu pid=3436388)[0m initial guess = chkfile
@@ -1905,32 +1905,32 @@ Point 48/67: SUCCESS (48/67 total)
 [36m(calculate_point_effect_cpu pid=3436388)[0m ** Add background charges for QMMMRKS **
 [36m(calculate_point_effect_cpu pid=3436388)[0m Set gradient conv threshold to 3.16228e-05
 [36m(calculate_point_effect_cpu pid=3436380)[0m [7.40200813]
-[36m(calculate_point_effect_cpu pid=3436380)[0m 
-[36m(calculate_point_effect_cpu pid=3436380)[0m 
+[36m(calculate_point_effect_cpu pid=3436380)[0m
+[36m(calculate_point_effect_cpu pid=3436380)[0m
 [36m(calculate_point_effect_cpu pid=3436386)[0m [7.40200813]
-[36m(calculate_point_effect_cpu pid=3436386)[0m 
-[36m(calculate_point_effect_cpu pid=3436386)[0m 
+[36m(calculate_point_effect_cpu pid=3436386)[0m
+[36m(calculate_point_effect_cpu pid=3436386)[0m
 [36m(calculate_point_effect_cpu pid=3436384)[0m [7.40200813]
-[36m(calculate_point_effect_cpu pid=3436384)[0m 
-[36m(calculate_point_effect_cpu pid=3436384)[0m 
+[36m(calculate_point_effect_cpu pid=3436384)[0m
+[36m(calculate_point_effect_cpu pid=3436384)[0m
 [36m(calculate_point_effect_cpu pid=3436376)[0m [7.40200813]
-[36m(calculate_point_effect_cpu pid=3436376)[0m 
-[36m(calculate_point_effect_cpu pid=3436376)[0m 
+[36m(calculate_point_effect_cpu pid=3436376)[0m
+[36m(calculate_point_effect_cpu pid=3436376)[0m
 [36m(calculate_point_effect_cpu pid=3436390)[0m [7.40200813]
-[36m(calculate_point_effect_cpu pid=3436390)[0m 
-[36m(calculate_point_effect_cpu pid=3436390)[0m 
+[36m(calculate_point_effect_cpu pid=3436390)[0m
+[36m(calculate_point_effect_cpu pid=3436390)[0m
 [36m(calculate_point_effect_cpu pid=3436390)[0m max_memory 4000 MB (current use 277 MB)[32m [repeated 6x across cluster][0m
 [36m(calculate_point_effect_cpu pid=3436390)[0m   HOMO = -0.276909488648134  LUMO = 0.0513585861644116[32m [repeated 13x across cluster][0m
 [36m(calculate_point_effect_cpu pid=3436386)[0m cycle= 1 E= -155.022804982833  delta_E= -0.000336  |g|= 0.0181  |ddm|= 0.0937[32m [repeated 6x across cluster][0m
 [36m(calculate_point_effect_cpu pid=3436382)[0m [7.40200813]
-[36m(calculate_point_effect_cpu pid=3436382)[0m 
-[36m(calculate_point_effect_cpu pid=3436382)[0m 
+[36m(calculate_point_effect_cpu pid=3436382)[0m
+[36m(calculate_point_effect_cpu pid=3436382)[0m
 [36m(calculate_point_effect_cpu pid=3436382)[0m init E= -155.021986202535[32m [repeated 7x across cluster][0m
 [36m(calculate_point_effect_cpu pid=3436385)[0m Extra cycle  E= -155.028195086648  delta_E= -2.56e-13  |g|= 1.41e-06  |ddm|= 3.89e-06
 [36m(calculate_point_effect_cpu pid=3436385)[0m converged SCF energy = -155.028195086648
 [36m(calculate_point_effect_cpu pid=3436385)[0m Running TDDFT in current process (force_single_gpu=False)
-[36m(calculate_point_effect_cpu pid=3436385)[0m 
-[36m(calculate_point_effect_cpu pid=3436385)[0m 
+[36m(calculate_point_effect_cpu pid=3436385)[0m
+[36m(calculate_point_effect_cpu pid=3436385)[0m
 [36m(calculate_point_effect_cpu pid=3436385)[0m ******** <class 'pyscf.tdscf.rks.TDDFT'> for <class 'pyscf.qmmm.itrf.QMMMRKS'> ********
 [36m(calculate_point_effect_cpu pid=3436385)[0m nstates = 1 singlet
 [36m(calculate_point_effect_cpu pid=3436385)[0m deg_eia_thresh = 1.000e-03
@@ -1940,8 +1940,8 @@ Point 48/67: SUCCESS (48/67 total)
 [36m(calculate_point_effect_cpu pid=3436385)[0m eigh level_shift = 0
 [36m(calculate_point_effect_cpu pid=3436385)[0m eigh max_cycle = 100
 [36m(calculate_point_effect_cpu pid=3436385)[0m chkfile = molecule_alone.chk
-[36m(calculate_point_effect_cpu pid=3436385)[0m 
-[36m(calculate_point_effect_cpu pid=3436385)[0m 
+[36m(calculate_point_effect_cpu pid=3436385)[0m
+[36m(calculate_point_effect_cpu pid=3436385)[0m
 [36m(calculate_point_effect_cpu pid=3436382)[0m Excited State energies (eV)[32m [repeated 6x across cluster][0m
 [36m(calculate_point_effect_cpu pid=3436382)[0m ******** <class 'pyscf.qmmm.itrf.QMMMRKS'> ********[32m [repeated 6x across cluster][0m
 [36m(calculate_point_effect_cpu pid=3436382)[0m method = QMMMRKS[32m [repeated 6x across cluster][0m
@@ -1965,37 +1965,37 @@ Point 48/67: SUCCESS (48/67 total)
 [36m(calculate_point_effect_cpu pid=3436382)[0m small_rho_cutoff = 1e-07[32m [repeated 6x across cluster][0m
 [36m(calculate_point_effect_cpu pid=3436382)[0m ** Add background charges for QMMMRKS **[32m [repeated 6x across cluster][0m
 [36m(calculate_point_effect_cpu pid=3436382)[0m Set gradient conv threshold to 3.16228e-05[32m [repeated 6x across cluster][0m
-[36m(calculate_point_effect_cpu pid=3436386)[0m 
-[36m(calculate_point_effect_cpu pid=3436386)[0m 
-[36m(calculate_point_effect_cpu pid=3436386)[0m 
-[36m(calculate_point_effect_cpu pid=3436386)[0m 
-[36m(calculate_point_effect_cpu pid=3436388)[0m 
-[36m(calculate_point_effect_cpu pid=3436388)[0m 
-[36m(calculate_point_effect_cpu pid=3436388)[0m 
-[36m(calculate_point_effect_cpu pid=3436388)[0m 
-[36m(calculate_point_effect_cpu pid=3436380)[0m 
-[36m(calculate_point_effect_cpu pid=3436380)[0m 
-[36m(calculate_point_effect_cpu pid=3436380)[0m 
-[36m(calculate_point_effect_cpu pid=3436380)[0m 
-[36m(calculate_point_effect_cpu pid=3436390)[0m 
-[36m(calculate_point_effect_cpu pid=3436390)[0m 
-[36m(calculate_point_effect_cpu pid=3436390)[0m 
-[36m(calculate_point_effect_cpu pid=3436390)[0m 
-[36m(calculate_point_effect_cpu pid=3436384)[0m 
-[36m(calculate_point_effect_cpu pid=3436384)[0m 
-[36m(calculate_point_effect_cpu pid=3436384)[0m 
-[36m(calculate_point_effect_cpu pid=3436384)[0m 
-[36m(calculate_point_effect_cpu pid=3436376)[0m 
-[36m(calculate_point_effect_cpu pid=3436376)[0m 
-[36m(calculate_point_effect_cpu pid=3436376)[0m 
-[36m(calculate_point_effect_cpu pid=3436376)[0m 
+[36m(calculate_point_effect_cpu pid=3436386)[0m
+[36m(calculate_point_effect_cpu pid=3436386)[0m
+[36m(calculate_point_effect_cpu pid=3436386)[0m
+[36m(calculate_point_effect_cpu pid=3436386)[0m
+[36m(calculate_point_effect_cpu pid=3436388)[0m
+[36m(calculate_point_effect_cpu pid=3436388)[0m
+[36m(calculate_point_effect_cpu pid=3436388)[0m
+[36m(calculate_point_effect_cpu pid=3436388)[0m
+[36m(calculate_point_effect_cpu pid=3436380)[0m
+[36m(calculate_point_effect_cpu pid=3436380)[0m
+[36m(calculate_point_effect_cpu pid=3436380)[0m
+[36m(calculate_point_effect_cpu pid=3436380)[0m
+[36m(calculate_point_effect_cpu pid=3436390)[0m
+[36m(calculate_point_effect_cpu pid=3436390)[0m
+[36m(calculate_point_effect_cpu pid=3436390)[0m
+[36m(calculate_point_effect_cpu pid=3436390)[0m
+[36m(calculate_point_effect_cpu pid=3436384)[0m
+[36m(calculate_point_effect_cpu pid=3436384)[0m
+[36m(calculate_point_effect_cpu pid=3436384)[0m
+[36m(calculate_point_effect_cpu pid=3436384)[0m
+[36m(calculate_point_effect_cpu pid=3436376)[0m
+[36m(calculate_point_effect_cpu pid=3436376)[0m
+[36m(calculate_point_effect_cpu pid=3436376)[0m
+[36m(calculate_point_effect_cpu pid=3436376)[0m
 [36m(calculate_point_effect_cpu pid=3436376)[0m max_memory 4000 MB (current use 276 MB)[32m [repeated 8x across cluster][0m
 [36m(calculate_point_effect_cpu pid=3436382)[0m   HOMO = -0.283458678373992  LUMO = 0.0310454222478984[32m [repeated 48x across cluster][0m
 [36m(calculate_point_effect_cpu pid=3436382)[0m cycle= 6 E= -155.022374620032  delta_E= -4.28e-09  |g|= 1.88e-05  |ddm|= 0.000125[32m [repeated 47x across cluster][0m
-[36m(calculate_point_effect_cpu pid=3436382)[0m 
-[36m(calculate_point_effect_cpu pid=3436382)[0m 
-[36m(calculate_point_effect_cpu pid=3436382)[0m 
-[36m(calculate_point_effect_cpu pid=3436382)[0m 
+[36m(calculate_point_effect_cpu pid=3436382)[0m
+[36m(calculate_point_effect_cpu pid=3436382)[0m
+[36m(calculate_point_effect_cpu pid=3436382)[0m
+[36m(calculate_point_effect_cpu pid=3436382)[0m
 [36m(calculate_point_effect_cpu pid=3436389)[0m [7.45421603]
 [36m(calculate_point_effect_cpu pid=3436382)[0m Extra cycle  E= -155.022374620124  delta_E= -4.55e-13  |g|= 2.21e-06  |ddm|= 5.35e-06[32m [repeated 7x across cluster][0m
 [36m(calculate_point_effect_cpu pid=3436382)[0m converged SCF energy = -155.022374620124[32m [repeated 7x across cluster][0m
@@ -2051,12 +2051,12 @@ Point 62/67: SUCCESS (62/67 total)
 Point 63/67: SUCCESS (63/67 total)
 Point 64/67: SUCCESS (64/67 total)
 [36m(calculate_point_effect_cpu pid=3436382)[0m [Point 64] Running on CPU cores: {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15}, PID: 3436382
-[36m(calculate_point_effect_cpu pid=3436382)[0m 
+[36m(calculate_point_effect_cpu pid=3436382)[0m
 [36m(calculate_point_effect_cpu pid=3436382)[0m === Resurrecting molecule_alone.chk ===
 [36m(calculate_point_effect_cpu pid=3436382)[0m Loaded XC functional: b3lyp
 [36m(calculate_point_effect_cpu pid=3436382)[0m Creating DFT object with xc=b3lyp
-[36m(calculate_point_effect_cpu pid=3436382)[0m 
-[36m(calculate_point_effect_cpu pid=3436382)[0m 
+[36m(calculate_point_effect_cpu pid=3436382)[0m
+[36m(calculate_point_effect_cpu pid=3436382)[0m
 [36m(calculate_point_effect_cpu pid=3436382)[0m ******** <class 'pyscf.dft.rks.RKS'> ********
 [36m(calculate_point_effect_cpu pid=3436382)[0m method = RKS
 [36m(calculate_point_effect_cpu pid=3436382)[0m initial guess = chkfile
@@ -2079,12 +2079,12 @@ Point 64/67: SUCCESS (64/67 total)
 [36m(calculate_point_effect_cpu pid=3436382)[0m     P. J. Stephens, F. J. Devlin, C. F. Chabalowski, and M. J. Frisch.,  J. Phys. Chem. 98, 11623 (1994)
 [36m(calculate_point_effect_cpu pid=3436382)[0m small_rho_cutoff = 1e-07
 [36m(calculate_point_effect_cpu pid=3436382)[0m Set gradient conv threshold to 3.16228e-05
-[36m(calculate_point_effect_cpu pid=3436384)[0m 
-[36m(calculate_point_effect_cpu pid=3436384)[0m 
-[36m(calculate_point_effect_cpu pid=3436384)[0m 
-[36m(calculate_point_effect_cpu pid=3436385)[0m 
-[36m(calculate_point_effect_cpu pid=3436385)[0m 
-[36m(calculate_point_effect_cpu pid=3436385)[0m 
+[36m(calculate_point_effect_cpu pid=3436384)[0m
+[36m(calculate_point_effect_cpu pid=3436384)[0m
+[36m(calculate_point_effect_cpu pid=3436384)[0m
+[36m(calculate_point_effect_cpu pid=3436385)[0m
+[36m(calculate_point_effect_cpu pid=3436385)[0m
+[36m(calculate_point_effect_cpu pid=3436385)[0m
 [36m(calculate_point_effect_cpu pid=3436382)[0m init E= -155.028768605456
 [36m(calculate_point_effect_cpu pid=3436382)[0m   HOMO = -0.260574538961987  LUMO = 0.0672407765319121
 [36m(calculate_point_effect_cpu pid=3436382)[0m cycle= 1 E= -155.028768605452  delta_E= 3.92e-12  |g|= 6.17e-06  |ddm|= 8.04e-06
@@ -2093,8 +2093,8 @@ Point 64/67: SUCCESS (64/67 total)
 [36m(calculate_point_effect_cpu pid=3436382)[0m converged SCF energy = -155.028768605444
 [36m(calculate_point_effect_cpu pid=3436382)[0m Resurrected CPU DFT object: <class 'pyscf.dft.rks.RKS'>, Energy: -155.02876860544364
 [36m(calculate_point_effect_cpu pid=3436382)[0m Running TDDFT in current process (force_single_gpu=b3lyp)
-[36m(calculate_point_effect_cpu pid=3436382)[0m 
-[36m(calculate_point_effect_cpu pid=3436382)[0m 
+[36m(calculate_point_effect_cpu pid=3436382)[0m
+[36m(calculate_point_effect_cpu pid=3436382)[0m
 [36m(calculate_point_effect_cpu pid=3436382)[0m ******** <class 'pyscf.tdscf.rks.TDDFT'> for <class 'pyscf.dft.rks.RKS'> ********
 [36m(calculate_point_effect_cpu pid=3436382)[0m nstates = 1 singlet
 [36m(calculate_point_effect_cpu pid=3436382)[0m deg_eia_thresh = 1.000e-03
@@ -2104,19 +2104,19 @@ Point 64/67: SUCCESS (64/67 total)
 [36m(calculate_point_effect_cpu pid=3436382)[0m eigh level_shift = 0
 [36m(calculate_point_effect_cpu pid=3436382)[0m eigh max_cycle = 100
 [36m(calculate_point_effect_cpu pid=3436382)[0m chkfile = molecule_alone.chk
-[36m(calculate_point_effect_cpu pid=3436382)[0m 
-[36m(calculate_point_effect_cpu pid=3436382)[0m 
-[36m(calculate_point_effect_cpu pid=3436384)[0m 
-[36m(calculate_point_effect_cpu pid=3436384)[0m 
-[36m(calculate_point_effect_cpu pid=3436384)[0m 
-[36m(calculate_point_effect_cpu pid=3436384)[0m 
-[36m(calculate_point_effect_cpu pid=3436385)[0m 
-[36m(calculate_point_effect_cpu pid=3436385)[0m 
-[36m(calculate_point_effect_cpu pid=3436385)[0m 
-[36m(calculate_point_effect_cpu pid=3436385)[0m 
+[36m(calculate_point_effect_cpu pid=3436382)[0m
+[36m(calculate_point_effect_cpu pid=3436382)[0m
+[36m(calculate_point_effect_cpu pid=3436384)[0m
+[36m(calculate_point_effect_cpu pid=3436384)[0m
+[36m(calculate_point_effect_cpu pid=3436384)[0m
+[36m(calculate_point_effect_cpu pid=3436384)[0m
+[36m(calculate_point_effect_cpu pid=3436385)[0m
+[36m(calculate_point_effect_cpu pid=3436385)[0m
+[36m(calculate_point_effect_cpu pid=3436385)[0m
+[36m(calculate_point_effect_cpu pid=3436385)[0m
 [36m(calculate_point_effect_cpu pid=3436382)[0m [7.40200813]
-[36m(calculate_point_effect_cpu pid=3436382)[0m 
-[36m(calculate_point_effect_cpu pid=3436382)[0m 
+[36m(calculate_point_effect_cpu pid=3436382)[0m
+[36m(calculate_point_effect_cpu pid=3436382)[0m
 [36m(calculate_point_effect_cpu pid=3436382)[0m ******** <class 'pyscf.qmmm.itrf.QMMMRKS'> ********
 [36m(calculate_point_effect_cpu pid=3436382)[0m method = QMMMRKS
 [36m(calculate_point_effect_cpu pid=3436382)[0m chkfile to save SCF result = molecule_alone.chk
@@ -2165,11 +2165,11 @@ Point 64/67: SUCCESS (64/67 total)
 [36m(calculate_point_effect_cpu pid=3436385)[0m eigh max_cycle = 100[32m [repeated 2x across cluster][0m
 [36m(calculate_point_effect_cpu pid=3436385)[0m chkfile = molecule_alone.chk[32m [repeated 2x across cluster][0m
 [36m(calculate_point_effect_cpu pid=3436382)[0m Running TDDFT in current process (force_single_gpu=False)
-[36m(calculate_point_effect_cpu pid=3436382)[0m 
-[36m(calculate_point_effect_cpu pid=3436382)[0m 
+[36m(calculate_point_effect_cpu pid=3436382)[0m
+[36m(calculate_point_effect_cpu pid=3436382)[0m
 [36m(calculate_point_effect_cpu pid=3436382)[0m ******** <class 'pyscf.tdscf.rks.TDDFT'> for <class 'pyscf.qmmm.itrf.QMMMRKS'> ********
-[36m(calculate_point_effect_cpu pid=3436382)[0m 
-[36m(calculate_point_effect_cpu pid=3436382)[0m 
+[36m(calculate_point_effect_cpu pid=3436382)[0m
+[36m(calculate_point_effect_cpu pid=3436382)[0m
 [36m(calculate_point_effect_cpu pid=3436385)[0m Excited State energies (eV)
 [36m(calculate_point_effect_cpu pid=3436385)[0m [7.40200813]
 [36m(calculate_point_effect_cpu pid=3436382)[0m max_memory 4000 MB (current use 275 MB)
@@ -2186,8 +2186,8 @@ Point 64/67: SUCCESS (64/67 total)
 [36m(calculate_point_effect_cpu pid=3436382)[0m eigh level_shift = 0
 [36m(calculate_point_effect_cpu pid=3436382)[0m eigh max_cycle = 100
 [36m(calculate_point_effect_cpu pid=3436382)[0m chkfile = molecule_alone.chk
-[36m(calculate_point_effect_cpu pid=3436385)[0m 
-[36m(calculate_point_effect_cpu pid=3436385)[0m 
+[36m(calculate_point_effect_cpu pid=3436385)[0m
+[36m(calculate_point_effect_cpu pid=3436385)[0m
 [36m(calculate_point_effect_cpu pid=3436385)[0m ******** <class 'pyscf.qmmm.itrf.QMMMRKS'> ********
 [36m(calculate_point_effect_cpu pid=3436385)[0m method = QMMMRKS
 [36m(calculate_point_effect_cpu pid=3436385)[0m initial guess = chkfile
@@ -2212,14 +2212,14 @@ Point 64/67: SUCCESS (64/67 total)
 [36m(calculate_point_effect_cpu pid=3436385)[0m ** Add background charges for QMMMRKS **
 [36m(calculate_point_effect_cpu pid=3436385)[0m Set gradient conv threshold to 3.16228e-05
 [36m(calculate_point_effect_cpu pid=3436384)[0m [7.40200813]
-[36m(calculate_point_effect_cpu pid=3436384)[0m 
-[36m(calculate_point_effect_cpu pid=3436384)[0m 
+[36m(calculate_point_effect_cpu pid=3436384)[0m
+[36m(calculate_point_effect_cpu pid=3436384)[0m
 [36m(calculate_point_effect_cpu pid=3436385)[0m init E= -155.026169146013
 [36m(calculate_point_effect_cpu pid=3436385)[0m Extra cycle  E= -155.026703532269  delta_E= -9.66e-13  |g|= 1.36e-06  |ddm|= 5.17e-06
 [36m(calculate_point_effect_cpu pid=3436385)[0m converged SCF energy = -155.026703532269
 [36m(calculate_point_effect_cpu pid=3436385)[0m Running TDDFT in current process (force_single_gpu=False)
-[36m(calculate_point_effect_cpu pid=3436385)[0m 
-[36m(calculate_point_effect_cpu pid=3436385)[0m 
+[36m(calculate_point_effect_cpu pid=3436385)[0m
+[36m(calculate_point_effect_cpu pid=3436385)[0m
 [36m(calculate_point_effect_cpu pid=3436385)[0m ******** <class 'pyscf.tdscf.rks.TDDFT'> for <class 'pyscf.qmmm.itrf.QMMMRKS'> ********
 [36m(calculate_point_effect_cpu pid=3436385)[0m nstates = 1 singlet
 [36m(calculate_point_effect_cpu pid=3436385)[0m deg_eia_thresh = 1.000e-03
@@ -2229,8 +2229,8 @@ Point 64/67: SUCCESS (64/67 total)
 [36m(calculate_point_effect_cpu pid=3436385)[0m eigh level_shift = 0
 [36m(calculate_point_effect_cpu pid=3436385)[0m eigh max_cycle = 100
 [36m(calculate_point_effect_cpu pid=3436385)[0m chkfile = molecule_alone.chk
-[36m(calculate_point_effect_cpu pid=3436385)[0m 
-[36m(calculate_point_effect_cpu pid=3436385)[0m 
+[36m(calculate_point_effect_cpu pid=3436385)[0m
+[36m(calculate_point_effect_cpu pid=3436385)[0m
 [36m(calculate_point_effect_cpu pid=3436384)[0m Excited State energies (eV)
 [36m(calculate_point_effect_cpu pid=3436384)[0m   HOMO = -0.284270397909766  LUMO = 0.0462115875737363[32m [repeated 10x across cluster][0m
 [36m(calculate_point_effect_cpu pid=3436384)[0m cycle= 1 E= -155.027145574013  delta_E= -0.000397  |g|= 0.0173  |ddm|= 0.126[32m [repeated 8x across cluster][0m
@@ -2267,8 +2267,8 @@ Point 64/67: SUCCESS (64/67 total)
 [36m(calculate_point_effect_cpu pid=3436384)[0m Extra cycle  E= -155.027226495468  delta_E= -8.53e-13  |g|= 1.5e-06  |ddm|= 4.22e-06
 [36m(calculate_point_effect_cpu pid=3436384)[0m converged SCF energy = -155.027226495468
 [36m(calculate_point_effect_cpu pid=3436384)[0m Running TDDFT in current process (force_single_gpu=False)
-[36m(calculate_point_effect_cpu pid=3436384)[0m 
-[36m(calculate_point_effect_cpu pid=3436384)[0m 
+[36m(calculate_point_effect_cpu pid=3436384)[0m
+[36m(calculate_point_effect_cpu pid=3436384)[0m
 [36m(calculate_point_effect_cpu pid=3436384)[0m ******** <class 'pyscf.tdscf.rks.TDDFT'> for <class 'pyscf.qmmm.itrf.QMMMRKS'> ********
 [36m(calculate_point_effect_cpu pid=3436384)[0m nstates = 1 singlet
 [36m(calculate_point_effect_cpu pid=3436384)[0m deg_eia_thresh = 1.000e-03
@@ -2279,8 +2279,8 @@ Point 64/67: SUCCESS (64/67 total)
 [36m(calculate_point_effect_cpu pid=3436384)[0m eigh max_cycle = 100
 [36m(calculate_point_effect_cpu pid=3436384)[0m chkfile = molecule_alone.chk
 [36m(calculate_point_effect_cpu pid=3436384)[0m max_memory 4000 MB (current use 276 MB)
-[36m(calculate_point_effect_cpu pid=3436384)[0m 
-[36m(calculate_point_effect_cpu pid=3436384)[0m 
+[36m(calculate_point_effect_cpu pid=3436384)[0m
+[36m(calculate_point_effect_cpu pid=3436384)[0m
 [36m(calculate_point_effect_cpu pid=3436384)[0m   HOMO = -0.281891545145645  LUMO = 0.0464487568939761[32m [repeated 2x across cluster][0m
 [36m(calculate_point_effect_cpu pid=3436384)[0m cycle= 7 E= -155.027226495467  delta_E= -1.11e-10  |g|= 2.18e-06  |ddm|= 2.02e-05[32m [repeated 2x across cluster][0m
 [36m(calculate_point_effect_cpu pid=3436385)[0m Excited State energies (eV)
@@ -2307,6 +2307,5 @@ Organizing results into: results_CCO_opt2_2026-03-25_02-01-42/
 Fetching inspirational quote...
 
 
-  The principle is sound. To avoid illness, expose yourself to germs, enabling your immune system to develop antibodies. I don’t know why everyone doesn’t do this… maybe they have something against living forever. 
+  The principle is sound. To avoid illness, expose yourself to germs, enabling your immune system to develop antibodies. I don’t know why everyone doesn’t do this… maybe they have something against living forever.
                      - Dwight Schrute
-

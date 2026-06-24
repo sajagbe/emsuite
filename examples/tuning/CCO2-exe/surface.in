@@ -6,7 +6,7 @@ input_data = 'CCO'    #SMILES string or path to XYZ file
 surface_density = 1.0 #4 points per Å^2 means each will be separated by 0.5 Å
 surface_scale = 1.0 #vdw surace scale
 surface_type = 'homogenous' #heterogenous is in development to gather the incident charge from solvent environment potential
-surface_charge = 0.1 #elemental point charge for each surface point 
+surface_charge = 0.1 #elemental point charge for each surface point
 output_surf = 'CCO2.surf'
 
 

@@ -2,7 +2,7 @@
 #                      EMSUITE TUNING CALCULATION INPUT
 # =============================================================================
 # Run with: emsuite -t tuning.in
-# 
+#
 # PREREQUISITE: Generate surface file first using: emsuite -s surface.in
 
 # -----------------------------------------------------------------------------
