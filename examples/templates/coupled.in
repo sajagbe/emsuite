@@ -4,7 +4,8 @@ molecule = 'molecule.xyz'
 output_surf = 'coupled.surf'
 surface_density = 0.5
 surface_scale = 1.0
-potential_method = 'coulomb'
+potential_method = 'apbs'
+potential_quantity = 'charge'
 
 properties = ['homo', 'lumo', 'gap']
 basis_set = 'sto-3g'

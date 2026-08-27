@@ -13,7 +13,8 @@ POTENTIAL_DEFAULTS = {
     "output_surf": "potential.surf",
     "surface_density": 0.5,
     "surface_scale": 1.0,
-    "method": "coulomb",
+    "method": "apbs",
+    "quantity": "potential",
     "pdie": 2.0,
     "sdie": 78.54,
     "charge": 0,
@@ -27,6 +28,7 @@ POTENTIAL_DEFAULTS = {
 def parse_potential_input(input_file: str) -> dict:
     params = parse_config_file(input_file, defaults=POTENTIAL_DEFAULTS)
     parsed = parse_assignments(Path(input_file).read_text())
-    if "method" in parsed:
-        params["method"] = parsed["method"]
+    for key in ("method", "quantity"):
+        if key in parsed:
+            params[key] = parsed[key]
     return validate_potential_params(params)

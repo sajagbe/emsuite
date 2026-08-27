@@ -4,15 +4,23 @@ All notable changes to this project are documented in this file.
 
 ## [Unreleased]
 
+_No changes yet._
+
+## [1.3.0] - 2026-08-27
+
 ### Added
 - Keyword-argument API (`emsuite.api`): `surface()`, `tune()`, `potential()`, `coupled()` — call channels with only the params you need; defaults fill the rest.
 - `emsuite.tune` shorthand exported at the top level.
 - `config=` argument on every channel accepts a `.in` file path or a dict; explicit kwargs override config values.
 - `emsuite.config.resolve_config()` and `UNSET` sentinel for layered config resolution (defaults < file/dict < explicit kwargs).
 - Channel default constants: `SURFACE_DEFAULTS`, `POTENTIAL_DEFAULTS`, `COUPLED_DEFAULTS`.
+- Potential channel `quantity` switch: `'potential'` (interpolated APBS φ) or `'charge'` (Gauss-law ρ → q at surface points).
+- APBS dielectric maps (`dielx`/`dely`/`dielz`) and Gauss-law conversion (`emsuite.potential.gauss`).
 
 ### Changed
 - `run_surface_calculation`, `run_potential_calculation`, `run_coupled_calculation`, and tuning `main()` now accept a parameter dict in addition to a file path (non-breaking).
+- Potential default engine is APBS (`method='apbs'`). Coulomb remains a vacuum fallback (potential only).
+- Coupled defaults to APBS Gauss-law surface charges (`potential_quantity='charge'`).
 
 ### Removed
 - Spatial Fukui properties (`fukui_spa_plus`, `fukui_spa_minus`) and the global `ts_barrier` property, along with their modules (`properties/fukui_spatial.py`, `properties/ts.py`, `tuning/surface_maps.py`), surface-map runner wiring, the `ts_xyz`/`fukui_projection` tuning inputs, and their unit/integration tests.

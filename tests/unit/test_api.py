@@ -61,9 +61,9 @@ def test_potential_kwargs_to_runner(monkeypatch):
     monkeypatch.setattr(
         api, "run_potential_calculation", lambda params: captured.update(params) or "p.surf"
     )
-    assert api.potential(molecule="m.xyz", bond_scan_atoms=[0, 1]) == "p.surf"
+    assert api.potential(molecule="m.xyz", quantity="charge") == "p.surf"
     assert captured["molecule"] == "m.xyz"
-    assert captured["bond_scan_atoms"] == [0, 1]
+    assert captured["quantity"] == "charge"
 
 
 def test_surface_kwargs_to_runner(monkeypatch):

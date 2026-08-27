@@ -1,5 +1,5 @@
-The **potential** channel computes electrostatic potential at VDW surface points and writes
-heterogeneous ``.surf`` files for downstream tuning or coupled workflows.
+The **potential** channel maps APBS electrostatics onto VDW surface points and writes
+a heterogeneous ``.surf`` file.
 
 CLI
 ---
@@ -8,10 +8,18 @@ CLI
 
    emsuite -p potential.in
 
-Methods
--------
+User choice
+-----------
 
-- ``method = 'coulomb'`` — Gasteiger partial charges (default, fast, CI-friendly)
-- ``method = 'apbs'`` — Poisson-Boltzmann via ``apbs-binary`` (falls back to Coulomb on failure)
+- ``quantity = 'potential'`` — interpolate the APBS potential grid onto surface coordinates
+- ``quantity = 'charge'`` — Gauss-law charges from that potential and the APBS dielectric maps
+  (``ρ = −ε₀ ∇·(ε ∇φ)``)
 
-See :doc:`../ROADMAP` for architecture and ``examples/templates/potential.in``.
+Engine
+------
+
+- ``method = 'apbs'`` — Poisson–Boltzmann (default). Writes potential and ``dielx/y/z`` maps.
+- ``method = 'coulomb'`` — vacuum ``q/r`` fallback. Potential only; cannot be combined with ``quantity='charge'``.
+- Planned: ``esp`` / ``mep`` via PySCF.
+
+See :doc:`../ROADMAP` and ``examples/templates/potential.in``.

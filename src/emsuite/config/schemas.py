@@ -31,8 +31,30 @@ def validate_tuning_params(params: dict[str, Any]) -> dict[str, Any]:
     return params
 
 
+_POTENTIAL_METHODS = frozenset({"apbs", "coulomb"})
+_FUTURE_POTENTIAL_METHODS = frozenset({"esp", "mep"})
+_POTENTIAL_QUANTITIES = frozenset({"potential", "charge"})
+
+
 def validate_potential_params(params: dict[str, Any]) -> dict[str, Any]:
     require_keys(params, ["molecule"], "potential")
+    method = str(params.get("method") or "apbs").lower()
+    quantity = str(params.get("quantity") or "potential").lower()
+    if method in _FUTURE_POTENTIAL_METHODS:
+        raise ConfigValidationError(
+            f"method={method!r} is not implemented yet (planned PySCF ESP/MEP backend)"
+        )
+    if method not in _POTENTIAL_METHODS:
+        allowed = ", ".join(sorted(_POTENTIAL_METHODS | _FUTURE_POTENTIAL_METHODS))
+        raise ConfigValidationError(f"potential method must be one of: {allowed}")
+    if quantity not in _POTENTIAL_QUANTITIES:
+        raise ConfigValidationError("potential quantity must be 'potential' or 'charge'")
+    if quantity == "charge" and method != "apbs":
+        raise ConfigValidationError(
+            "quantity='charge' requires method='apbs' (Gauss-law needs dielectric maps)"
+        )
+    params["method"] = method
+    params["quantity"] = quantity
     return params
 
 

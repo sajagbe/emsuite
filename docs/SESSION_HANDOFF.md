@@ -1,18 +1,18 @@
 # EMSuite status — 2026-08-27
 
-Progress snapshot of `emsuite` on `main` at `/data/PHO_WORK/sajagbe2/packages/emsuite`. Version is still **1.2.0**; unreleased work is sitting in the working tree and has not been version-bumped.
+Progress snapshot of `emsuite` on `main` at `/data/PHO_WORK/sajagbe2/packages/emsuite`. Version is **1.3.0**.
 
 ## Snapshot
 
 | Item | Status |
 |------|--------|
-| Version | **1.2.0** (`pyproject.toml`, `emsuite.__version__`) |
+| Version | **1.3.0** (`pyproject.toml`, `emsuite.__version__`) |
 | Channels | `-s` surface, `-t` tuning, `-p` potential, `-c` coupled — shipped |
-| Python API | **Unreleased:** `emsuite.api` kwargs (`surface`, `tune`, `potential`, `coupled`) |
+| Python API | `emsuite.api` kwargs (`surface`, `tune`, `potential`, `coupled`) |
 | Properties | **27** (17 core + 10 advanced). Spatial Fukui and `ts_barrier` removed in working tree |
 | Fast tests | 39 unit + 3 regression (includes 11 new API tests; not re-run this write-up) |
 | Slow integration | 12 collected tests (2 deleted with Fukui/TS). Last full audit: 2026-06-24, **stale** vs current tree |
-| Git | `main` at `880c4fd`, **9 commits ahead of `origin/main`**, **uncommitted** API + property trim |
+| Git | `main`, ahead of `origin/main`; local tags `v1.2.0` and `v1.3.0` (not pushed) |
 | Remote | `origin/main` still at `8590549` (2026-03-25 README/CHANGELOG). Nothing since the March snapshot has been pushed |
 
 ## Two layers of progress
@@ -61,7 +61,7 @@ Four channels, two engines, 27 properties once the working-tree trim is included
 |---------|---------|-----|--------|
 | Surface | Geometry + VDW envelope | `emsuite -s surface.in` | `api.surface(...)` / `run_surface_calculation` |
 | Tuning | Electrostatic maps of molecular properties | `emsuite -t tuning.in` | `api.tune(...)` / `run_tuning` |
-| Potential | ESP on a surface (Coulomb, APBS, bond-axis scan) | `emsuite -p potential.in` | `api.potential(...)` / `run_potential_calculation` |
+| Potential | APBS φ or Gauss-law charge on a surface (`quantity`) | `emsuite -p potential.in` | `api.potential(...)` / `run_potential_calculation` |
 | Coupled | Potential → tuning pipeline | `emsuite -c coupled.in` | `api.coupled(...)` / `run_coupled_calculation` |
 
 `calc_type='combined'` is a **tuning mode**, not the coupled channel.

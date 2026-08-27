@@ -16,7 +16,8 @@ COUPLED_DEFAULTS = {
     "output_surf": "coupled.surf",
     "surface_density": 0.5,
     "surface_scale": 1.0,
-    "potential_method": "coulomb",
+    "potential_method": "apbs",
+    "potential_quantity": "charge",
     "pdie": 2.0,
     "sdie": 78.54,
     "properties": ["homo", "lumo", "gap"],
@@ -37,13 +38,17 @@ COUPLED_DEFAULTS = {
 def parse_coupled_input(input_file: str) -> dict:
     params = parse_config_file(input_file, defaults=COUPLED_DEFAULTS)
     parsed = parse_assignments(Path(input_file).read_text())
-    for key in ("potential_method", "properties", "parallel"):
+    for key in ("potential_method", "potential_quantity", "properties", "parallel"):
         if key in parsed:
             params[key] = parsed[key]
     return validate_coupled_params(params)
 
 
 def _write_potential_input(params: dict, path: Path) -> None:
+    method = str(params.get("potential_method") or "apbs")
+    quantity = params.get("potential_quantity")
+    if not quantity:
+        quantity = "charge" if method.lower() == "apbs" else "potential"
     path.write_text(
         "\n".join(
             [
@@ -54,7 +59,8 @@ def _write_potential_input(params: dict, path: Path) -> None:
                 f"output_surf = {params['output_surf']!r}",
                 f"surface_density = {params['surface_density']}",
                 f"surface_scale = {params['surface_scale']}",
-                f"method = {params['potential_method']!r}",
+                f"method = {method!r}",
+                f"quantity = {quantity!r}",
                 f"pdie = {params['pdie']}",
                 f"sdie = {params['sdie']}",
             ]
@@ -88,7 +94,7 @@ def _write_tuning_input(params: dict, surface_file: str, path: Path) -> None:
 
 def run_coupled_calculation(config) -> None:
     """
-    Run potential-derived heterogeneous surface charges, then tuning maps.
+    Run APBS-derived surface values (potential or Gauss-law charge), then tuning maps.
 
     Distinct from tuning ``calc_type='combined'`` (all probes at once).
 

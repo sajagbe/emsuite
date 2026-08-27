@@ -12,7 +12,7 @@ Examples
 >>> api.surface(input_type="SMILES", input_data="CCO")
 >>> api.tune(molecule="CCO.xyz", surface_file="CCO.surf",
 ...          properties=["homo", "gap", "stark_gap"])
->>> api.potential(molecule="CCO.xyz", bond_scan_atoms=[0, 1])
+>>> api.potential(molecule="CCO.xyz", quantity="potential")
 >>> api.coupled(molecule="CCO.xyz", properties=["homo", "lumo"])
 
 Mix a file with overrides:
@@ -97,6 +97,7 @@ def potential(
     surface_density: Any = UNSET,
     surface_scale: Any = UNSET,
     method: Any = UNSET,
+    quantity: Any = UNSET,
     pdie: Any = UNSET,
     sdie: Any = UNSET,
     charge: Any = UNSET,
@@ -106,7 +107,7 @@ def potential(
     bond_scan_span: Any = UNSET,
     config: Config = None,
 ) -> str:
-    """Compute an electrostatic potential map. Returns the ``.surf`` path."""
+    """Map APBS potential or Gauss-law charge onto a surface. Returns the ``.surf`` path."""
     params = resolve_config(config, _overrides(locals()))
     return run_potential_calculation(params)
 
@@ -120,6 +121,7 @@ def coupled(
     surface_density: Any = UNSET,
     surface_scale: Any = UNSET,
     potential_method: Any = UNSET,
+    potential_quantity: Any = UNSET,
     pdie: Any = UNSET,
     sdie: Any = UNSET,
     basis_set: Any = UNSET,

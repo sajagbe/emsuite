@@ -8,7 +8,7 @@ Approved direction for EMSuite. Shipped features are documented in [README.md](.
 |---------|---------|-----|
 | **Surface** | Geometry + VDW envelope | `emsuite -s surface.in` |
 | **Tuning** | Electrostatic tuning of molecular properties | `emsuite -t tuning.in` |
-| **Potential** | ESP maps (Coulomb, APBS, bond-axis scan) | `emsuite -p potential.in` |
+| **Potential** | APBS φ or Gauss-law charge on a surface | `emsuite -p potential.in` |
 | **Coupled** | Potential → tuning pipeline | `emsuite -c coupled.in` |
 
 **Naming:** `calc_type='combined'` ≠ the **coupled** channel.
@@ -40,6 +40,7 @@ bond_scan_span = 3.0
 
 ## Future ideas (not scheduled)
 
+PySCF ESP/MEP backends for the potential channel (`method='esp'` / `'mep'`).
 Higher-accuracy MLIP models (MACE, etc.), explicit solvent MD coupling.
 
 ## Version milestones
@@ -48,6 +49,7 @@ Higher-accuracy MLIP models (MACE, etc.), explicit solvent MD coupling.
 |---------|-------|
 | **v1.1** | Refoundation, four channels, tests, CI |
 | **v1.2** | Advanced properties, xTB engine, bond scan |
+| **v1.3** | Kwargs API, APBS `quantity` (potential or Gauss-law charge) |
 | **v1.x+** | Further properties and engine backends as needed |
 
 See [ENGINEERING.md](ENGINEERING.md) and [SESSION_HANDOFF.md](SESSION_HANDOFF.md).

@@ -1,22 +1,45 @@
-"""APBS Poisson-Boltzmann potential sampling."""
+"""APBS Poisson-Boltzmann grids (potential + dielectric)."""
 
 from __future__ import annotations
 
 import subprocess
 import tempfile
+from dataclasses import dataclass
 from pathlib import Path
 
 import apbs_binary
 import numpy as np
 
+from .dx import DxGrid, parse_dx
 from .pqr import read_xyz, write_pqr
+
+
+@dataclass(frozen=True)
+class ApbsGrids:
+    potential: DxGrid
+    dielx: DxGrid
+    diely: DxGrid
+    dielz: DxGrid
+
+
+def _box_lengths(
+    atom_coords: np.ndarray,
+) -> tuple[tuple[float, float, float], tuple[float, float, float]]:
+    extent = atom_coords.max(axis=0) - atom_coords.min(axis=0)
+    box = float(max(float(np.max(extent)) + 12.0, 16.0))
+    cglen = (box, box, box)
+    fglen = (0.8 * box, 0.8 * box, 0.8 * box)
+    return cglen, fglen
 
 
 def _write_apbs_input(
     pqr_name: str,
-    output_prefix: str,
+    prefix: str,
     pdie: float,
     sdie: float,
+    cglen: tuple[float, float, float],
+    fglen: tuple[float, float, float],
+    dime: tuple[int, int, int],
     path: Path,
 ) -> Path:
     content = f"""read
@@ -24,9 +47,9 @@ def _write_apbs_input(
 end
 elec
   mg-auto
-  dime 33 33 33
-  cglen 16 16 16
-  fglen 10 10 10
+  dime {dime[0]} {dime[1]} {dime[2]}
+  cglen {cglen[0]:.3f} {cglen[1]:.3f} {cglen[2]:.3f}
+  fglen {fglen[0]:.3f} {fglen[1]:.3f} {fglen[2]:.3f}
   cgcent mol 1
   fgcent mol 1
   mol 1
@@ -40,7 +63,10 @@ elec
   temp 298.15
   calcenergy total
   calcforce no
-  write pot dx {output_prefix}
+  write pot dx {prefix}
+  write dielx dx {prefix}_dielx
+  write diely dx {prefix}_diely
+  write dielz dx {prefix}_dielz
 end
 quit
 """
@@ -49,22 +75,33 @@ quit
     return apbs_in
 
 
-def run_apbs_potential(
+def _dx_file(work_path: Path, stem: str) -> Path:
+    exact = work_path / f"{stem}.dx"
+    if exact.is_file():
+        return exact
+    if stem.endswith(("_dielx", "_diely", "_dielz")):
+        matches = list(work_path.glob(f"{stem}*.dx"))
+    else:
+        matches = [path for path in work_path.glob(f"{stem}*.dx") if "_diel" not in path.name]
+    if not matches:
+        raise RuntimeError(f"APBS did not produce a DX file named '{stem}'")
+    return matches[0]
+
+
+def run_apbs_grids(
     xyz_path: str,
-    surface_coords: np.ndarray,
     charges: np.ndarray | None = None,
     pdie: float = 2.0,
     sdie: float = 78.54,
+    dime: tuple[int, int, int] = (65, 65, 65),
     workdir: str | Path | None = None,
-) -> np.ndarray:
-    """
-    Run APBS and sample electrostatic potential at surface coordinates.
-
-    Raises RuntimeError when APBS fails; callers may fall back to Coulomb ESP.
-    """
+) -> ApbsGrids:
+    """Run APBS and return potential plus dielectric grids."""
     atoms = read_xyz(xyz_path)
     if charges is None:
         charges = np.zeros(len(atoms))
+    atom_coords = np.array([[x, y, z] for _, x, y, z in atoms], dtype=float)
+    cglen, fglen = _box_lengths(atom_coords)
 
     if workdir is None:
         tmp = tempfile.TemporaryDirectory()
@@ -76,8 +113,9 @@ def run_apbs_potential(
     try:
         pqr_path = write_pqr(atoms, charges.tolist(), work_path / "input.pqr")
         prefix = "potential"
-        apbs_in = _write_apbs_input(pqr_path.name, prefix, pdie, sdie, work_path)
-
+        apbs_in = _write_apbs_input(
+            pqr_path.name, prefix, pdie, sdie, cglen, fglen, dime, work_path
+        )
         result = subprocess.run(
             [apbs_binary.APBS_BIN_PATH, str(apbs_in)],
             cwd=work_path,
@@ -88,33 +126,27 @@ def run_apbs_potential(
         if result.returncode != 0:
             raise RuntimeError(f"APBS failed (exit {result.returncode}): {result.stderr[-500:]}")
 
-        dx_files = list(work_path.glob(f"{prefix}*.dx"))
-        if not dx_files:
-            raise RuntimeError("APBS did not produce a DX potential file")
-
-        coords_file = work_path / "surface_coords.txt"
-        np.savetxt(coords_file, surface_coords, fmt="%.6f")
-
-        multivalue_out = work_path / "multivalue_out.txt"
-        subprocess.run(
-            [
-                apbs_binary.MULTIVALUE_BIN_PATH,
-                str(coords_file),
-                str(dx_files[0]),
-                str(multivalue_out),
-            ],
-            cwd=work_path,
-            capture_output=True,
-            text=True,
-            check=True,
+        return ApbsGrids(
+            potential=parse_dx(_dx_file(work_path, prefix)),
+            dielx=parse_dx(_dx_file(work_path, f"{prefix}_dielx")),
+            diely=parse_dx(_dx_file(work_path, f"{prefix}_diely")),
+            dielz=parse_dx(_dx_file(work_path, f"{prefix}_dielz")),
         )
-
-        values = np.loadtxt(multivalue_out)
-        if values.ndim == 0:
-            return np.array([float(values)])
-        if values.ndim == 2:
-            return values[:, -1]
-        return values
     finally:
         if tmp is not None:
             tmp.cleanup()
+
+
+def run_apbs_potential(
+    xyz_path: str,
+    surface_coords: np.ndarray,
+    charges: np.ndarray | None = None,
+    pdie: float = 2.0,
+    sdie: float = 78.54,
+    workdir: str | Path | None = None,
+) -> np.ndarray:
+    """Run APBS and interpolate electrostatic potential at surface coordinates."""
+    from .gauss import potential_at_points
+
+    grids = run_apbs_grids(xyz_path, charges=charges, pdie=pdie, sdie=sdie, workdir=workdir)
+    return potential_at_points(grids.potential, surface_coords)

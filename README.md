@@ -50,7 +50,7 @@ emsuite -c coupled.in      # Potential → tuning pipeline
 
 - `-s, --surface INPUT_FILE`: Generate a `.surf` file from SMILES or XYZ input.
 - `-t, --tuning INPUT_FILE`: Run electrostatic tuning using an XYZ structure and `.surf` file.
-- `-p, --potential INPUT_FILE`: Map electrostatic potential onto a VDW surface (Coulomb default; APBS optional).
+- `-p, --potential INPUT_FILE`: Map APBS potential or Gauss-law charge onto a VDW surface.
 - `-c, --coupled INPUT_FILE`: Run potential mapping, then tuning with the heterogeneous surface.
 
 ## Python API
@@ -64,7 +64,7 @@ from emsuite import api
 api.surface(input_type="SMILES", input_data="CCO", output_surf="CCO.surf")
 api.tune(molecule="CCO.xyz", surface_file="CCO.surf",
          properties=["homo", "gap", "stark_gap"])
-api.potential(molecule="CCO.xyz", bond_scan_atoms=[0, 1])
+api.potential(molecule="CCO.xyz", quantity="potential")
 api.coupled(molecule="CCO.xyz", properties=["homo", "lumo"])
 ```
 
@@ -235,16 +235,20 @@ Optional keys and defaults:
 - `output_surf = 'potential.surf'`
 - `surface_density = 0.5`
 - `surface_scale = 1.0`
-- `method = 'coulomb'` (`'coulomb'` or `'apbs'`)
+- `method = 'apbs'` (`'apbs'` or `'coulomb'`; ESP/MEP via PySCF planned)
+- `quantity = 'potential'` (`'potential'` or `'charge'`). `'charge'` is Gauss-law conversion and requires `'apbs'`
 - `pdie = 2.0`
 - `sdie = 78.54`
-- `bond_scan_atoms = None` (e.g. `[0, 1]` for bond-axis ESP scan)
+- `bond_scan_atoms = None` (e.g. `[0, 1]` for bond-axis scan)
 - `bond_scan_steps = 10`
 - `bond_scan_span = 3.0` (Å along bond axis)
+
+The `.surf` fourth column is interpolated APBS potential when `quantity='potential'`, or Gauss-law charge (e) when `quantity='charge'`.
 
 ### coupled.in (`emsuite -c coupled.in`)
 
 Combines potential and tuning parameters. Required: `molecule`, `properties`.
+Defaults to APBS Gauss-law surface charges (`potential_method='apbs'`, `potential_quantity='charge'`), then runs tuning.
 See `examples/templates/coupled.in` for a minimal example.
 
 ### Methods and Basis Sets
