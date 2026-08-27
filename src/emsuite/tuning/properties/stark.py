@@ -9,7 +9,9 @@ from emsuite.core import find_homo_lumo_and_gap
 from ..constants import HARTREE_TO_EV
 
 
-def _field_from_probe(probe_coord: np.ndarray, probe_charge: float, origin: np.ndarray) -> np.ndarray:
+def _field_from_probe(
+    probe_coord: np.ndarray, probe_charge: float, origin: np.ndarray
+) -> np.ndarray:
     """Approximate electric field (atomic units) from a point charge at probe_coord."""
     vec = origin - probe_coord
     dist = float(np.linalg.norm(vec))

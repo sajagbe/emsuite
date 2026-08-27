@@ -7,28 +7,34 @@ from pathlib import Path
 
 import numpy as np
 
+from emsuite.config.schemas import validate_potential_params
 from emsuite.surface import load_surf, save_surf
 from emsuite.surface.bond_scan import bond_scan_coords
 from emsuite.surface.generate import generate_surface
 
+from .apbs import run_apbs_potential
+from .config_io import POTENTIAL_DEFAULTS, parse_potential_input
+from .coulomb import coulomb_potential_at_points, partial_charges_from_xyz
 from .pqr import read_xyz
 
-from .apbs import run_apbs_potential
-from .config_io import parse_potential_input
-from .coulomb import coulomb_potential_at_points, partial_charges_from_xyz
 
-
-def run_potential_calculation(input_file: str) -> str:
+def run_potential_calculation(config) -> str:
     """
     Compute electrostatic potential at surface points and write heterogeneous .surf.
 
     Uses Coulomb/Gasteiger charges by default; set method='apbs' for Poisson-Boltzmann.
+
+    Args:
+        config (str | Path | dict): Path to a potential.in file, or a parameter dict.
     """
     print("\n" + "=" * 60)
     print("              Electrostatic Potential Module")
     print("=" * 60 + "\n")
 
-    params = parse_potential_input(input_file)
+    if isinstance(config, dict):
+        params = validate_potential_params({**POTENTIAL_DEFAULTS, **config})
+    else:
+        params = parse_potential_input(config)
     molecule = params["molecule"]
     if not os.path.exists(molecule):
         raise FileNotFoundError(f"Molecule XYZ not found: {molecule}")

@@ -10,31 +10,32 @@ from emsuite.config.schemas import validate_coupled_params
 from emsuite.potential import run_potential_calculation
 from emsuite.tuning import main as run_tuning
 
+COUPLED_DEFAULTS = {
+    "molecule": None,
+    "surface_file": None,
+    "output_surf": "coupled.surf",
+    "surface_density": 0.5,
+    "surface_scale": 1.0,
+    "potential_method": "coulomb",
+    "pdie": 2.0,
+    "sdie": 78.54,
+    "properties": ["homo", "lumo", "gap"],
+    "basis_set": "6-31G*",
+    "method": "dft",
+    "functional": "b3lyp",
+    "charge": 0,
+    "spin": 0,
+    "solvent": None,
+    "calc_type": "separate",
+    "parallel": False,
+    "state_of_interest": 2,
+    "triplet": False,
+    "num_procs": None,
+}
+
 
 def parse_coupled_input(input_file: str) -> dict:
-    defaults = {
-        "molecule": None,
-        "surface_file": None,
-        "output_surf": "coupled.surf",
-        "surface_density": 0.5,
-        "surface_scale": 1.0,
-        "potential_method": "coulomb",
-        "pdie": 2.0,
-        "sdie": 78.54,
-        "properties": ["homo", "lumo", "gap"],
-        "basis_set": "6-31G*",
-        "method": "dft",
-        "functional": "b3lyp",
-        "charge": 0,
-        "spin": 0,
-        "solvent": None,
-        "calc_type": "separate",
-        "parallel": False,
-        "state_of_interest": 2,
-        "triplet": False,
-        "num_procs": None,
-    }
-    params = parse_config_file(input_file, defaults=defaults)
+    params = parse_config_file(input_file, defaults=COUPLED_DEFAULTS)
     parsed = parse_assignments(Path(input_file).read_text())
     for key in ("potential_method", "properties", "parallel"):
         if key in parsed:
@@ -85,17 +86,23 @@ def _write_tuning_input(params: dict, surface_file: str, path: Path) -> None:
     )
 
 
-def run_coupled_calculation(input_file: str) -> None:
+def run_coupled_calculation(config) -> None:
     """
     Run potential-derived heterogeneous surface charges, then tuning maps.
 
     Distinct from tuning ``calc_type='combined'`` (all probes at once).
+
+    Args:
+        config (str | Path | dict): Path to a coupled.in file, or a parameter dict.
     """
     print("\n" + "=" * 60)
     print("           Coupled Potential → Tuning Pipeline")
     print("=" * 60 + "\n")
 
-    params = parse_coupled_input(input_file)
+    if isinstance(config, dict):
+        params = validate_coupled_params({**COUPLED_DEFAULTS, **config})
+    else:
+        params = parse_coupled_input(config)
     if not os.path.exists(params["molecule"]):
         raise FileNotFoundError(f"Molecule XYZ not found: {params['molecule']}")
 

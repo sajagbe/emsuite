@@ -2,6 +2,8 @@
 
 __version__ = "1.2.0"
 
+from emsuite import api
+from emsuite.api import tune
 from emsuite.config import load_config, parse_config_file
 from emsuite.coupled import run_coupled_calculation
 from emsuite.potential import run_potential_calculation
@@ -11,6 +13,7 @@ from emsuite.tuning import main as run_tuning
 
 __all__ = [
     "__version__",
+    "api",
     "generate_surface",
     "get_tuning_parameters",
     "load_config",
@@ -19,4 +22,5 @@ __all__ = [
     "run_potential_calculation",
     "run_surface_calculation",
     "run_tuning",
+    "tune",
 ]

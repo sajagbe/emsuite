@@ -53,7 +53,33 @@ emsuite -c coupled.in      # Potential → tuning pipeline
 - `-p, --potential INPUT_FILE`: Map electrostatic potential onto a VDW surface (Coulomb default; APBS optional).
 - `-c, --coupled INPUT_FILE`: Run potential mapping, then tuning with the heterogeneous surface.
 
-## Importable API
+## Python API
+
+The most accessible way to drive EMSuite is the keyword-argument API in
+`emsuite.api` — pass only what you care about; defaults handle the rest:
+
+```python
+from emsuite import api
+
+api.surface(input_type="SMILES", input_data="CCO", output_surf="CCO.surf")
+api.tune(molecule="CCO.xyz", surface_file="CCO.surf",
+         properties=["homo", "gap", "stark_gap"])
+api.potential(molecule="CCO.xyz", bond_scan_atoms=[0, 1])
+api.coupled(molecule="CCO.xyz", properties=["homo", "lumo"])
+```
+
+Every channel also accepts `config=` (a `.in` file path **or** a dict), and
+explicit keyword arguments override values loaded from `config`:
+
+```python
+api.tune(config="tuning.in")                 # load a file
+api.tune(config="tuning.in", parallel=False) # load a file, override one value
+api.tune(config={"molecule": "m.xyz", "surface_file": "m.surf"})  # pass a dict
+```
+
+`emsuite.tune` is also exported at the top level as a shorthand for `api.tune`.
+
+### File-path API (unchanged)
 
 ```python
 import emsuite
@@ -138,8 +164,6 @@ The following molecular properties can be calculated:
 | `'fukui_minus'` | Electrophilic Fukui index | eV |
 | `'exe'` | Excitation energies | eV |
 | `'osc'` | Oscillator strengths | dimensionless |
-| `'fukui_spa_plus'` | Spatial nucleophilic Fukui (surface map) | dimensionless |
-| `'fukui_spa_minus'` | Spatial electrophilic Fukui (surface map) | dimensionless |
 | `'freq'` | Lowest fundamental vibrational frequency | cm⁻¹ |
 | `'stark_homo'` | HOMO under probe field | eV |
 | `'stark_lumo'` | LUMO under probe field | eV |
@@ -150,7 +174,6 @@ The following molecular properties can be calculated:
 | `'efl_fug'` | Electrophilicity fugacity extension | dimensionless |
 | `'nfl_fug'` | Nucleophilicity fugacity extension | dimensionless |
 | `'eng_fug'` | Electronegativity fugacity extension | dimensionless |
-| `'ts_barrier'` | Transition-state barrier (global scalar) | kcal/mol |
 
 Use `'all'` to calculate all available properties.
 
@@ -201,8 +224,6 @@ Optional keys and defaults:
 - `triplet = False`
 - `parallel = True`
 - `num_procs = None` (auto-detect CPU/GPU worker count)
-- `ts_xyz = None` (transition-state XYZ for `ts_barrier`)
-- `fukui_projection = 'nearest'` (`'nearest'` or `'inverse_distance'` for spatial Fukui maps)
 
 ### potential.in (`emsuite -p potential.in`)
 

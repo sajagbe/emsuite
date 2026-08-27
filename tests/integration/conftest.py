@@ -57,16 +57,6 @@ INTEGRATION_FEATURE_TRACE: dict[str, dict[str, object]] = {
             "src/emsuite/surface/bond_scan.py",
         ],
     },
-    "tests/integration/test_tuning_fukui_spatial.py::test_tuning_fukui_spatial_maps": {
-        "feature_id": "v1.2-fukui-spatial",
-        "version": "1.2.0",
-        "channel": "tuning",
-        "summary": "Surface-projected Fukui maps (fukui_spa_plus/minus)",
-        "code_paths": [
-            "src/emsuite/tuning/surface_maps.py",
-            "src/emsuite/tuning/properties/fukui_spatial.py",
-        ],
-    },
     "tests/integration/test_tuning_stark.py::test_tuning_stark_gap": {
         "feature_id": "v1.2-stark",
         "version": "1.2.0",
@@ -87,13 +77,6 @@ INTEGRATION_FEATURE_TRACE: dict[str, dict[str, object]] = {
         "channel": "tuning",
         "summary": "Explicit water probe interaction energy (h2o)",
         "code_paths": ["src/emsuite/tuning/properties/interaction.py"],
-    },
-    "tests/integration/test_tuning_ts_barrier.py::test_tuning_ts_barrier_global": {
-        "feature_id": "v1.2-ts-barrier",
-        "version": "1.2.0",
-        "channel": "tuning",
-        "summary": "Global transition-state barrier from ts_xyz",
-        "code_paths": ["src/emsuite/tuning/properties/ts.py"],
     },
     "tests/integration/test_tuning_fugacity.py::test_tuning_fugacity_extensions": {
         "feature_id": "v1.2-fugacity",

@@ -29,18 +29,6 @@ PROPERTY_CONFIG = {
     "nfl": {"deps": ["efl"], "calc": [], "unit": HARTREE_TO_EV},
     "fukui_plus": {"deps": ["ea"], "calc": ["anion"], "unit": HARTREE_TO_EV},
     "fukui_minus": {"deps": ["ie"], "calc": ["cation"], "unit": HARTREE_TO_EV},
-    "fukui_spa_plus": {
-        "deps": [],
-        "calc": ["anion", "cation"],
-        "unit": 1,
-        "surface_map": True,
-    },
-    "fukui_spa_minus": {
-        "deps": [],
-        "calc": ["anion", "cation"],
-        "unit": 1,
-        "surface_map": True,
-    },
     "freq": {"deps": [], "calc": [], "unit": 1},
     "stark_homo": {"deps": [], "calc": [], "unit": 1},
     "stark_lumo": {"deps": [], "calc": [], "unit": 1},
@@ -51,18 +39,9 @@ PROPERTY_CONFIG = {
     "efl_fug": {"deps": ["efl"], "calc": [], "unit": 1},
     "nfl_fug": {"deps": ["nfl"], "calc": [], "unit": 1},
     "eng_fug": {"deps": ["eng"], "calc": [], "unit": 1},
-    "ts_barrier": {"deps": [], "calc": [], "unit": HARTREE_TO_KCAL, "global": True},
     "exe": {"deps": [], "calc": ["td"], "unit": 1},
     "osc": {"deps": [], "calc": ["td"], "unit": 1},
 }
-
-
-def is_surface_map_property(prop: str) -> bool:
-    return bool(PROPERTY_CONFIG.get(prop, {}).get("surface_map"))
-
-
-def is_global_property(prop: str) -> bool:
-    return bool(PROPERTY_CONFIG.get(prop, {}).get("global"))
 
 
 def setup_calculation(requested_props):
@@ -104,7 +83,7 @@ def calculate_all_properties(
     if not props_to_calc:
         return {}
 
-    props = [p for p in props_to_calc if not is_surface_map_property(p) and not is_global_property(p)]
+    props = list(props_to_calc)
 
     results = calculate_ground_state_properties(mf, props)
     results = calculate_thermo_properties(mf, anion_mf, cation_mf, props, partial=results)

@@ -54,7 +54,4 @@ class TBLiteEngine:
         return float(atoms.get_potential_energy())
 
 
-# MLIPEngine delegates to TBLite when available
-from .mlip_engine import MLIPEngine as _MLIPStub  # noqa: E402
-
 __all__ = ["TBLiteEngine"]

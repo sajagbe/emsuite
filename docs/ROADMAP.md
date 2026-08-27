@@ -24,16 +24,9 @@ Approved direction for EMSuite. Shipped features are documented in [README.md](.
 
 **Core (17):** `gse`, `homo`, `lumo`, `gap`, `dm`, `spin`, `ie`, `ea`, `cp`, `eng`, `hard`, `efl`, `nfl`, `fukui_plus`, `fukui_minus`, `exe`, `osc`
 
-**Advanced (12):** `fukui_spa_plus`, `fukui_spa_minus`, `freq`, `stark_homo`, `stark_lumo`, `stark_gap`, `eint`, `h2o`, `pa`, `efl_fug`, `nfl_fug`, `eng_fug`, `ts_barrier`
+**Advanced (10):** `freq`, `stark_homo`, `stark_lumo`, `stark_gap`, `eint`, `h2o`, `pa`, `efl_fug`, `nfl_fug`, `eng_fug`
 
 Use `properties = ['all']` for the full registry.
-
-### Tuning input extras
-
-| Key | Purpose |
-|-----|---------|
-| `ts_xyz` | Transition-state XYZ for `ts_barrier` baseline |
-| `fukui_projection` | `'nearest'` or `'inverse_distance'` for spatial Fukui maps |
 
 ### Potential bond scan
 
@@ -47,14 +40,14 @@ bond_scan_span = 3.0
 
 ## Future ideas (not scheduled)
 
-Higher-accuracy MLIP models (MACE, etc.), explicit solvent MD coupling, automated TS search for `ts_barrier` effects per probe.
+Higher-accuracy MLIP models (MACE, etc.), explicit solvent MD coupling.
 
 ## Version milestones
 
 | Version | Scope |
 |---------|-------|
 | **v1.1** | Refoundation, four channels, tests, CI |
-| **v1.2** | Advanced properties, spatial Fukui, xTB engine, bond scan |
+| **v1.2** | Advanced properties, xTB engine, bond scan |
 | **v1.x+** | Further properties and engine backends as needed |
 
 See [ENGINEERING.md](ENGINEERING.md) and [SESSION_HANDOFF.md](SESSION_HANDOFF.md).

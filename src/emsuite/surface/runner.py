@@ -7,6 +7,25 @@ from emsuite.config.schemas import validate_surface_params
 
 from .generate import generate_surface
 
+SURFACE_DEFAULTS = {
+    "input_type": None,  # Required
+    "input_data": None,  # Required
+    "output_surf": "surface.surf",
+    "optimized_xyz": None,  # Optional: custom name for optimized XYZ
+    "surface_density": 1.0,
+    "surface_scale": 1.0,
+    "surface_type": "homogenous",
+    "surface_charge": 0.10,
+    "optimize": None,  # Auto-determined based on input_type
+    "optimize_method": "mmff",
+    "method": "dft",
+    "basis_set": "6-31G*",
+    "functional": "b3lyp",
+    "solvent": None,
+    "charge": 0,
+    "spin": 0,
+}
+
 
 def parse_surface_input(input_file):
     """
@@ -18,26 +37,7 @@ def parse_surface_input(input_file):
     Returns:
         dict: Dictionary of parameters with defaults applied
     """
-    defaults = {
-        "input_type": None,  # Required
-        "input_data": None,  # Required
-        "output_surf": "surface.surf",
-        "optimized_xyz": None,  # Optional: custom name for optimized XYZ
-        "surface_density": 1.0,
-        "surface_scale": 1.0,
-        "surface_type": "homogenous",
-        "surface_charge": 0.10,
-        "optimize": None,  # Auto-determined based on input_type
-        "optimize_method": "mmff",
-        "method": "dft",
-        "basis_set": "6-31G*",
-        "functional": "b3lyp",
-        "solvent": None,
-        "charge": 0,
-        "spin": 0,
-    }
-
-    params = parse_config_file(input_file, defaults=defaults)
+    params = parse_config_file(input_file, defaults=SURFACE_DEFAULTS)
     parsed = parse_assignments(Path(input_file).read_text())
 
     if params["surface_type"].lower() == "homogenous" and "surface_charge" not in parsed:
@@ -46,12 +46,12 @@ def parse_surface_input(input_file):
     return validate_surface_params(params)
 
 
-def run_surface_calculation(input_file):
+def run_surface_calculation(config):
     """
-    Main entry point for surface generation from input file.
+    Main entry point for surface generation.
 
     Args:
-        input_file (str): Path to surface.in file
+        config (str | Path | dict): Path to a surface.in file, or a parameter dict.
 
     Returns:
         str: Path to the generated surf file
@@ -60,8 +60,11 @@ def run_surface_calculation(input_file):
     print("                  Surface Generation Module")
     print("=" * 60 + "\n")
 
-    print(f"Reading input file: {input_file}")
-    params = parse_surface_input(input_file)
+    if isinstance(config, dict):
+        params = validate_surface_params({**SURFACE_DEFAULTS, **config})
+    else:
+        print(f"Reading input file: {config}")
+        params = parse_surface_input(config)
 
     print(f"\nInput type: {params['input_type']}")
     print(f"Input data: {params['input_data']}")

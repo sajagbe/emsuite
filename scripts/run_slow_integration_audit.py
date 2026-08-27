@@ -17,10 +17,9 @@ RUNS_ROOT = REPO_ROOT / "tests" / "integration_runs"
 def _git_info() -> dict[str, str | None]:
     def run(cmd: list[str]) -> str | None:
         try:
-            return (
-                subprocess.check_output(cmd, cwd=REPO_ROOT, stderr=subprocess.DEVNULL, text=True)
-                .strip()
-            )
+            return subprocess.check_output(
+                cmd, cwd=REPO_ROOT, stderr=subprocess.DEVNULL, text=True
+            ).strip()
         except (subprocess.CalledProcessError, FileNotFoundError):
             return None
 
@@ -78,9 +77,7 @@ def _write_run_manifest(run_dir: Path) -> None:
         nodeid = manifest.get("nodeid", test_dir.name)
         duration = manifest.get("duration_s", "—")
         summary = manifest.get("summary", "")
-        lines.append(
-            f"| {icon} | `{feature}` | {version} | {channel} | `{nodeid}` | {duration} |"
-        )
+        lines.append(f"| {icon} | `{feature}` | {version} | {channel} | `{nodeid}` | {duration} |")
         if summary:
             lines.append(f"| | | | | _{summary}_ | |")
 

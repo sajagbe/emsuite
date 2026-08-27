@@ -30,12 +30,6 @@ from .output import (
 from .parallel import calculate_point_effect_cpu_remote, calculate_point_effect_gpu
 from .properties import calculate_all_properties, interaction_effect_kcal, setup_calculation
 from .properties.interaction import water_probe_coords_and_charges
-from .properties.ts import ts_barrier_kcal
-from .surface_maps import (
-    precompute_surface_maps,
-    split_property_lists,
-    surface_map_effects_for_point,
-)
 from .resume import (
     create_resume_metadata,
     find_incomplete_logs,
@@ -46,18 +40,6 @@ from .resume import (
 )
 
 os.environ["HDF5_USE_FILE_LOCKING"] = "FALSE"
-
-
-def _merge_surface_map_effects(
-    effects: dict | None,
-    point_index: int,
-    map_properties: list[str],
-    surface_map_data: dict,
-) -> dict | None:
-    if effects is None or not map_properties:
-        return effects
-    effects.update(surface_map_effects_for_point(map_properties, point_index, surface_map_data))
-    return effects
 
 
 def calculate_surface_effect_at_point(
@@ -557,16 +539,24 @@ def startup_message():
 
 
 ##########################################################
-def main(tuning_file="tuning.in"):
+def main(tuning_input="tuning.in"):
     #######################################
     #           Preliminary Setup         #
     #######################################
-    """Main entry point for tuning calculations"""
+    """Main entry point for tuning calculations.
+
+    Args:
+        tuning_input (str | Path | dict): Path to a tuning.in file, or a
+            parameter dict (defaults are supplied per-key below).
+    """
     # Print startup message
     startup_message()
 
-    # Get parameters from tuning file
-    tuning_params = get_tuning_parameters(tuning_file)
+    # Get parameters from tuning file or dict
+    if isinstance(tuning_input, dict):
+        tuning_params = tuning_input
+    else:
+        tuning_params = get_tuning_parameters(tuning_input)
 
     # Extract all parameters
     molecule = tuning_params.get("molecule") or tuning_params.get("xyz_file")
@@ -602,10 +592,7 @@ def main(tuning_file="tuning.in"):
 
     # Resolve property dependencies and required calculations
     properties_to_calculate, required_calculations = setup_calculation(properties)
-    qm_properties, map_properties = split_property_lists(properties_to_calculate)
     print(f"Calculating Tuning of:  {properties_to_calculate}")
-    if map_properties:
-        print(f"Surface-map properties: {map_properties}")
     print(f"Using molecular states: {required_calculations}")
 
     # Prepare input data
@@ -773,23 +760,6 @@ def main(tuning_file="tuning.in"):
         triplet=triplet,
         props_to_calc=properties_to_calculate,
     )
-
-    ts_xyz = tuning_params.get("ts_xyz")
-    if "ts_barrier" in properties_to_calculate and ts_xyz:
-        raw_properties["ts_barrier"] = ts_barrier_kcal(
-            ts_xyz, molecule_alone, basis_set, method, functional
-        )
-
-    surface_map_data = {}
-    if map_properties:
-        surface_map_data = precompute_surface_maps(
-            molecule_alone,
-            anion_alone,
-            cation_alone,
-            surface_coords,
-            map_properties,
-            projection=tuning_params.get("fukui_projection", "nearest"),
-        )
 
     print("\n")
     print("=" * 60)
@@ -992,9 +962,7 @@ def main(tuning_file="tuning.in"):
                 # Get results and log them IMMEDIATELY after each completes
                 for result in ray.get(futures):
                     point_index = result["point_index"]
-                    all_effects[point_index] = _merge_surface_map_effects(
-                        result["effects"], point_index, map_properties, surface_map_data
-                    )
+                    all_effects[point_index] = result["effects"]
 
                     # Log individual point file
                     log_point_result(
@@ -1050,10 +1018,7 @@ def main(tuning_file="tuning.in"):
                         force_single_gpu=True,
                     )
 
-                    all_effects[point_idx] = _merge_surface_map_effects(
-                        effects, point_idx, map_properties, surface_map_data
-                    )
-                    effects = all_effects[point_idx]
+                    all_effects[point_idx] = effects
 
                     # Log individual file
                     log_point_result(
