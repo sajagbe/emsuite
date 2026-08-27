@@ -1,9 +1,33 @@
-"""v1.2 advanced property registry tests."""
+"""Core property registry tests (advanced modules removed)."""
 
-from emsuite.tuning.properties import PROPERTY_CONFIG, setup_calculation
+from emsuite.tuning.properties import PROPERTY_CONFIG
+
+CORE = {
+    "gse",
+    "homo",
+    "lumo",
+    "gap",
+    "dm",
+    "spin",
+    "ie",
+    "ea",
+    "cp",
+    "eng",
+    "hard",
+    "efl",
+    "nfl",
+    "fukui_plus",
+    "fukui_minus",
+    "exe",
+    "osc",
+}
 
 
-def test_v2_properties_registered():
+def test_core_properties_registered():
+    assert set(PROPERTY_CONFIG) == CORE
+
+
+def test_advanced_properties_removed():
     for code in (
         "freq",
         "stark_homo",
@@ -13,10 +37,4 @@ def test_v2_properties_registered():
         "pa",
         "efl_fug",
     ):
-        assert code in PROPERTY_CONFIG
-
-
-def test_stark_resolves_homo_lumo():
-    props, _ = setup_calculation(["stark_gap"])
-    assert "stark_homo" in props
-    assert "stark_lumo" in props
+        assert code not in PROPERTY_CONFIG

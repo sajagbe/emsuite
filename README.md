@@ -11,7 +11,7 @@ A comprehensive Python package for calculating electrostatic tuning effects on m
 
 ## Overview
 
-EMSuite is aimed at qualifying and quantifying the influence of external electrostatic fields on electronic structure and corresponding chemistry. The suite provides four channels: **surface** generation, **tuning** maps for molecular properties, **potential** maps on surfaces, and a **coupled** potential→tuning pipeline. The tuning module extends the electrostatic spectral tuning approach ([Gozem et al., 2019](https://pubs.acs.org/doi/10.1021/acs.jpcb.9b00489)) to 29 molecular properties.
+EMSuite is aimed at qualifying and quantifying the influence of external electrostatic fields on electronic structure and corresponding chemistry. The suite provides four channels: **surface** generation, **tuning** maps for molecular properties, **potential** maps on surfaces, and a **coupled** potential→tuning pipeline. The tuning module extends the electrostatic spectral tuning approach ([Gozem et al., 2019](https://pubs.acs.org/doi/10.1021/acs.jpcb.9b00489)) to a core set of electronic properties.
 
 ## Features
 
@@ -62,10 +62,23 @@ The most accessible way to drive EMSuite is the keyword-argument API in
 from emsuite import api
 
 api.surface(input_type="SMILES", input_data="CCO", output_surf="CCO.surf")
-api.tune(molecule="CCO.xyz", surface_file="CCO.surf",
-         properties=["homo", "gap", "stark_gap"])
+api.tune(molecule="CCO.xyz", surface_file="CCO.surf", properties=["homo", "gap"])
 api.potential(molecule="CCO.xyz", quantity="potential")
 api.coupled(molecule="CCO.xyz", properties=["homo", "lumo"])
+
+# Ligand in a protein field (surface from the ligand; charges from the protein):
+api.potential(
+    ligand="ligand.xyz",
+    protein="protein.xyz",
+    ligand_atoms="present",   # ligand in the PQR at q=0 (cavity)
+    quantity="charge",
+)
+api.potential(
+    ligand="ligand.xyz",
+    protein="protein.xyz",
+    ligand_atoms="absent",    # ligand omitted from the PQR
+    quantity="charge",
+)
 ```
 
 Every channel also accepts `config=` (a `.in` file path **or** a dict), and
@@ -164,16 +177,6 @@ The following molecular properties can be calculated:
 | `'fukui_minus'` | Electrophilic Fukui index | eV |
 | `'exe'` | Excitation energies | eV |
 | `'osc'` | Oscillator strengths | dimensionless |
-| `'freq'` | Lowest fundamental vibrational frequency | cm⁻¹ |
-| `'stark_homo'` | HOMO under probe field | eV |
-| `'stark_lumo'` | LUMO under probe field | eV |
-| `'stark_gap'` | Stark HOMO–LUMO gap | eV |
-| `'eint'` | Interaction energy (probe complex) | kcal/mol |
-| `'h2o'` | Water probe interaction energy | kcal/mol |
-| `'pa'` | Proton affinity | kcal/mol |
-| `'efl_fug'` | Electrophilicity fugacity extension | dimensionless |
-| `'nfl_fug'` | Nucleophilicity fugacity extension | dimensionless |
-| `'eng_fug'` | Electronegativity fugacity extension | dimensionless |
 
 Use `'all'` to calculate all available properties.
 
@@ -228,27 +231,28 @@ Optional keys and defaults:
 ### potential.in (`emsuite -p potential.in`)
 
 Required keys:
-- `molecule`: Path to XYZ file
+- `molecule` or `ligand`: Path to the ligand (or standalone molecule) XYZ
 
 Optional keys and defaults:
-- `surface_file = None` (generate VDW surface if missing)
+- `protein = None` (protein XYZ; when set, APBS charges come from the protein only)
+- `ligand_atoms = 'present'` (`'present'` = ligand atoms in the PQR at charge 0; `'absent'` = ligand omitted from the PQR)
+- `surface_file = None` (generate ligand VDW surface if missing)
 - `output_surf = 'potential.surf'`
 - `surface_density = 0.5`
 - `surface_scale = 1.0`
-- `method = 'apbs'` (`'apbs'` or `'coulomb'`; ESP/MEP via PySCF planned)
-- `quantity = 'potential'` (`'potential'` or `'charge'`). `'charge'` is Gauss-law conversion and requires `'apbs'`
+- `method = 'apbs'` (ESP/MEP via PySCF planned)
+- `quantity = 'potential'` (`'potential'` or `'charge'`). `'charge'` is Gauss-law conversion
 - `pdie = 2.0`
 - `sdie = 78.54`
-- `bond_scan_atoms = None` (e.g. `[0, 1]` for bond-axis scan)
-- `bond_scan_steps = 10`
-- `bond_scan_span = 3.0` (Å along bond axis)
 
 The `.surf` fourth column is interpolated APBS potential when `quantity='potential'`, or Gauss-law charge (e) when `quantity='charge'`.
 
+When `protein` is set, the APBS box is sized from protein **and** ligand coordinates even if `ligand_atoms='absent'`, so a pocket ligand is not clipped. Compare `present` vs `absent` with both quantities, then tune the ligand on the charge surfaces.
+
 ### coupled.in (`emsuite -c coupled.in`)
 
-Combines potential and tuning parameters. Required: `molecule`, `properties`.
-Defaults to APBS Gauss-law surface charges (`potential_method='apbs'`, `potential_quantity='charge'`), then runs tuning.
+Combines potential and tuning parameters. Required: `molecule` (or `ligand`), `properties`.
+Defaults to APBS Gauss-law surface charges (`potential_method='apbs'`, `potential_quantity='charge'`), then runs tuning on the ligand. Same `protein` / `ligand_atoms` occupancy flags as potential.
 See `examples/templates/coupled.in` for a minimal example.
 
 ### Methods and Basis Sets

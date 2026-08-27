@@ -1,4 +1,4 @@
-"""Potential channel Coulomb smoke test."""
+"""Potential channel APBS smoke test."""
 
 from __future__ import annotations
 
@@ -18,12 +18,13 @@ POTENTIAL_IN = """\
 molecule = 'methane.xyz'
 surface_file = 'methane.surf'
 output_surf = 'methane_potential.surf'
-method = 'coulomb'
+method = 'apbs'
+quantity = 'potential'
 """
 
 
 @pytest.mark.slow
-def test_potential_coulomb_map(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+def test_potential_apbs_map(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.chdir(tmp_path)
     (tmp_path / "surface.in").write_text(SURFACE_IN)
     run_surface_calculation("surface.in")
@@ -39,7 +40,8 @@ def test_potential_coulomb_map(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) 
 
     record_assertions(
         tmp_path,
-        method="coulomb",
+        method="apbs",
+        quantity="potential",
         surface_points=int(potentials.shape[0]),
         potentials_finite=True,
         output_surf=surf_path,

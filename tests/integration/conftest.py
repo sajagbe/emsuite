@@ -33,12 +33,12 @@ INTEGRATION_FEATURE_TRACE: dict[str, dict[str, object]] = {
         "summary": "Alias entry point for separate-mode tuning smoke test",
         "code_paths": ["tests/integration/test_smoke_methane.py"],
     },
-    "tests/integration/test_potential_coulomb.py::test_potential_coulomb_map": {
-        "feature_id": "v1.1-potential-coulomb",
-        "version": "1.1.0",
+    "tests/integration/test_potential_apbs.py::test_potential_apbs_map": {
+        "feature_id": "v1.3-potential-apbs",
+        "version": "1.3.0",
         "channel": "potential",
-        "summary": "Coulomb/Gasteiger ESP map on VDW surface",
-        "code_paths": ["src/emsuite/potential/runner.py", "src/emsuite/potential/coulomb.py"],
+        "summary": "APBS potential map on VDW surface",
+        "code_paths": ["src/emsuite/potential/runner.py", "src/emsuite/potential/apbs.py"],
     },
     "tests/integration/test_coupled_smoke.py::test_coupled_pipeline": {
         "feature_id": "v1.1-coupled-pipeline",
@@ -46,61 +46,6 @@ INTEGRATION_FEATURE_TRACE: dict[str, dict[str, object]] = {
         "channel": "coupled",
         "summary": "Potential → tuning coupled channel smoke test",
         "code_paths": ["src/emsuite/coupled/runner.py"],
-    },
-    "tests/integration/test_potential_bond_scan.py::test_potential_bond_axis_scan": {
-        "feature_id": "v1.2-potential-bond-scan",
-        "version": "1.2.0",
-        "channel": "potential",
-        "summary": "Bond-axis ESP scan via bond_scan_atoms",
-        "code_paths": [
-            "src/emsuite/potential/runner.py",
-            "src/emsuite/surface/bond_scan.py",
-        ],
-    },
-    "tests/integration/test_tuning_stark.py::test_tuning_stark_gap": {
-        "feature_id": "v1.2-stark",
-        "version": "1.2.0",
-        "channel": "tuning",
-        "summary": "Stark orbital shifts under probe field (stark_gap)",
-        "code_paths": ["src/emsuite/tuning/properties/stark.py"],
-    },
-    "tests/integration/test_tuning_freq.py::test_tuning_fundamental_frequency": {
-        "feature_id": "v1.2-freq",
-        "version": "1.2.0",
-        "channel": "tuning",
-        "summary": "Hessian fundamental frequency (freq)",
-        "code_paths": ["src/emsuite/tuning/properties/vibrational.py"],
-    },
-    "tests/integration/test_tuning_water_probe.py::test_tuning_water_probe_interaction": {
-        "feature_id": "v1.2-water-probe",
-        "version": "1.2.0",
-        "channel": "tuning",
-        "summary": "Explicit water probe interaction energy (h2o)",
-        "code_paths": ["src/emsuite/tuning/properties/interaction.py"],
-    },
-    "tests/integration/test_tuning_fugacity.py::test_tuning_fugacity_extensions": {
-        "feature_id": "v1.2-fugacity",
-        "version": "1.2.0",
-        "channel": "tuning",
-        "summary": "Fugacity extensions (efl_fug, nfl_fug, eng_fug)",
-        "code_paths": ["src/emsuite/tuning/properties/thermo_ext.py"],
-    },
-    "tests/integration/test_tuning_pa.py::test_tuning_proton_affinity": {
-        "feature_id": "v1.2-proton-affinity",
-        "version": "1.2.0",
-        "channel": "tuning",
-        "summary": "Proton affinity property (pa)",
-        "code_paths": ["src/emsuite/tuning/properties/interaction.py"],
-    },
-    "tests/integration/test_mlip_engine.py::test_mlip_engine_optional": {
-        "feature_id": "v1.2-mlip-engine",
-        "version": "1.2.0",
-        "channel": "engines",
-        "summary": "TBLite/xTB MLIP engine optional extra",
-        "code_paths": [
-            "src/emsuite/engines/mlip_engine.py",
-            "src/emsuite/engines/tblite_engine.py",
-        ],
     },
 }
 

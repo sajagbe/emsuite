@@ -13,7 +13,6 @@ import ray
 from emsuite import core
 from emsuite.surface import load_surf
 
-from .config_io import get_tuning_parameters
 from .logging import (
     append_point_to_summary,
     finalize_summary_log,
@@ -28,8 +27,7 @@ from .output import (
     organize_results,
 )
 from .parallel import calculate_point_effect_cpu_remote, calculate_point_effect_gpu
-from .properties import calculate_all_properties, interaction_effect_kcal, setup_calculation
-from .properties.interaction import water_probe_coords_and_charges
+from .properties import calculate_all_properties, setup_calculation
 from .resume import (
     create_resume_metadata,
     find_incomplete_logs,
@@ -102,13 +100,9 @@ def calculate_surface_effect_at_point(
                 force_single_gpu=force_single_gpu,
             )
 
-        # Create single-point charge array (optionally include explicit water probe)
+        # Create single-point charge array
         single_coord = np.array([coord])
         q_mm = np.array([surface_charge])
-        if "h2o" in properties_to_calculate:
-            w_coords, w_charges = water_probe_coords_and_charges(np.asarray(coord))
-            single_coord = np.vstack([single_coord, w_coords])
-            q_mm = np.concatenate([q_mm, w_charges])
 
         # Create QM/MM objects for this point
         molecule_wsc, anion_wsc, cation_wsc, td_wsc = create_wsc_objects(
@@ -154,8 +148,6 @@ def calculate_surface_effect_at_point(
             td_obj=td_alone,
             triplet=triplet,
             props_to_calc=properties_to_calculate,
-            probe_coord=np.asarray(coord),
-            probe_charge=float(surface_charge),
         )
         wsc_results = calculate_all_properties(
             molecule_wsc,
@@ -164,16 +156,7 @@ def calculate_surface_effect_at_point(
             td_obj=td_wsc,
             triplet=triplet,
             props_to_calc=properties_to_calculate,
-            probe_coord=np.asarray(coord),
-            probe_charge=float(surface_charge),
         )
-
-        if "eint" in properties_to_calculate:
-            results["eint"] = 0.0
-            wsc_results["eint"] = interaction_effect_kcal(molecule_alone, molecule_wsc)
-        if "h2o" in properties_to_calculate:
-            results["h2o"] = 0.0
-            wsc_results["h2o"] = interaction_effect_kcal(molecule_alone, molecule_wsc)
 
         # Calculate differences
         effects = {}
@@ -552,11 +535,9 @@ def main(tuning_input="tuning.in"):
     # Print startup message
     startup_message()
 
-    # Get parameters from tuning file or dict
-    if isinstance(tuning_input, dict):
-        tuning_params = tuning_input
-    else:
-        tuning_params = get_tuning_parameters(tuning_input)
+    from emsuite.inputs import TuningInput
+
+    tuning_params = TuningInput.from_any(tuning_input).to_dict()
 
     # Extract all parameters
     molecule = tuning_params.get("molecule") or tuning_params.get("xyz_file")
@@ -1105,6 +1086,7 @@ def main(tuning_input="tuning.in"):
     os.chdir(results_dir)
     check_all_files_created(molecule_name, output_coords, properties_to_calculate, all_effects)
     os.chdir(original_dir)
+    return results_dir
 
 
 if __name__ == "__main__":

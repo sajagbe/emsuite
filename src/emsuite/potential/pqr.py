@@ -19,19 +19,6 @@ VDW_RADII = {
 }
 
 
-def read_xyz(xyz_path: str | Path) -> list[tuple[str, float, float, float]]:
-    lines = Path(xyz_path).read_text().strip().splitlines()
-    n_atoms = int(lines[0].strip())
-    atoms: list[tuple[str, float, float, float]] = []
-    for line in lines[2 : 2 + n_atoms]:
-        parts = line.split()
-        if len(parts) < 4:
-            continue
-        symbol = parts[0].title() if parts[0].isalpha() else parts[0]
-        atoms.append((symbol, float(parts[1]), float(parts[2]), float(parts[3])))
-    return atoms
-
-
 def write_pqr(
     atoms: list[tuple[str, float, float, float]],
     charges: list[float],

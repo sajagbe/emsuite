@@ -5,34 +5,34 @@ EMSuite refoundation follows two reference guides:
 - [uv-cookiecutter](https://github.com/jevandezande/uv-cookiecutter) — project layout, `uv` workflow, Ruff, pytest, pre-commit, GitHub Actions
 - [How to Make a Great Open-Source Scientific Project](https://rowansci.com/blog/how-to-make-a-great-open-source-scientific-project) — principles for minimal, packaged, clean, tested scientific Python
 
-## Package structure (v1.1)
+## Package structure
 
 ```
 src/emsuite/
-  __init__.py        # version 1.1.0 + public API exports
-  config/            # parser.py, schemas.py
+  __init__.py        # version + public Input/Result/API exports
+  api.py             # keyword API → Input.run()
+  geometry.py        # Geometry.from_xyz
+  inputs.py          # SurfaceInput, PotentialInput, TuningInput, CoupledInput
+  results.py         # SurfaceResult, PotentialResult, TuningResult, CoupledResult
+  config/            # parser, schemas, resolve
   cli/               # main.py (-s -t -p -c)
   core/              # hardware, molecule, qmmm, excited, io
-  engines/           # base.py, pyscf_engine.py, mlip_engine.py
+  engines/           # base.py, pyscf_engine.py
   surface/           # io, vdw, optimize, generate, runner
   tuning/
     properties/      # registry, ground_state, excited_state, thermo
     parallel.py      # Ray workers
     logging.py, output.py, resume.py, config_io.py, runner.py
-  potential/         # coulomb, apbs, pqr, runner
-  coupled/           # runner (potential → tuning)
-tests/
-  unit/              # fast, no PySCF
-  integration/       # @pytest.mark.slow
-  regression/        # golden artifact checks
+  potential/         # apbs, pqr, charges, dx, gauss, occupancy, runner
+  coupled/           # in-memory potential → tuning
 ```
 
 ## Testing
 
 ```bash
 uv sync --extra dev
-uv run pytest tests/unit tests/regression -v    # ~27 tests, <2s
-uv run pytest tests/integration -v -m slow      # ~5 tests, ~2 min
+uv run pytest tests/unit tests/regression -v    # freeze line
+uv run pytest tests/integration -v -m slow      # optional APBS/PySCF
 uv run pre-commit run --all-files
 ```
 

@@ -31,10 +31,6 @@ docs = [
     "sphinx>=7.0",
     "myst-parser>=3.0",
 ]
-mlip = [
-    "tblite>=0.3",
-    "ase>=3.22",
-]
 
 [project.scripts]
 emsuite = "emsuite.cli.main:main"

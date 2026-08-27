@@ -4,7 +4,21 @@ All notable changes to this project are documented in this file.
 
 ## [Unreleased]
 
-_No changes yet._
+### Added
+- Public `SurfaceInput` / `PotentialInput` / `TuningInput` / `CoupledInput` and matching `*Result` types; `.in` files load inputs.
+- `Geometry.from_xyz` and `PotentialResult.to_surf()`.
+- Protein/ligand APBS occupancy: `ligand_atoms='present'` (ligand in PQR at q=0) vs `'absent'` (ligand omitted). Box always spans protein and ligand coordinates.
+
+### Changed
+- CLI and `emsuite.api` construct Input objects and call `.run()`.
+- Coupled pipeline calls potential then tuning in memory (no throwaway `coupled_*.in` files).
+- Potential mapping is APBS only. Gasteiger remains the temporary charge helper for PQR writing.
+
+### Removed
+- Bond-axis scan (`bond_scan_atoms` / `bond_scan.py`).
+- MLIP/xTB engines and the `mlip` extra.
+- User-facing `method='coulomb'` vacuum ESP (no Coulomb fallback).
+- Advanced tuning properties: `freq`, `stark_*`, `eint`, `h2o`, `pa`, fugacity extensions.
 
 ## [1.3.0] - 2026-08-27
 

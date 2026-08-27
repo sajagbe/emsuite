@@ -18,30 +18,21 @@ Approved direction for EMSuite. Shipped features are documented in [README.md](.
 | Engine | Status |
 |--------|--------|
 | **PySCF** | Default QM (`PySCFEngine`) |
-| **MLIP/xTB** | `TBLiteEngine` via `uv sync --extra mlip` (`get_engine('mlip')`) |
 
-## Tuning properties (v1.2)
+## Tuning properties
 
-**Core (17):** `gse`, `homo`, `lumo`, `gap`, `dm`, `spin`, `ie`, `ea`, `cp`, `eng`, `hard`, `efl`, `nfl`, `fukui_plus`, `fukui_minus`, `exe`, `osc`
-
-**Advanced (10):** `freq`, `stark_homo`, `stark_lumo`, `stark_gap`, `eint`, `h2o`, `pa`, `efl_fug`, `nfl_fug`, `eng_fug`
+**Core:** `gse`, `homo`, `lumo`, `gap`, `dm`, `spin`, `ie`, `ea`, `cp`, `eng`, `hard`, `efl`, `nfl`, `fukui_plus`, `fukui_minus`, `exe`, `osc`
 
 Use `properties = ['all']` for the full registry.
 
-### Potential bond scan
+## Protein/ligand occupancy
 
-In `potential.in`:
-
-```python
-bond_scan_atoms = [0, 1]
-bond_scan_steps = 10
-bond_scan_span = 3.0
-```
+`PotentialInput` / `potential.in`: `ligand` (or `molecule`), optional `protein`, `ligand_atoms='present'|'absent'`, `quantity='potential'|'charge'`. APBS box spans protein and ligand coordinates even when the ligand is omitted from the PQR.
 
 ## Future ideas (not scheduled)
 
 PySCF ESP/MEP backends for the potential channel (`method='esp'` / `'mep'`).
-Higher-accuracy MLIP models (MACE, etc.), explicit solvent MD coupling.
+Protein charges from a real PQR/PDB instead of Gasteiger.
 
 ## Version milestones
 

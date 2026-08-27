@@ -7,16 +7,12 @@ from pathlib import Path
 
 import numpy as np
 
-from emsuite.config.schemas import validate_potential_params
 from emsuite.surface import load_surf, save_surf
-from emsuite.surface.bond_scan import bond_scan_coords
 from emsuite.surface.generate import generate_surface
 
 from .apbs import run_apbs_grids
-from .config_io import POTENTIAL_DEFAULTS, parse_potential_input
-from .coulomb import coulomb_potential_at_points, partial_charges_from_xyz
 from .gauss import charges_at_points, potential_at_points
-from .pqr import read_xyz
+from .occupancy import occupancy_atoms_and_charges
 
 # Planned PySCF backends (ESP/MEP) — not implemented yet.
 _FUTURE_METHODS = frozenset({"esp", "mep"})
@@ -25,18 +21,6 @@ _FUTURE_METHODS = frozenset({"esp", "mep"})
 def _surface_coords(params: dict) -> np.ndarray:
     molecule = params["molecule"]
     surface_file = params.get("surface_file")
-    bond_atoms = params.get("bond_scan_atoms")
-    if bond_atoms and len(bond_atoms) == 2:
-        atom_coords = np.array([[x, y, z] for _, x, y, z in read_xyz(molecule)])
-        coords = bond_scan_coords(
-            atom_coords,
-            int(bond_atoms[0]),
-            int(bond_atoms[1]),
-            n_steps=int(params.get("bond_scan_steps", 10)),
-            span_angstrom=float(params.get("bond_scan_span", 3.0)),
-        )
-        print(f"Bond-axis scan: {len(coords)} points between atoms {bond_atoms}")
-        return coords
     if surface_file and os.path.exists(surface_file):
         coords, _ = load_surf(surface_file)
         print(f"Loaded existing surface: {surface_file} ({len(coords)} points)")
@@ -58,16 +42,18 @@ def _surface_coords(params: dict) -> np.ndarray:
     return coords
 
 
-def _coulomb_values(atoms, charges, coords: np.ndarray) -> np.ndarray:
-    values = coulomb_potential_at_points(atoms, charges, coords)
-    print("Computed potentials with Coulomb/Gasteiger model")
-    return values
-
-
 def _apbs_values(
-    molecule: str, coords: np.ndarray, charges, pdie: float, sdie: float, quantity: str
+    coords: np.ndarray,
+    atoms,
+    charges,
+    box_coords: np.ndarray,
+    pdie: float,
+    sdie: float,
+    quantity: str,
 ) -> np.ndarray:
-    grids = run_apbs_grids(molecule, charges=charges, pdie=pdie, sdie=sdie)
+    grids = run_apbs_grids(
+        atoms=atoms, charges=charges, box_coords=box_coords, pdie=pdie, sdie=sdie
+    )
     if quantity == "charge":
         values = charges_at_points(grids.potential, grids.dielx, grids.diely, grids.dielz, coords)
         print("Computed Gauss-law surface charges from APBS potential and dielectric maps")
@@ -83,7 +69,6 @@ def run_potential_calculation(config) -> str:
 
     ``quantity='potential'`` writes interpolated APBS φ at each surface point.
     ``quantity='charge'`` writes Gauss-law charges from φ and the dielectric maps.
-    ``method='coulomb'`` is a vacuum 1/r fallback (potential only).
 
     Args:
         config (str | Path | dict): Path to a potential.in file, or a parameter dict.
@@ -92,44 +77,39 @@ def run_potential_calculation(config) -> str:
     print("              Electrostatic Potential Module")
     print("=" * 60 + "\n")
 
-    if isinstance(config, dict):
-        params = validate_potential_params({**POTENTIAL_DEFAULTS, **config})
-    else:
-        params = parse_potential_input(config)
+    from emsuite.inputs import PotentialInput
+
+    params = PotentialInput.from_any(config).to_dict()
     molecule = params["molecule"]
     if not os.path.exists(molecule):
         raise FileNotFoundError(f"Molecule XYZ not found: {molecule}")
+    protein = params.get("protein")
+    if protein and not os.path.exists(protein):
+        raise FileNotFoundError(f"Protein XYZ not found: {protein}")
 
     coords = _surface_coords(params)
     method = str(params["method"]).lower()
     quantity = str(params["quantity"]).lower()
-    atoms, charges = partial_charges_from_xyz(molecule)
+    atoms, charges, box_coords = occupancy_atoms_and_charges(
+        ligand_xyz=molecule,
+        protein_xyz=protein,
+        ligand_atoms=str(params.get("ligand_atoms") or "present"),
+    )
 
     if method in _FUTURE_METHODS:
         raise NotImplementedError(
             f"method={method!r} is not implemented yet (planned PySCF ESP/MEP backend)"
         )
 
-    if method == "apbs":
-        try:
-            values = _apbs_values(
-                molecule,
-                coords,
-                charges,
-                pdie=float(params["pdie"]),
-                sdie=float(params["sdie"]),
-                quantity=quantity,
-            )
-        except Exception as exc:
-            if quantity == "charge":
-                raise RuntimeError(
-                    "APBS Gauss-law charges require potential and dielectric maps; "
-                    "refusing to fall back to Coulomb"
-                ) from exc
-            print(f"APBS failed ({exc}); falling back to Coulomb potential")
-            values = _coulomb_values(atoms, charges, coords)
-    else:
-        values = _coulomb_values(atoms, charges, coords)
+    values = _apbs_values(
+        coords,
+        atoms,
+        charges,
+        box_coords,
+        pdie=float(params["pdie"]),
+        sdie=float(params["sdie"]),
+        quantity=quantity,
+    )
 
     output_surf = params["output_surf"]
     save_surf(coords, values, output_surf, heterogenous=True)

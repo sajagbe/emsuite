@@ -11,7 +11,7 @@ Examples
 >>> from emsuite import api
 >>> api.surface(input_type="SMILES", input_data="CCO")
 >>> api.tune(molecule="CCO.xyz", surface_file="CCO.surf",
-...          properties=["homo", "gap", "stark_gap"])
+...          properties=["homo", "gap"])
 >>> api.potential(molecule="CCO.xyz", quantity="potential")
 >>> api.coupled(molecule="CCO.xyz", properties=["homo", "lumo"])
 
@@ -25,11 +25,9 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Any
 
-from emsuite.config import UNSET, resolve_config
-from emsuite.coupled.runner import run_coupled_calculation
-from emsuite.potential.runner import run_potential_calculation
-from emsuite.surface.runner import run_surface_calculation
-from emsuite.tuning.runner import main as _run_tuning
+from emsuite.config import UNSET
+from emsuite.inputs import CoupledInput, PotentialInput, SurfaceInput, TuningInput
+from emsuite.results import CoupledResult, TuningResult
 
 __all__ = ["surface", "tune", "potential", "coupled"]
 
@@ -62,8 +60,7 @@ def surface(
     config: Config = None,
 ) -> str:
     """Generate a VDW surface from SMILES or XYZ. Returns the ``.surf`` path."""
-    params = resolve_config(config, _overrides(locals()))
-    return run_surface_calculation(params)
+    return SurfaceInput.from_config(config, **_overrides(locals())).run().path
 
 
 def tune(
@@ -83,10 +80,9 @@ def tune(
     parallel: Any = UNSET,
     num_procs: Any = UNSET,
     config: Config = None,
-):
+) -> TuningResult:
     """Run an electrostatic tuning map. See ``PROPERTY_CONFIG`` for properties."""
-    params = resolve_config(config, _overrides(locals()))
-    return _run_tuning(params)
+    return TuningInput.from_config(config, **_overrides(locals())).run()
 
 
 def potential(
@@ -102,14 +98,13 @@ def potential(
     sdie: Any = UNSET,
     charge: Any = UNSET,
     spin: Any = UNSET,
-    bond_scan_atoms: Any = UNSET,
-    bond_scan_steps: Any = UNSET,
-    bond_scan_span: Any = UNSET,
+    ligand: Any = UNSET,
+    protein: Any = UNSET,
+    ligand_atoms: Any = UNSET,
     config: Config = None,
 ) -> str:
     """Map APBS potential or Gauss-law charge onto a surface. Returns the ``.surf`` path."""
-    params = resolve_config(config, _overrides(locals()))
-    return run_potential_calculation(params)
+    return PotentialInput.from_config(config, **_overrides(locals())).run().path
 
 
 def coupled(
@@ -135,8 +130,10 @@ def coupled(
     state_of_interest: Any = UNSET,
     triplet: Any = UNSET,
     num_procs: Any = UNSET,
+    ligand: Any = UNSET,
+    protein: Any = UNSET,
+    ligand_atoms: Any = UNSET,
     config: Config = None,
-) -> None:
+) -> CoupledResult:
     """Run the potential → tuning coupled pipeline."""
-    params = resolve_config(config, _overrides(locals()))
-    return run_coupled_calculation(params)
+    return CoupledInput.from_config(config, **_overrides(locals())).run()

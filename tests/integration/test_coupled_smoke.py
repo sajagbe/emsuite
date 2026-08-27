@@ -14,7 +14,7 @@ COUPLED_IN = """\
 molecule = 'methane.xyz'
 output_surf = 'coupled.surf'
 surface_density = 0.5
-potential_method = 'coulomb'
+potential_method = 'apbs'
 properties = ['homo', 'lumo']
 basis_set = 'sto-3g'
 method = 'dft'
@@ -39,6 +39,7 @@ def test_coupled_pipeline(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> No
     run_coupled_calculation("coupled.in")
     results = list(tmp_path.glob("results_methane_*"))
     assert results
+    assert not list(tmp_path.glob("coupled_*.in"))
 
     record_assertions(
         tmp_path,

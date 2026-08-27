@@ -1,6 +1,8 @@
 # Run with: emsuite -c coupled.in
 
 molecule = 'molecule.xyz'
+# protein = 'protein.xyz'
+# ligand_atoms = 'present'    # or 'absent'
 output_surf = 'coupled.surf'
 surface_density = 0.5
 surface_scale = 1.0

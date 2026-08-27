@@ -94,9 +94,9 @@ def test_potential_at_points_reads_grid_value():
     assert potential_at_points(pot, np.array([[1.0, 1.0, 1.0]]))[0] == pytest.approx(4.2)
 
 
-def test_quantity_charge_requires_apbs():
-    with pytest.raises(ConfigValidationError, match="quantity='charge'"):
-        validate_potential_params({"molecule": "m.xyz", "method": "coulomb", "quantity": "charge"})
+def test_coulomb_method_rejected():
+    with pytest.raises(ConfigValidationError, match="coulomb"):
+        validate_potential_params({"molecule": "m.xyz", "method": "coulomb"})
 
 
 def test_future_esp_method_rejected():

@@ -1,11 +1,18 @@
 # Run with: emsuite -p potential.in
 
+# Ligand (or standalone molecule) XYZ. Alias: ligand = 'ligand.xyz'
 molecule = 'molecule.xyz'
 surface_file = None
 output_surf = 'potential.surf'
 surface_density = 0.5
 surface_scale = 1.0
-method = 'apbs'            # 'apbs' (default) or 'coulomb' fallback
-quantity = 'potential'     # 'potential' or 'charge' (Gauss-law; requires apbs)
+method = 'apbs'
+quantity = 'potential'     # 'potential' or 'charge' (Gauss-law)
+
+# Protein field (optional). Surface is always the ligand VDW.
+# protein = 'protein.xyz'
+# ligand_atoms = 'present'   # ligand in PQR at q=0 (cavity)
+# ligand_atoms = 'absent'    # ligand omitted from PQR; box still spans ligand
+
 pdie = 2.0
 sdie = 78.54

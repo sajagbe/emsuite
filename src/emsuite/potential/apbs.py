@@ -10,8 +10,10 @@ from pathlib import Path
 import apbs_binary
 import numpy as np
 
+from emsuite.geometry import read_xyz
+
 from .dx import DxGrid, parse_dx
-from .pqr import read_xyz, write_pqr
+from .pqr import write_pqr
 
 
 @dataclass(frozen=True)
@@ -89,19 +91,25 @@ def _dx_file(work_path: Path, stem: str) -> Path:
 
 
 def run_apbs_grids(
-    xyz_path: str,
+    xyz_path: str | None = None,
     charges: np.ndarray | None = None,
     pdie: float = 2.0,
     sdie: float = 78.54,
     dime: tuple[int, int, int] = (65, 65, 65),
     workdir: str | Path | None = None,
+    atoms: list[tuple[str, float, float, float]] | None = None,
+    box_coords: np.ndarray | None = None,
 ) -> ApbsGrids:
     """Run APBS and return potential plus dielectric grids."""
-    atoms = read_xyz(xyz_path)
+    if atoms is None:
+        if xyz_path is None:
+            raise ValueError("run_apbs_grids requires xyz_path or atoms")
+        atoms = read_xyz(xyz_path)
     if charges is None:
         charges = np.zeros(len(atoms))
     atom_coords = np.array([[x, y, z] for _, x, y, z in atoms], dtype=float)
-    cglen, fglen = _box_lengths(atom_coords)
+    extent_coords = atom_coords if box_coords is None else np.asarray(box_coords, dtype=float)
+    cglen, fglen = _box_lengths(extent_coords)
 
     if workdir is None:
         tmp = tempfile.TemporaryDirectory()

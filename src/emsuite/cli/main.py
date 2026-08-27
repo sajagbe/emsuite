@@ -46,44 +46,36 @@ def main():
         run_coupled(args.coupled)
 
 
-def run_surface(input_file: str):
-    from emsuite.surface import run_surface_calculation
-
+def _require_file(input_file: str) -> Path:
     input_path = Path(input_file)
     if not input_path.exists():
         print(f"Error: Input file '{input_path}' not found")
         sys.exit(1)
-    run_surface_calculation(str(input_path))
+    return input_path
+
+
+def run_surface(input_file: str):
+    from emsuite.inputs import SurfaceInput
+
+    SurfaceInput.from_file(_require_file(input_file)).run()
 
 
 def run_tuning(input_file: str):
-    from emsuite.tuning import main as tuning_main
+    from emsuite.inputs import TuningInput
 
-    input_path = Path(input_file)
-    if not input_path.exists():
-        print(f"Error: Input file '{input_path}' not found")
-        sys.exit(1)
-    tuning_main(str(input_path))
+    TuningInput.from_file(_require_file(input_file)).run()
 
 
 def run_potential(input_file: str):
-    from emsuite.potential import run_potential_calculation
+    from emsuite.inputs import PotentialInput
 
-    input_path = Path(input_file)
-    if not input_path.exists():
-        print(f"Error: Input file '{input_path}' not found")
-        sys.exit(1)
-    run_potential_calculation(str(input_path))
+    PotentialInput.from_file(_require_file(input_file)).run()
 
 
 def run_coupled(input_file: str):
-    from emsuite.coupled import run_coupled_calculation
+    from emsuite.inputs import CoupledInput
 
-    input_path = Path(input_file)
-    if not input_path.exists():
-        print(f"Error: Input file '{input_path}' not found")
-        sys.exit(1)
-    run_coupled_calculation(str(input_path))
+    CoupledInput.from_file(_require_file(input_file)).run()
 
 
 if __name__ == "__main__":

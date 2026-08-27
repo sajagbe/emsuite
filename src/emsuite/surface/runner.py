@@ -60,11 +60,11 @@ def run_surface_calculation(config):
     print("                  Surface Generation Module")
     print("=" * 60 + "\n")
 
-    if isinstance(config, dict):
-        params = validate_surface_params({**SURFACE_DEFAULTS, **config})
-    else:
+    from emsuite.inputs import SurfaceInput
+
+    if not isinstance(config, (dict, SurfaceInput)):
         print(f"Reading input file: {config}")
-        params = parse_surface_input(config)
+    params = SurfaceInput.from_any(config).to_dict()
 
     print(f"\nInput type: {params['input_type']}")
     print(f"Input data: {params['input_data']}")
