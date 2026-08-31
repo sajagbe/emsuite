@@ -299,5 +299,23 @@ export default defineSoftwareMap({
       to: "emsuite.core.checkpointIO",
       label: "Resurrects base checkpoints per point",
     },
+    {
+      kind: "semantic",
+      from: "emsuite.tuning.orchestration",
+      to: "emsuite.core.geometryPrep",
+      label: "Derives molecule name from the xyz path",
+    },
+    {
+      kind: "semantic",
+      from: "emsuite.surface.structurePrep",
+      to: "emsuite.core.geometryPrep",
+      label: "Runs a PySCF geometry optimization",
+    },
+    {
+      kind: "semantic",
+      from: "emsuite.core.moleculeBuilders",
+      to: "emsuite.core.numericsUtils",
+      label: "Coerces GPU/CPU arrays for TDDFT results",
+    },
   ],
 });
