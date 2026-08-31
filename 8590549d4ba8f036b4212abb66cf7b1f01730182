@@ -1,0 +1,303 @@
+import { defineSoftwareMap } from "@dev.fast/progressive-review/software-map-model";
+
+export default defineSoftwareMap({
+  people: {
+    user: {
+      label: "Computational chemist",
+      description:
+        "Runs the emsuite CLI to generate VDW surfaces and electrostatic tuning maps for molecules.",
+    },
+  },
+  systems: {
+    emsuite: {
+      label: "emsuite",
+      description:
+        "Electrostatic Map Suite: a CLI package for generating VDW surfaces and running electrostatic tuning calculations on molecules using PySCF/RDKit quantum-chemistry backends.",
+      containers: {
+        cli: {
+          label: "CLI",
+          description:
+            "Command-line entry point that parses arguments and routes to the surface or tuning channel.",
+          components: {
+            entrypoint: {
+              label: "CLI entrypoint",
+              description:
+                "Parses -s/-t arguments, validates the input file, and dispatches to surface or tuning execution.",
+              coverage: {
+                files: [{ path: "src/emsuite/cli.py", ranges: [{ fromLine: 6, toLine: 59 }] }],
+              },
+            },
+          },
+        },
+        core: {
+          label: "Core",
+          description:
+            "Shared PySCF molecule construction, checkpoint I/O, geometry prep, and hardware-info utilities used by both channels.",
+          components: {
+            systemInfo: {
+              label: "System info",
+              description:
+                "Detects GPU/CPU availability and prints the CLI startup banner.",
+              coverage: {
+                files: [{ path: "src/emsuite/core.py", ranges: [{ fromLine: 25, toLine: 116 }] }],
+              },
+            },
+            moleculeBuilders: {
+              label: "Molecule builders",
+              description:
+                "Constructs PySCF mean-field, QM/MM, solvated, and TDDFT molecule objects.",
+              coverage: {
+                files: [
+                  {
+                    path: "src/emsuite/core.py",
+                    ranges: [
+                      { fromLine: 117, toLine: 217 },
+                      { fromLine: 338, toLine: 578 },
+                    ],
+                  },
+                ],
+              },
+            },
+            checkpointIO: {
+              label: "Checkpoint I/O",
+              description: "Saves and resurrects PySCF calculations from chkfiles.",
+              coverage: {
+                files: [{ path: "src/emsuite/core.py", ranges: [{ fromLine: 218, toLine: 337 }] }],
+              },
+            },
+            numericsUtils: {
+              label: "Numerics utilities",
+              description: "Array coercion helpers shared across GPU/CPU code paths.",
+              coverage: {
+                files: [{ path: "src/emsuite/core.py", ranges: [{ fromLine: 579, toLine: 676 }] }],
+              },
+            },
+            geometryPrep: {
+              label: "Geometry prep",
+              description:
+                "Optimizes molecular geometry from xyz/SMILES input ahead of QM calculations.",
+              coverage: {
+                files: [{ path: "src/emsuite/core.py", ranges: [{ fromLine: 677, toLine: 816 }] }],
+              },
+            },
+            mol2Export: {
+              label: "mol2 export",
+              description: "Writes property-annotated mol2 output files.",
+              coverage: {
+                files: [{ path: "src/emsuite/core.py", ranges: [{ fromLine: 817, toLine: 865 }] }],
+              },
+            },
+          },
+        },
+        surface: {
+          label: "Surface",
+          description:
+            "Generates VDW surface point clouds from SMILES or xyz input and reads/writes .surf files.",
+          components: {
+            surfaceIO: {
+              label: "Surface file I/O",
+              description: "Reads and writes .surf coordinate/charge files.",
+              coverage: {
+                files: [{ path: "src/emsuite/surface.py", ranges: [{ fromLine: 19, toLine: 89 }] }],
+              },
+            },
+            surfaceGeometry: {
+              label: "Surface geometry",
+              description: "Computes VDW surface point coordinates for a molecule.",
+              coverage: {
+                files: [{ path: "src/emsuite/surface.py", ranges: [{ fromLine: 90, toLine: 148 }] }],
+              },
+            },
+            structurePrep: {
+              label: "Structure prep",
+              description:
+                "Optimizes structures with RDKit/PySCF and converts SMILES/RDKit molecules to xyz.",
+              coverage: {
+                files: [{ path: "src/emsuite/surface.py", ranges: [{ fromLine: 149, toLine: 311 }] }],
+              },
+            },
+            surfaceWorkflow: {
+              label: "Surface workflow",
+              description:
+                "Parses surface.in input and orchestrates end-to-end surface generation.",
+              coverage: {
+                files: [{ path: "src/emsuite/surface.py", ranges: [{ fromLine: 312, toLine: 533 }] }],
+              },
+            },
+          },
+        },
+        tuning: {
+          label: "Tuning",
+          description:
+            "Electrostatic tuning engine: places surface point charges around a molecule and recomputes electronic properties at each point.",
+          components: {
+            calculationSetup: {
+              label: "Calculation setup",
+              description:
+                "Reads tuning.in parameters and builds the base/alone/QM-MM molecule objects and solvation used for every point.",
+              coverage: {
+                files: [
+                  {
+                    path: "src/emsuite/tuning.py",
+                    ranges: [
+                      { fromLine: 44, toLine: 273 },
+                      { fromLine: 679, toLine: 901 },
+                    ],
+                  },
+                ],
+              },
+            },
+            pointCalculators: {
+              label: "Point calculators",
+              description:
+                "Computes the property shift at a single surface point on CPU or GPU, and combines effects across the whole surface.",
+              coverage: {
+                files: [{ path: "src/emsuite/tuning.py", ranges: [{ fromLine: 494, toLine: 678 }] }],
+              },
+            },
+            runLogging: {
+              label: "Run logging",
+              description:
+                "Writes the per-point and summary logs produced while a tuning run executes.",
+              coverage: {
+                files: [
+                  {
+                    path: "src/emsuite/tuning.py",
+                    ranges: [
+                      { fromLine: 274, toLine: 493 },
+                      { fromLine: 902, toLine: 968 },
+                    ],
+                  },
+                ],
+              },
+            },
+            resume: {
+              label: "Resume",
+              description:
+                "Detects incomplete runs, validates parameter compatibility, and reloads completed points so a run can continue.",
+              coverage: {
+                files: [{ path: "src/emsuite/tuning.py", ranges: [{ fromLine: 1272, toLine: 1541 }] }],
+              },
+            },
+            resultsOutput: {
+              label: "Results output",
+              description:
+                "Organizes, normalizes, and writes the final tuning summary and output files.",
+              coverage: {
+                files: [{ path: "src/emsuite/tuning.py", ranges: [{ fromLine: 969, toLine: 1258 }] }],
+              },
+            },
+            orchestration: {
+              label: "Orchestration",
+              description:
+                "Top-level entry point that drives a tuning run from input file to finished outputs.",
+              coverage: {
+                files: [
+                  {
+                    path: "src/emsuite/tuning.py",
+                    ranges: [
+                      { fromLine: 1259, toLine: 1271 },
+                      { fromLine: 1542, toLine: 2010 },
+                    ],
+                  },
+                ],
+              },
+            },
+          },
+        },
+      },
+    },
+  },
+  relationships: [
+    {
+      kind: "semantic",
+      from: "user",
+      to: "emsuite.cli.entrypoint",
+      label: "Runs `emsuite -s/-t <input file>`",
+    },
+    {
+      kind: "semantic",
+      from: "emsuite.cli.entrypoint",
+      to: "emsuite.core.systemInfo",
+      label: "Prints startup banner",
+    },
+    {
+      kind: "semantic",
+      from: "emsuite.cli.entrypoint",
+      to: "emsuite.surface.surfaceWorkflow",
+      label: "Runs the surface channel",
+    },
+    {
+      kind: "semantic",
+      from: "emsuite.cli.entrypoint",
+      to: "emsuite.tuning.orchestration",
+      label: "Runs the tuning channel",
+    },
+    {
+      kind: "semantic",
+      from: "emsuite.surface.surfaceWorkflow",
+      to: "emsuite.surface.structurePrep",
+      label: "Prepares input structure",
+    },
+    {
+      kind: "semantic",
+      from: "emsuite.surface.surfaceWorkflow",
+      to: "emsuite.surface.surfaceGeometry",
+      label: "Computes VDW points",
+    },
+    {
+      kind: "semantic",
+      from: "emsuite.surface.surfaceWorkflow",
+      to: "emsuite.surface.surfaceIO",
+      label: "Writes the .surf file",
+    },
+    {
+      kind: "semantic",
+      from: "emsuite.tuning.orchestration",
+      to: "emsuite.tuning.calculationSetup",
+      label: "Builds base molecule objects",
+    },
+    {
+      kind: "semantic",
+      from: "emsuite.tuning.orchestration",
+      to: "emsuite.tuning.resume",
+      label: "Checks for a resumable run",
+    },
+    {
+      kind: "semantic",
+      from: "emsuite.tuning.orchestration",
+      to: "emsuite.tuning.pointCalculators",
+      label: "Evaluates each surface point",
+    },
+    {
+      kind: "semantic",
+      from: "emsuite.tuning.orchestration",
+      to: "emsuite.tuning.runLogging",
+      label: "Logs run progress",
+    },
+    {
+      kind: "semantic",
+      from: "emsuite.tuning.orchestration",
+      to: "emsuite.tuning.resultsOutput",
+      label: "Writes final outputs",
+    },
+    {
+      kind: "semantic",
+      from: "emsuite.tuning.calculationSetup",
+      to: "emsuite.core.moleculeBuilders",
+      label: "Builds PySCF molecule/mean-field objects",
+    },
+    {
+      kind: "semantic",
+      from: "emsuite.tuning.calculationSetup",
+      to: "emsuite.surface.surfaceIO",
+      label: "Loads the surface point cloud",
+    },
+    {
+      kind: "semantic",
+      from: "emsuite.tuning.pointCalculators",
+      to: "emsuite.core.checkpointIO",
+      label: "Resurrects base checkpoints per point",
+    },
+  ],
+});
