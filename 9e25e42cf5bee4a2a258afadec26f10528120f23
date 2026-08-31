@@ -1,0 +1,781 @@
+import { defineSoftwareMap } from "@dev.fast/progressive-review/software-map-model";
+
+export default defineSoftwareMap({
+  people: {
+    user: {
+      label: "Computational chemist",
+      description:
+        "Runs the emsuite CLI, or the Python api/inputs layer, to generate VDW surfaces, electrostatic potential maps, and electrostatic tuning maps for molecules.",
+    },
+  },
+  systems: {
+    emsuite: {
+      label: "emsuite",
+      description:
+        "Electrostatic Map Suite: a package for generating VDW surfaces and running surface-potential and electrostatic-tuning calculations on molecules using PySCF/RDKit/APBS backends. Refactored from a flat 4-module package into a multi-package layout with a typed kwargs API, config resolution, and a new potential/coupled channel.",
+      containers: {
+        cli: {
+          label: "CLI",
+          description:
+            "Command-line entry point that parses arguments and routes to one of four channels.",
+          components: {
+            entrypoint: {
+              label: "CLI entrypoint",
+              description:
+                "Parses -s/-t/-p/-c arguments, validates the input file, and dispatches to the matching *Input.from_file(...).run() call. Gained the -p (potential) and -c (coupled) flags.",
+              coverage: {
+                files: [{ path: "src/emsuite/cli/main.py", ranges: [{ fromLine: 1, toLine: 82 }] }],
+              },
+            },
+          },
+        },
+        api: {
+          label: "API",
+          description:
+            "New keyword-argument Python API layer: one function per channel for driving emsuite without hand-writing an .in file.",
+          components: {
+            channelFunctions: {
+              label: "Channel functions",
+              description:
+                "surface(), tune(), potential(), and coupled() wrappers that accept explicit kwargs and/or a config= file/dict, then build and run the matching Input dataclass.",
+              coverage: {
+                files: [{ path: "src/emsuite/api.py", ranges: [{ fromLine: 1, toLine: 139 }] }],
+              },
+            },
+          },
+        },
+        inputs: {
+          label: "Inputs",
+          description:
+            "New immutable input layer sitting between the CLI/API and the channel runners.",
+          components: {
+            channelInputs: {
+              label: "Channel input dataclasses",
+              description:
+                "SurfaceInput, PotentialInput, TuningInput, and CoupledInput: frozen dataclasses with from_file/from_mapping/from_config/from_any constructors and a run() that resolves, validates, and dispatches to the channel's runner, returning a typed Result. CoupledInput.run() composes a PotentialInput run followed by a TuningInput run.",
+              coverage: {
+                files: [{ path: "src/emsuite/inputs.py", ranges: [{ fromLine: 1, toLine: 307 }] }],
+              },
+            },
+          },
+        },
+        config: {
+          label: "Config",
+          description:
+            "New shared configuration layer extracted out of the per-channel .in file parsers.",
+          components: {
+            fileParser: {
+              label: "File parser",
+              description:
+                "Parses `key = value` .in file assignments with ast.literal_eval and merges them with defaults.",
+              coverage: {
+                files: [{ path: "src/emsuite/config/parser.py", ranges: [{ fromLine: 1, toLine: 53 }] }],
+              },
+            },
+            resolver: {
+              label: "Config resolver",
+              description:
+                "Layers defaults < config file/dict < explicit kwargs into one params dict, using the UNSET sentinel to distinguish an omitted kwarg from an explicit value.",
+              coverage: {
+                files: [{ path: "src/emsuite/config/resolve.py", ranges: [{ fromLine: 1, toLine: 66 }] }],
+              },
+            },
+            schemas: {
+              label: "Channel schemas",
+              description:
+                "Per-channel parameter validation (validate_surface_params, validate_tuning_params, validate_potential_params, validate_coupled_params) and the known tuning property set.",
+              coverage: {
+                files: [{ path: "src/emsuite/config/schemas.py", ranges: [{ fromLine: 1, toLine: 139 }] }],
+              },
+            },
+          },
+        },
+        results: {
+          label: "Results",
+          description: "New typed result objects returned from each channel's run().",
+          components: {
+            resultTypes: {
+              label: "Result types",
+              description:
+                "SurfaceResult and PotentialResult wrap a surf point cloud (with to_surf/from_surf helpers); TuningResult and CoupledResult wrap the output directory/sub-results.",
+              coverage: {
+                files: [{ path: "src/emsuite/results.py", ranges: [{ fromLine: 1, toLine: 68 }] }],
+              },
+            },
+          },
+        },
+        geometry: {
+          label: "Geometry",
+          description: "New standalone molecular geometry value type.",
+          components: {
+            geometryModel: {
+              label: "Geometry",
+              description:
+                "read_xyz() and the frozen Geometry dataclass (symbols + coords) with from_xyz/to_xyz, shared by the potential channel.",
+              coverage: {
+                files: [{ path: "src/emsuite/geometry.py", ranges: [{ fromLine: 1, toLine: 51 }] }],
+              },
+            },
+          },
+        },
+        engines: {
+          label: "Engines",
+          description:
+            "New pluggable QM-backend abstraction; currently wraps the existing PySCF primitives in core.",
+          components: {
+            engineProtocol: {
+              label: "Engine protocol",
+              description: "Engine Protocol (optimize_geometry/single_point_energy) and the get_engine() factory.",
+              coverage: {
+                files: [
+                  { path: "src/emsuite/engines/base.py", ranges: [{ fromLine: 1, toLine: 16 }] },
+                  { path: "src/emsuite/engines/__init__.py", ranges: [{ fromLine: 1, toLine: 15 }] },
+                ],
+              },
+            },
+            pyscfEngine: {
+              label: "PySCF engine",
+              description: "The only registered Engine implementation; delegates to emsuite.core.",
+              coverage: {
+                files: [{ path: "src/emsuite/engines/pyscf_engine.py", ranges: [{ fromLine: 1, toLine: 40 }] }],
+              },
+            },
+          },
+        },
+        core: {
+          label: "Core",
+          description:
+            "Shared PySCF molecule construction, checkpoint I/O, geometry prep, and hardware-info utilities, split from one core.py into a core/ subpackage. The office-quote startup easter egg (and its `requests` dependency) was dropped.",
+          components: {
+            systemInfo: {
+              label: "System info",
+              description: "Detects GPU/CPU availability and prints the CLI startup banner.",
+              coverage: {
+                files: [{ path: "src/emsuite/core/hardware.py", ranges: [{ fromLine: 6, toLine: 65 }] }],
+              },
+            },
+            moleculeBuilders: {
+              label: "Molecule builders",
+              description:
+                "Constructs PySCF mean-field, QM/MM, solvated, and TDDFT molecule objects; now spread across molecule.py, qmmm.py, and excited.py.",
+              coverage: {
+                files: [
+                  {
+                    path: "src/emsuite/core/molecule.py",
+                    ranges: [
+                      { fromLine: 12, toLine: 112 },
+                      { fromLine: 242, toLine: 303 },
+                    ],
+                  },
+                  { path: "src/emsuite/core/qmmm.py", ranges: [{ fromLine: 6, toLine: 71 }] },
+                  { path: "src/emsuite/core/excited.py", ranges: [{ fromLine: 11, toLine: 125 }] },
+                ],
+              },
+            },
+            checkpointIO: {
+              label: "Checkpoint I/O",
+              description: "Saves and resurrects PySCF calculations from chkfiles.",
+              coverage: {
+                files: [{ path: "src/emsuite/core/molecule.py", ranges: [{ fromLine: 113, toLine: 241 }] }],
+              },
+            },
+            numericsUtils: {
+              label: "Numerics utilities",
+              description: "Array coercion helpers shared across GPU/CPU code paths.",
+              coverage: {
+                files: [{ path: "src/emsuite/core/excited.py", ranges: [{ fromLine: 126, toLine: 220 }] }],
+              },
+            },
+            geometryPrep: {
+              label: "Geometry prep",
+              description:
+                "Optimizes molecular geometry from xyz/SMILES input ahead of QM calculations.",
+              coverage: {
+                files: [{ path: "src/emsuite/core/io.py", ranges: [{ fromLine: 13, toLine: 154 }] }],
+              },
+            },
+            mol2Export: {
+              label: "mol2 export",
+              description: "Writes property-annotated mol2 output files (still unused/dead code).",
+              coverage: {
+                files: [{ path: "src/emsuite/core/io.py", ranges: [{ fromLine: 155, toLine: 205 }] }],
+              },
+            },
+          },
+        },
+        surface: {
+          label: "Surface",
+          description:
+            "Generates VDW surface point clouds from SMILES or xyz input and reads/writes .surf files; now takes a SurfaceInput/dict/path instead of only a file path.",
+          components: {
+            surfaceIO: {
+              label: "Surface file I/O",
+              description: "Reads and writes .surf coordinate/charge files; reused by results and potential.",
+              coverage: {
+                files: [{ path: "src/emsuite/surface/io.py", ranges: [{ fromLine: 8, toLine: 77 }] }],
+              },
+            },
+            surfaceGeometry: {
+              label: "Surface geometry",
+              description: "Computes VDW surface point coordinates for a molecule.",
+              coverage: {
+                files: [{ path: "src/emsuite/surface/vdw.py", ranges: [{ fromLine: 9, toLine: 67 }] }],
+              },
+            },
+            structurePrep: {
+              label: "Structure prep",
+              description:
+                "Optimizes structures with RDKit/PySCF and converts SMILES/RDKit molecules to xyz.",
+              coverage: {
+                files: [{ path: "src/emsuite/surface/optimize.py", ranges: [{ fromLine: 9, toLine: 185 }] }],
+              },
+            },
+            surfaceWorkflow: {
+              label: "Surface workflow",
+              description:
+                "Parses surface.in/params and orchestrates end-to-end surface generation, split into generate.py and runner.py.",
+              coverage: {
+                files: [
+                  { path: "src/emsuite/surface/generate.py", ranges: [{ fromLine: 12, toLine: 136 }] },
+                  { path: "src/emsuite/surface/runner.py", ranges: [{ fromLine: 1, toLine: 114 }] },
+                ],
+              },
+            },
+          },
+        },
+        potential: {
+          label: "Potential",
+          description:
+            "New channel: maps APBS Poisson-Boltzmann electrostatics (potential or Gauss-law surface charge) onto a molecular surface.",
+          components: {
+            apbsGrids: {
+              label: "APBS grids",
+              description: "Writes an APBS input, runs the apbs binary, and parses the resulting potential/dielectric OpenDX grids.",
+              coverage: {
+                files: [{ path: "src/emsuite/potential/apbs.py", ranges: [{ fromLine: 1, toLine: 160 }] }],
+              },
+            },
+            dxParsing: {
+              label: "DX grid parsing",
+              description: "Parses OpenDX scalar grid files into a DxGrid.",
+              coverage: {
+                files: [{ path: "src/emsuite/potential/dx.py", ranges: [{ fromLine: 1, toLine: 60 }] }],
+              },
+            },
+            gaussLaw: {
+              label: "Gauss-law math",
+              description:
+                "Interpolates potential at surface points and derives Gauss-law surface charges from the potential and dielectric grids; includes standalone partial-charge estimation.",
+              coverage: {
+                files: [
+                  { path: "src/emsuite/potential/gauss.py", ranges: [{ fromLine: 1, toLine: 135 }] },
+                  { path: "src/emsuite/potential/charges.py", ranges: [{ fromLine: 1, toLine: 27 }] },
+                ],
+              },
+            },
+            occupancyPrep: {
+              label: "Occupancy prep",
+              description:
+                "Assembles a PQR (atoms/charges/radii) for the ligand (+ optional protein) and writes it for APBS.",
+              coverage: {
+                files: [
+                  { path: "src/emsuite/potential/occupancy.py", ranges: [{ fromLine: 1, toLine: 61 }] },
+                  { path: "src/emsuite/potential/pqr.py", ranges: [{ fromLine: 1, toLine: 36 }] },
+                ],
+              },
+            },
+            potentialConfigIO: {
+              label: "Potential input parsing",
+              description: "Parses potential.in files into validated parameters.",
+              coverage: {
+                files: [{ path: "src/emsuite/potential/config_io.py", ranges: [{ fromLine: 1, toLine: 34 }] }],
+              },
+            },
+            potentialWorkflow: {
+              label: "Potential workflow",
+              description:
+                "Orchestrates the potential channel end to end: gets/generates surface coords, runs APBS, computes potential or charge values, and writes the .surf and CSV.",
+              coverage: {
+                files: [{ path: "src/emsuite/potential/runner.py", ranges: [{ fromLine: 1, toLine: 128 }] }],
+              },
+            },
+          },
+        },
+        coupled: {
+          label: "Coupled",
+          description: "New channel: chains the potential channel into the tuning channel as one run.",
+          components: {
+            coupledWorkflow: {
+              label: "Coupled workflow",
+              description:
+                "Parses coupled.in and drives CoupledInput.run(), which runs potential then tuning.",
+              coverage: {
+                files: [{ path: "src/emsuite/coupled/runner.py", ranges: [{ fromLine: 1, toLine: 73 }] }],
+              },
+            },
+          },
+        },
+        tuning: {
+          label: "Tuning",
+          description:
+            "Electrostatic tuning engine: places surface point charges around a molecule and recomputes electronic properties at each point; split from one tuning.py into a tuning/ subpackage, with property calculation broken out into its own properties/ subpackage.",
+          components: {
+            configIO: {
+              label: "Tuning input parsing",
+              description: "Reads tuning.in via the shared config file parser.",
+              coverage: {
+                files: [{ path: "src/emsuite/tuning/config_io.py", ranges: [{ fromLine: 1, toLine: 20 }] }],
+              },
+            },
+            properties: {
+              label: "Property registry",
+              description:
+                "New dedicated subpackage: resolves requested properties to dependencies/required calculations (setup_calculation, calculate_all_properties) and computes ground-state, excited-state, and thermo property values.",
+              coverage: {
+                files: [
+                  { path: "src/emsuite/tuning/properties/registry.py", ranges: [{ fromLine: 1, toLine: 86 }] },
+                  { path: "src/emsuite/tuning/properties/ground_state.py", ranges: [{ fromLine: 1, toLine: 43 }] },
+                  { path: "src/emsuite/tuning/properties/excited_state.py", ranges: [{ fromLine: 1, toLine: 25 }] },
+                  { path: "src/emsuite/tuning/properties/thermo.py", ranges: [{ fromLine: 1, toLine: 31 }] },
+                ],
+              },
+            },
+            calculationSetup: {
+              label: "Calculation setup",
+              description:
+                "Builds the base/alone/QM-MM molecule objects and solvation used for every point, and evaluates the per-point effect for a separate-mode run.",
+              coverage: {
+                files: [
+                  {
+                    path: "src/emsuite/tuning/runner.py",
+                    ranges: [
+                      { fromLine: 43, toLine: 181 },
+                      { fromLine: 292, toLine: 514 },
+                    ],
+                  },
+                ],
+              },
+            },
+            pointCalculators: {
+              label: "Point calculators",
+              description:
+                "Computes the property shift at a single surface point on CPU or GPU (as Ray remote workers) and combines effects across the whole surface for combined-mode runs.",
+              coverage: {
+                files: [
+                  { path: "src/emsuite/tuning/parallel.py", ranges: [{ fromLine: 11, toLine: 186 }] },
+                  { path: "src/emsuite/tuning/runner.py", ranges: [{ fromLine: 182, toLine: 291 }] },
+                ],
+              },
+            },
+            runLogging: {
+              label: "Run logging",
+              description:
+                "Writes the per-point and summary logs produced while a tuning run executes.",
+              coverage: {
+                files: [{ path: "src/emsuite/tuning/logging.py", ranges: [{ fromLine: 9, toLine: 236 }] }],
+              },
+            },
+            resume: {
+              label: "Resume",
+              description:
+                "Detects incomplete runs, validates parameter compatibility, and reloads completed points so a run can continue.",
+              coverage: {
+                files: [{ path: "src/emsuite/tuning/resume.py", ranges: [{ fromLine: 1, toLine: 287 }] }],
+              },
+            },
+            resultsOutput: {
+              label: "Results output",
+              description:
+                "Organizes, normalizes, and writes the final tuning summary and output files.",
+              coverage: {
+                files: [{ path: "src/emsuite/tuning/output.py", ranges: [{ fromLine: 1, toLine: 373 }] }],
+              },
+            },
+            orchestration: {
+              label: "Orchestration",
+              description:
+                "Top-level entry point that drives a tuning run from a TuningInput to finished outputs.",
+              coverage: {
+                files: [{ path: "src/emsuite/tuning/runner.py", ranges: [{ fromLine: 515, toLine: 1094 }] }],
+              },
+            },
+          },
+        },
+        tests: {
+          label: "Tests",
+          description:
+            "New test tree added alongside the package refactor: fast unit tests, slower PySCF/APBS integration smoke tests, and a golden-output regression test.",
+          components: {
+            unitTests: {
+              label: "Unit tests",
+              description:
+                "Fast, backend-free tests of config parsing/validation, the api/inputs layer, engines, geometry, potential math, and the tuning property registry.",
+              coverage: { globs: ["tests/unit/**"] },
+            },
+            integrationTests: {
+              label: "Integration tests",
+              description:
+                "Slower smoke tests that exercise real PySCF/APBS/RDKit backends across the surface, potential, tuning, and coupled channels.",
+              coverage: { globs: ["tests/integration/**"] },
+            },
+            regressionTests: {
+              label: "Regression tests",
+              description: "Golden-output comparison for a known molecule's tuning results.",
+              coverage: { globs: ["tests/regression/**"] },
+            },
+          },
+        },
+      },
+    },
+  },
+  relationships: [
+    {
+      kind: "semantic",
+      from: "user",
+      to: "emsuite.cli.entrypoint",
+      label: "Runs `emsuite -s/-t/-p/-c <input file>`",
+    },
+    {
+      kind: "semantic",
+      from: "user",
+      to: "emsuite.api.channelFunctions",
+      label: "Calls api.surface/tune/potential/coupled(...) from Python",
+    },
+    {
+      kind: "semantic",
+      from: "emsuite.cli.entrypoint",
+      to: "emsuite.core.systemInfo",
+      label: "Prints startup banner",
+    },
+    {
+      kind: "semantic",
+      from: "emsuite.cli.entrypoint",
+      to: "emsuite.inputs.channelInputs",
+      label: "Builds and runs the selected channel's Input.from_file(...)",
+    },
+    {
+      kind: "semantic",
+      from: "emsuite.api.channelFunctions",
+      to: "emsuite.config.resolver",
+      label: "Uses the UNSET sentinel to drop unset kwargs",
+    },
+    {
+      kind: "semantic",
+      from: "emsuite.api.channelFunctions",
+      to: "emsuite.inputs.channelInputs",
+      label: "Builds and runs the matching *Input.from_config(...)",
+    },
+    {
+      kind: "semantic",
+      from: "emsuite.inputs.channelInputs",
+      to: "emsuite.config.resolver",
+      label: "Layers defaults < config < kwargs",
+    },
+    {
+      kind: "semantic",
+      from: "emsuite.inputs.channelInputs",
+      to: "emsuite.config.schemas",
+      label: "Validates channel parameters",
+    },
+    {
+      kind: "semantic",
+      from: "emsuite.inputs.channelInputs",
+      to: "emsuite.results.resultTypes",
+      label: "Wraps each channel's output in a typed Result",
+    },
+    {
+      kind: "semantic",
+      from: "emsuite.inputs.channelInputs",
+      to: "emsuite.surface.surfaceWorkflow",
+      label: "SurfaceInput.run() calls run_surface_calculation",
+    },
+    {
+      kind: "semantic",
+      from: "emsuite.inputs.channelInputs",
+      to: "emsuite.potential.potentialWorkflow",
+      label: "PotentialInput.run() calls run_potential_calculation",
+    },
+    {
+      kind: "semantic",
+      from: "emsuite.inputs.channelInputs",
+      to: "emsuite.tuning.orchestration",
+      label: "TuningInput.run() calls tuning main()",
+    },
+    {
+      kind: "semantic",
+      from: "emsuite.results.resultTypes",
+      to: "emsuite.surface.surfaceIO",
+      label: "Loads/saves surf points for Surface/PotentialResult",
+    },
+    {
+      kind: "semantic",
+      from: "emsuite.surface.surfaceWorkflow",
+      to: "emsuite.surface.structurePrep",
+      label: "Prepares input structure",
+    },
+    {
+      kind: "semantic",
+      from: "emsuite.surface.surfaceWorkflow",
+      to: "emsuite.surface.surfaceGeometry",
+      label: "Computes VDW points",
+    },
+    {
+      kind: "semantic",
+      from: "emsuite.surface.surfaceWorkflow",
+      to: "emsuite.surface.surfaceIO",
+      label: "Writes the .surf file",
+    },
+    {
+      kind: "semantic",
+      from: "emsuite.surface.surfaceWorkflow",
+      to: "emsuite.config.schemas",
+      label: "Validates surface parameters",
+    },
+    {
+      kind: "semantic",
+      from: "emsuite.surface.structurePrep",
+      to: "emsuite.core.geometryPrep",
+      label: "Runs a PySCF geometry optimization",
+    },
+    {
+      kind: "semantic",
+      from: "emsuite.surface.structurePrep",
+      to: "emsuite.core.systemInfo",
+      label: "Checks GPU availability before optimizing",
+    },
+    {
+      kind: "semantic",
+      from: "emsuite.core.moleculeBuilders",
+      to: "emsuite.core.numericsUtils",
+      label: "Coerces GPU/CPU arrays for TDDFT results",
+    },
+    {
+      kind: "semantic",
+      from: "emsuite.potential.potentialConfigIO",
+      to: "emsuite.config.fileParser",
+      label: "Parses potential.in assignments",
+    },
+    {
+      kind: "semantic",
+      from: "emsuite.potential.potentialWorkflow",
+      to: "emsuite.potential.potentialConfigIO",
+      label: "Resolves potential parameters",
+    },
+    {
+      kind: "semantic",
+      from: "emsuite.potential.potentialWorkflow",
+      to: "emsuite.potential.occupancyPrep",
+      label: "Builds ligand/protein occupancy for APBS",
+    },
+    {
+      kind: "semantic",
+      from: "emsuite.potential.potentialWorkflow",
+      to: "emsuite.potential.apbsGrids",
+      label: "Runs APBS and gets potential/dielectric grids",
+    },
+    {
+      kind: "semantic",
+      from: "emsuite.potential.potentialWorkflow",
+      to: "emsuite.potential.gaussLaw",
+      label: "Interpolates potential or derives Gauss-law charges",
+    },
+    {
+      kind: "semantic",
+      from: "emsuite.potential.potentialWorkflow",
+      to: "emsuite.surface.surfaceWorkflow",
+      label: "Generates a VDW surface when none is supplied",
+    },
+    {
+      kind: "semantic",
+      from: "emsuite.potential.potentialWorkflow",
+      to: "emsuite.surface.surfaceIO",
+      label: "Loads/saves the .surf file",
+    },
+    {
+      kind: "semantic",
+      from: "emsuite.potential.apbsGrids",
+      to: "emsuite.potential.dxParsing",
+      label: "Parses the APBS OpenDX output",
+    },
+    {
+      kind: "semantic",
+      from: "emsuite.potential.apbsGrids",
+      to: "emsuite.potential.occupancyPrep",
+      label: "Writes the PQR APBS reads",
+    },
+    {
+      kind: "semantic",
+      from: "emsuite.potential.apbsGrids",
+      to: "emsuite.geometry.geometryModel",
+      label: "Reads ligand/protein XYZ geometry",
+    },
+    {
+      kind: "semantic",
+      from: "emsuite.coupled.coupledWorkflow",
+      to: "emsuite.config.fileParser",
+      label: "Parses coupled.in assignments",
+    },
+    {
+      kind: "semantic",
+      from: "emsuite.coupled.coupledWorkflow",
+      to: "emsuite.config.schemas",
+      label: "Validates coupled parameters",
+    },
+    {
+      kind: "semantic",
+      from: "emsuite.coupled.coupledWorkflow",
+      to: "emsuite.inputs.channelInputs",
+      label: "Runs CoupledInput (potential then tuning)",
+    },
+    {
+      kind: "semantic",
+      from: "emsuite.engines.pyscfEngine",
+      to: "emsuite.core.moleculeBuilders",
+      label: "Delegates SCF energy evaluation",
+    },
+    {
+      kind: "semantic",
+      from: "emsuite.engines.pyscfEngine",
+      to: "emsuite.core.geometryPrep",
+      label: "Delegates geometry optimization",
+    },
+    {
+      kind: "semantic",
+      from: "emsuite.tuning.configIO",
+      to: "emsuite.config.fileParser",
+      label: "Parses tuning.in",
+    },
+    {
+      kind: "semantic",
+      from: "emsuite.tuning.orchestration",
+      to: "emsuite.tuning.calculationSetup",
+      label: "Builds base molecule objects",
+    },
+    {
+      kind: "semantic",
+      from: "emsuite.tuning.orchestration",
+      to: "emsuite.tuning.properties",
+      label: "Resolves and computes requested properties",
+    },
+    {
+      kind: "semantic",
+      from: "emsuite.tuning.orchestration",
+      to: "emsuite.tuning.resume",
+      label: "Checks for a resumable run",
+    },
+    {
+      kind: "semantic",
+      from: "emsuite.tuning.orchestration",
+      to: "emsuite.tuning.pointCalculators",
+      label: "Evaluates each surface point",
+    },
+    {
+      kind: "semantic",
+      from: "emsuite.tuning.orchestration",
+      to: "emsuite.tuning.runLogging",
+      label: "Logs run progress",
+    },
+    {
+      kind: "semantic",
+      from: "emsuite.tuning.orchestration",
+      to: "emsuite.tuning.resultsOutput",
+      label: "Writes final outputs",
+    },
+    {
+      kind: "semantic",
+      from: "emsuite.tuning.orchestration",
+      to: "emsuite.surface.surfaceIO",
+      label: "Loads the surface point cloud",
+    },
+    {
+      kind: "semantic",
+      from: "emsuite.tuning.orchestration",
+      to: "emsuite.core.geometryPrep",
+      label: "Derives molecule name from the xyz path",
+    },
+    {
+      kind: "semantic",
+      from: "emsuite.tuning.calculationSetup",
+      to: "emsuite.core.moleculeBuilders",
+      label: "Builds PySCF molecule/mean-field objects",
+    },
+    {
+      kind: "semantic",
+      from: "emsuite.tuning.pointCalculators",
+      to: "emsuite.core.checkpointIO",
+      label: "Resurrects base checkpoints per point",
+    },
+    {
+      kind: "semantic",
+      from: "emsuite.tests.unitTests",
+      to: "emsuite.api.channelFunctions",
+      label: "Tests the kwargs API",
+    },
+    {
+      kind: "semantic",
+      from: "emsuite.tests.unitTests",
+      to: "emsuite.inputs.channelInputs",
+      label: "Tests channel input resolution",
+    },
+    {
+      kind: "semantic",
+      from: "emsuite.tests.unitTests",
+      to: "emsuite.config.schemas",
+      label: "Tests config parsing and validation",
+    },
+    {
+      kind: "semantic",
+      from: "emsuite.tests.unitTests",
+      to: "emsuite.engines.pyscfEngine",
+      label: "Tests engine selection",
+    },
+    {
+      kind: "semantic",
+      from: "emsuite.tests.unitTests",
+      to: "emsuite.geometry.geometryModel",
+      label: "Tests Geometry round-tripping",
+    },
+    {
+      kind: "semantic",
+      from: "emsuite.tests.unitTests",
+      to: "emsuite.potential.gaussLaw",
+      label: "Tests Gauss-law math",
+    },
+    {
+      kind: "semantic",
+      from: "emsuite.tests.unitTests",
+      to: "emsuite.potential.occupancyPrep",
+      label: "Tests PQR assembly",
+    },
+    {
+      kind: "semantic",
+      from: "emsuite.tests.unitTests",
+      to: "emsuite.results.resultTypes",
+      label: "Tests result wrapping",
+    },
+    {
+      kind: "semantic",
+      from: "emsuite.tests.unitTests",
+      to: "emsuite.surface.surfaceIO",
+      label: "Tests .surf round-tripping",
+    },
+    {
+      kind: "semantic",
+      from: "emsuite.tests.unitTests",
+      to: "emsuite.tuning.properties",
+      label: "Tests the property registry",
+    },
+    {
+      kind: "semantic",
+      from: "emsuite.tests.integrationTests",
+      to: "emsuite.api.channelFunctions",
+      label: "Smoke-tests each channel end to end",
+    },
+    {
+      kind: "semantic",
+      from: "emsuite.tests.regressionTests",
+      to: "emsuite.tuning.orchestration",
+      label: "Compares a run's output to a golden result",
+    },
+  ],
+});
