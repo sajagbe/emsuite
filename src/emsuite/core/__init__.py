@@ -3,7 +3,7 @@
 from ._gpu import GPU_AVAILABLE, cp
 from .excited import create_td_molecule_object
 from .hardware import check_cpu_info, check_gpu_info, print_startup_message
-from .io import create_mol2_file, extract_xyz_name, optimize_molecule, smiles_to_xyz
+from .io import extract_xyz_name, optimize_molecule
 from .molecule import (
     create_molecule_object,
     find_homo_lumo_and_gap,
@@ -28,6 +28,4 @@ __all__ = [
     "create_td_molecule_object",
     "extract_xyz_name",
     "optimize_molecule",
-    "smiles_to_xyz",
-    "create_mol2_file",
 ]

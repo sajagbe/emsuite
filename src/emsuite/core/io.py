@@ -1,8 +1,6 @@
 import os
 
 from pyscf.geomopt.geometric_solver import optimize
-from rdkit import Chem
-from rdkit.Chem import AllChem
 
 from .molecule import create_molecule_object, solvate_molecule
 
@@ -113,93 +111,3 @@ def optimize_molecule(
 
     print(f"Optimized geometry written to {output_filename}")
     return output_filename
-
-
-def smiles_to_xyz(smiles, filename=None):
-    """
-    Convert a SMILES string to an XYZ coordinate file.
-
-    This function uses RDKit to generate 3D coordinates from a SMILES string,
-    including hydrogen atoms and basic geometry optimization using MMFF.
-
-    Args:
-        smiles (str): SMILES representation of the molecule
-        filename (str, optional): Output filename. If None, generates automatic name.
-                                 Defaults to None.
-
-    Returns:
-        str: Path to the generated XYZ file
-
-    Note:
-        - Automatically adds hydrogen atoms to the molecule
-        - Performs 3D embedding and MMFF geometry optimization
-        - If no filename provided, uses format "mol_{hash}.xyz"
-        - Hash is generated from SMILES string for reproducibility
-    """
-    mol = Chem.AddHs(Chem.MolFromSmiles(smiles))
-    AllChem.EmbedMolecule(mol)
-    AllChem.MMFFOptimizeMolecule(mol)
-
-    if not filename:
-        filename = f"mol_{abs(hash(smiles)) % 10000}.xyz"
-
-    conf = mol.GetConformer()
-    with open(filename, "w") as f:
-        f.write(f"{mol.GetNumAtoms()}\n{smiles}\n")
-        for i, atom in enumerate(mol.GetAtoms()):
-            pos = conf.GetAtomPosition(i)
-            f.write(f"{atom.GetSymbol()} {pos.x:.6f} {pos.y:.6f} {pos.z:.6f}\n")
-    return filename
-
-
-def create_mol2_file(molecule_name, coordinates, property_list, property_name):
-    """
-    Create a MOL2 file with molecular property data mapped to coordinates.
-
-    This function generates a MOL2 format file where each coordinate point
-    is assigned a property value. The file can be used for visualization
-    of molecular properties in molecular graphics software.
-
-    Args:
-        molecule_name (str): Base name for the molecule
-        coordinates (array-like): Array of 3D coordinates with shape [N, 3]
-        property_list (array-like): Property values for each coordinate point with shape [N]
-        property_name (str): Name/type of the property being mapped
-
-    Returns:
-        None: Writes output directly to file
-
-    Raises:
-        ValueError: If coordinates and property_list have different lengths
-
-    Note:
-        - Output filename format: "{molecule_name}_{property_name}.mol2"
-        - Each point is represented as a hydrogen atom for visualization
-        - Property values are stored in the charge field of the MOL2 format
-        - Uses TRIPOS MOL2 format specification
-    """
-    if len(coordinates) != len(property_list):
-        raise ValueError("coordinates and property_list must have same length")
-
-    filename = f"{molecule_name}_{property_name}.mol2"
-    num_points = len(coordinates)
-
-    with open(filename, "w") as f:
-        f.write("@<TRIPOS>MOLECULE\n")
-        f.write(f"{filename}\n")
-        f.write(f"    {num_points} 0 0 0\n")
-        f.write("SMALL\n")
-        f.write("GASTEIGER\n")
-        f.write("@<TRIPOS>ATOM\n")
-
-        for i, (coord, prop_val) in enumerate(
-            zip(coordinates, property_list, strict=True), start=1
-        ):
-            x, y, z = coord
-            atom_name = "H"
-            atom_type = "H1"
-            subst_id = 1
-            subst_name = property_name.upper()
-            f.write(
-                f"{i:>4} {atom_name:<4} {x:>9.4f} {y:>9.4f} {z:>9.4f} {atom_type:<4} {subst_id} {subst_name} {prop_val:>10.6f}\n"
-            )
