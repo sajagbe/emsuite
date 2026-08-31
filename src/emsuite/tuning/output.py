@@ -324,12 +324,6 @@ def normalize_effects(all_effects, effect_keys):
             # Min-max normalization to [-1, 1]
             if max_val - min_val != 0:
                 normalized[key] = 2 * (value - min_val) / (max_val - min_val) - 1
-                # if value > 0:
-                #     normalized[key] = value / max_val
-                # elif value < 0:
-                #     normalized[key] = - value / min_val
-                # else:
-                #     normalized[key] = 0.0
             else:
                 normalized[key] = 0.0
         normalized_effects.append(normalized)

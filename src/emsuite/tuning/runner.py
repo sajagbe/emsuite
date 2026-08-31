@@ -891,15 +891,12 @@ def main(tuning_input="tuning.in"):
                     No_of_CPUs if No_of_GPUs < 1 else No_of_GPUs, int(num_procs)
                 )
 
-            # logging.getLogger("ray").setLevel(logging.ERROR)
-
             if No_of_GPUs < 1:
                 ray.init(
                     num_cpus=parallel_processes,
                     include_dashboard=False,
                     ignore_reinit_error=True,
                     logging_level=logging.ERROR,
-                    # log_to_driver=False
                 )
                 calculate_point_effect = calculate_point_effect_cpu_remote
             else:
@@ -908,7 +905,6 @@ def main(tuning_input="tuning.in"):
                     include_dashboard=False,
                     ignore_reinit_error=True,
                     logging_level=logging.ERROR,
-                    # log_to_driver=False
                 )
                 calculate_point_effect = calculate_point_effect_gpu
 

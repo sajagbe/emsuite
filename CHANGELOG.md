@@ -19,6 +19,9 @@ All notable changes to this project are documented in this file.
 - MLIP/xTB engines and the `mlip` extra.
 - User-facing `method='coulomb'` vacuum ESP (no Coulomb fallback).
 - Advanced tuning properties: `freq`, `stark_*`, `eint`, `h2o`, `pa`, fugacity extensions.
+- Unused `core.create_mol2_file` and a dead duplicate `core.smiles_to_xyz` (the real one lives in `surface/optimize.py`).
+- Unused `potential.run_apbs_potential`, superseded by the inline APBS + quantity dispatch in `potential/runner.py`.
+- The `engines/` abstraction (`Engine` protocol, `PySCFEngine`, `get_engine()`) — unreferenced outside its own test; runners call `emsuite.core` directly.
 
 ## [1.3.0] - 2026-08-27
 

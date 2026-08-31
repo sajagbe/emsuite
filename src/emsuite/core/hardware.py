@@ -38,7 +38,6 @@ def check_cpu_info():
     """
     try:
         cpu_cores = os.cpu_count()
-        # print(f"Number of CPU cores available: {cpu_cores}")
         return cpu_cores
     except Exception as e:
         print(f"Could not determine CPU cores: {e}")
