@@ -17,7 +17,6 @@ src/emsuite/
   config/            # parser, schemas, resolve
   cli/               # main.py (-s -t -p -c)
   core/              # hardware, molecule, qmmm, excited, io
-  engines/           # base.py, pyscf_engine.py
   surface/           # io, vdw, optimize, generate, runner
   tuning/
     properties/      # registry, ground_state, excited_state, thermo
@@ -48,7 +47,7 @@ CI (`.github/workflows/tests.yml`) runs unit + regression on every push; integra
 
 ## What not to do
 
-- Do not commit local research work — use gitignored [`dev/`](../dev/README.md).
+- Do not commit local research work — use the gitignored `dev/` directory.
 - Do not grow `tuning/runner.py` with new properties — extend `tuning/properties/`.
 - Do not confuse `calc_type='combined'` with the `coupled` channel.
 

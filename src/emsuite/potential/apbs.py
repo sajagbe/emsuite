@@ -143,18 +143,3 @@ def run_apbs_grids(
     finally:
         if tmp is not None:
             tmp.cleanup()
-
-
-def run_apbs_potential(
-    xyz_path: str,
-    surface_coords: np.ndarray,
-    charges: np.ndarray | None = None,
-    pdie: float = 2.0,
-    sdie: float = 78.54,
-    workdir: str | Path | None = None,
-) -> np.ndarray:
-    """Run APBS and interpolate electrostatic potential at surface coordinates."""
-    from .gauss import potential_at_points
-
-    grids = run_apbs_grids(xyz_path, charges=charges, pdie=pdie, sdie=sdie, workdir=workdir)
-    return potential_at_points(grids.potential, surface_coords)
