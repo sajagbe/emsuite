@@ -629,6 +629,18 @@ export default defineSoftwareMap({
     },
     {
       kind: "semantic",
+      from: "emsuite.engines.engineProtocol",
+      to: "emsuite.engines.pyscfEngine",
+      label: "get_engine('pyscf') returns the PySCF implementation",
+    },
+    {
+      kind: "semantic",
+      from: "emsuite.tests.unitTests",
+      to: "emsuite.engines.engineProtocol",
+      label: "Tests the get_engine factory",
+    },
+    {
+      kind: "semantic",
       from: "emsuite.engines.pyscfEngine",
       to: "emsuite.core.moleculeBuilders",
       label: "Delegates SCF energy evaluation",
