@@ -10,6 +10,11 @@ All notable changes to this project are documented in this file.
 - `SurfaceResult.to_xyz()` (pseudo-atom point cloud) and `SurfaceResult.to_mol2()` (pseudo-atoms with `values` in the charge column), plus `surface.io.save_mol2()`, for visualizing a `.surf` in a molecular viewer.
 - Protein/ligand APBS occupancy: `ligand_atoms='present'` (ligand in PQR at q=0) vs `'absent'` (ligand omitted). Box always spans protein and ligand coordinates.
 
+### Fixed
+- APBS input template was missing the required `bcfl` and `sdens` keywords, so every real APBS run failed with `PBEparm_check` errors; the potential and coupled channels could not previously complete a run against a real APBS binary. Added `bcfl mdh` and `sdens 10.0`.
+- `partial_charges_from_xyz` computed Gasteiger charges on a bond-free RDKit molecule (`Chem.MolFromXYZFile` doesn't perceive bonds from 3D coordinates), so charges didn't propagate across the molecule and didn't sum to the formal charge. Now calls `rdDetermineBonds.DetermineBonds()` first.
+- The potential channel's `charge` input was parsed and validated but never used; it's now passed through to Gasteiger charge assignment for the ligand.
+
 ### Changed
 - CLI and Python code both construct `*Input` objects (`.from_file()` or `.from_config(**kwargs)`) and call `.run()`.
 - `emsuite.tuning.runner.main` renamed to `run_tuning_calculation(config)`, matching `run_surface_calculation` / `run_potential_calculation` / `run_coupled_calculation`.
@@ -18,6 +23,8 @@ All notable changes to this project are documented in this file.
 - Potential mapping is APBS only. Gasteiger remains the temporary charge helper for PQR writing.
 
 ### Removed
+- Redundant post-merge key loops in `parse_potential_input` / `parse_coupled_input` — `parse_config_file(..., defaults=...)` already merges every default key from the parsed file; the extra loops were dead code re-applying the same assignment.
+- Dead `.replace(".etm", ".xyz")` branch in `surface/generate.py` (no `.etm` extension exists anywhere in the codebase) and orphaned trailing section-divider comments with no content after them in `surface/{generate,optimize,vdw,io}.py`.
 - `emsuite.api` (`surface()`, `tune()`, `potential()`, `coupled()`) and the top-level `emsuite.tune` shorthand — redundant with `*Input.from_config(**kwargs).run()`, which already accepted the same kwargs and `config=`.
 - Bond-axis scan (`bond_scan_atoms` / `bond_scan.py`).
 - MLIP/xTB engines and the `mlip` extra.

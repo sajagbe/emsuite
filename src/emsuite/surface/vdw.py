@@ -62,6 +62,3 @@ def get_vdw_surface_coordinates(xyz_file, surface_density=1.0, surface_scale=1.0
             pass
 
     return coords
-
-
-##############################################

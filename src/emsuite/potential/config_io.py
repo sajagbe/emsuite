@@ -2,9 +2,7 @@
 
 from __future__ import annotations
 
-from pathlib import Path
-
-from emsuite.config import parse_assignments, parse_config_file
+from emsuite.config import parse_config_file
 from emsuite.config.schemas import validate_potential_params
 
 POTENTIAL_DEFAULTS = {
@@ -27,8 +25,4 @@ POTENTIAL_DEFAULTS = {
 
 def parse_potential_input(input_file: str) -> dict:
     params = parse_config_file(input_file, defaults=POTENTIAL_DEFAULTS)
-    parsed = parse_assignments(Path(input_file).read_text())
-    for key in ("method", "quantity", "ligand", "protein", "ligand_atoms"):
-        if key in parsed:
-            params[key] = parsed[key]
     return validate_potential_params(params)

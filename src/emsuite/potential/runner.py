@@ -94,6 +94,7 @@ def run_potential_calculation(config) -> str:
         ligand_xyz=molecule,
         protein_xyz=protein,
         ligand_atoms=str(params.get("ligand_atoms") or "present"),
+        ligand_charge=int(params.get("charge") or 0),
     )
 
     if method in _FUTURE_METHODS:

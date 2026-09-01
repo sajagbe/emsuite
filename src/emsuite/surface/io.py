@@ -102,6 +102,3 @@ def save_mol2(coords, values, output_path, name="SURF"):
             )
 
     print(f"Surface saved to: {output_path} ({n_points} points)")
-
-
-##############################################

@@ -38,18 +38,6 @@ COUPLED_DEFAULTS = {
 
 def parse_coupled_input(input_file: str) -> dict:
     params = parse_config_file(input_file, defaults=COUPLED_DEFAULTS)
-    parsed = parse_assignments(Path(input_file).read_text())
-    for key in (
-        "potential_method",
-        "potential_quantity",
-        "properties",
-        "parallel",
-        "ligand",
-        "protein",
-        "ligand_atoms",
-    ):
-        if key in parsed:
-            params[key] = parsed[key]
     return validate_coupled_params(params)
 
 

@@ -49,11 +49,12 @@ def occupancy_atoms_and_charges(
     ligand_xyz: str,
     protein_xyz: str | None,
     ligand_atoms: str = "present",
+    ligand_charge: int = 0,
 ) -> tuple[list[tuple[str, float, float, float]], np.ndarray, np.ndarray]:
     """Return (pqr_atoms, pqr_charges, box_coords) for an APBS run."""
     ligand = Geometry.from_xyz(ligand_xyz)
     if not protein_xyz:
-        atoms, charges = partial_charges_from_xyz(ligand_xyz)
+        atoms, charges = partial_charges_from_xyz(ligand_xyz, charge=ligand_charge)
         return atoms, charges, ligand.coords
 
     protein = Geometry.from_xyz(protein_xyz)

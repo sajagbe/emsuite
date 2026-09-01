@@ -56,12 +56,14 @@ elec
   fgcent mol 1
   mol 1
   lpbe
+  bcfl mdh
   pdie {pdie}
   sdie {sdie}
   chgm spl2
   srfm smol
   srad 1.4
   swin 0.3
+  sdens 10.0
   temp 298.15
   calcenergy total
   calcforce no

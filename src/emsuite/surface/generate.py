@@ -59,7 +59,7 @@ def generate_surface(
         if optimized_xyz:
             xyz_path = optimized_xyz
         else:
-            xyz_path = output_surf.replace(".surf", ".xyz").replace(".etm", ".xyz")
+            xyz_path = output_surf.replace(".surf", ".xyz")
 
         # Default to optimizing SMILES input
         should_optimize = optimize if optimize is not None else True
@@ -129,8 +129,3 @@ def generate_surface(
     save_surf(coords, charges, output_surf, heterogenous=(surface_type.lower() == "heterogenous"))
 
     return output_surf
-
-
-##############################################
-#         Input Parsing & Entry Point        #
-##############################################

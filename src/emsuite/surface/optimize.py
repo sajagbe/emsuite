@@ -180,6 +180,3 @@ def smiles_to_xyz(
         raise ValueError(
             f"Unknown optimization method: {optimize_method}. Use 'mmff', 'uff', or 'pyscf'."
         )
-
-
-##############################################
