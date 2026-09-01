@@ -12,6 +12,7 @@ All notable changes to this project are documented in this file.
 - `PotentialInput.protein_format='pdb'`: convert a real PDB via `pdb2pqr` (AMBER/CHARMM/PARSE/etc. force-field charges + propka pH-dependent protonation) instead of Gasteiger-on-XYZ. New `ligand_resname`/`ligand_chain`/`ligand_resseq` select the ligand residue explicitly (not via pdb2pqr's own atom-name-matching `--ligand`, which has no residue-identity check and can collide with other HETATM residues). `ligand_atoms` gains a third value, `'charged'` — pdb2pqr's own real (PEOE) nonzero ligand charge, alongside existing `'present'` (charge zeroed) / `'absent'` (excluded). New `potential/pdb2pqr_runner.py`, `potential/pdb_select.py`, and `potential.pqr.{read_pqr_coords,zero_ligand_charges}`.
 - `PotentialResult.to_mol2()`, mirroring `SurfaceResult.to_mol2()`.
 - `CoupledInput.potential_surf`: reuse an already-produced potential `.surf` directly for tuning (`calc_type='separate'`/`'combined'`) instead of always recomputing potential.
+- `CoupledInput` gains the same `protein_format='pdb'`/`ligand_resname`/`ligand_chain`/`ligand_resseq`/`ligand_mol2`/`forcefield`/`ph` fields as `PotentialInput`, so the coupled (potential → tuning) pipeline can drive the pdb2pqr path too, not just the standalone `potential` channel.
 
 ### Fixed
 - APBS input template was missing the required `bcfl` and `sdens` keywords, so every real APBS run failed with `PBEparm_check` errors; the potential and coupled channels could not previously complete a run against a real APBS binary. Added `bcfl mdh` and `sdens 10.0`.

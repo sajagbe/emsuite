@@ -141,6 +141,13 @@ def validate_coupled_params(params: dict[str, Any]) -> dict[str, Any]:
             "ligand_atoms": params.get("ligand_atoms"),
             "method": params.get("potential_method"),
             "quantity": params.get("potential_quantity"),
+            "protein_format": params.get("protein_format"),
+            "ligand_resname": params.get("ligand_resname"),
+            "ligand_chain": params.get("ligand_chain"),
+            "ligand_resseq": params.get("ligand_resseq"),
+            "ligand_mol2": params.get("ligand_mol2"),
+            "forcefield": params.get("forcefield"),
+            "ph": params.get("ph"),
         }
         validate_potential_params({k: v for k, v in potential_keys.items() if v is not None})
     properties = params.get("properties")

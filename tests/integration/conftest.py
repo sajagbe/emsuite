@@ -124,3 +124,85 @@ def pytest_runtest_makereport(item: pytest.Item, call: pytest.CallInfo[None]):
 
     if report.failed:
         (test_dir / "failure.txt").write_text(str(report.longrepr))
+
+
+# --- pdb2pqr fixture (shared by test_potential_pdb2pqr.py, test_coupled_pdb2pqr.py) ---
+
+# A real, standard 3-residue fragment (ASN-ILE-PHE, no altlocs) from PDB 3HTB
+# (T4 lysozyme L99A/M102Q), plus a synthetic methane ligand as a second HETATM
+# residue. Small and self-contained so this doesn't depend on external files.
+PDB2PQR_PROTEIN_PDB = """\
+ATOM     14  N   ASN A   2       8.696 -17.109 -10.221  1.00 13.04           N
+ATOM     15  CA  ASN A   2       9.444 -18.214 -10.830  1.00 11.28           C
+ATOM     16  C   ASN A   2      10.923 -17.749 -10.851  1.00 11.13           C
+ATOM     17  O   ASN A   2      11.262 -16.586 -10.453  1.00  8.10           O
+ATOM     18  CB  ASN A   2       8.903 -18.572 -12.242  1.00 11.33           C
+ATOM     19  CG  ASN A   2       8.979 -17.384 -13.226  1.00 13.64           C
+ATOM     20  OD1 ASN A   2      10.036 -16.854 -13.455  1.00  9.75           O
+ATOM     21  ND2 ASN A   2       7.826 -16.975 -13.804  1.00 12.13           N
+ATOM     22  N   ILE A   3      11.803 -18.653 -11.255  1.00  9.44           N
+ATOM     23  CA  ILE A   3      13.215 -18.370 -11.247  1.00  9.32           C
+ATOM     24  C   ILE A   3      13.649 -17.195 -12.132  1.00  7.70           C
+ATOM     25  O   ILE A   3      14.597 -16.489 -11.782  1.00  9.80           O
+ATOM     26  CB  ILE A   3      14.010 -19.669 -11.653  1.00  9.07           C
+ATOM     27  CG1 ILE A   3      15.522 -19.542 -11.375  1.00  8.89           C
+ATOM     28  CG2 ILE A   3      13.701 -20.044 -13.127  1.00  9.00           C
+ATOM     29  CD1 ILE A   3      16.021 -18.938 -10.040  1.00 10.83           C
+ATOM     30  N   PHE A   4      12.976 -16.982 -13.265  1.00  8.60           N
+ATOM     31  CA  PHE A   4      13.313 -15.827 -14.061  1.00  8.69           C
+ATOM     32  C   PHE A   4      12.939 -14.559 -13.370  1.00  9.89           C
+ATOM     33  O   PHE A   4      13.695 -13.598 -13.393  1.00  9.06           O
+ATOM     34  CB  PHE A   4      12.680 -15.895 -15.481  1.00  8.95           C
+ATOM     35  CG  PHE A   4      13.207 -17.104 -16.277  1.00 11.87           C
+ATOM     36  CD1 PHE A   4      12.684 -18.381 -16.087  1.00 12.45           C
+ATOM     37  CD2 PHE A   4      14.252 -16.959 -17.165  1.00 10.91           C
+ATOM     38  CE1 PHE A   4      13.203 -19.507 -16.757  1.00 10.97           C
+ATOM     39  CE2 PHE A   4      14.737 -18.073 -17.875  1.00 13.68           C
+ATOM     40  CZ  PHE A   4      14.194 -19.334 -17.662  1.00 13.03           C
+HETATM    1  C1  MTH A 200      50.000  50.000  50.000  1.00  0.00           C
+HETATM    2  H1  MTH A 200      50.630  50.630  50.630  1.00  0.00           H
+HETATM    3  H2  MTH A 200      49.370  49.370  50.630  1.00  0.00           H
+HETATM    4  H3  MTH A 200      49.370  50.630  49.370  1.00  0.00           H
+HETATM    5  H4  MTH A 200      50.630  49.370  49.370  1.00  0.00           H
+END
+"""
+
+# Gasteiger charges for methane (sum ~0), computed once via `obabel --partialcharge
+# gasteiger` on the HETATM block above — real, unique atom names, matching MTH's
+# own PDB atom names so pdb2pqr's --ligand atom-name matching succeeds.
+PDB2PQR_METHANE_MOL2 = """\
+@<TRIPOS>MOLECULE
+methane
+ 5 4 0 0 0
+SMALL
+GASTEIGER
+
+@<TRIPOS>ATOM
+      1  C1        50.0000   50.0000   50.0000 C.3   200  MTH200     -0.0776
+      2  H1        50.6300   50.6300   50.6300 H     200  MTH200      0.0194
+      3  H2        49.3700   49.3700   50.6300 H     200  MTH200      0.0194
+      4  H3        49.3700   50.6300   49.3700 H     200  MTH200      0.0194
+      5  H4        50.6300   49.3700   49.3700 H     200  MTH200      0.0194
+@<TRIPOS>BOND
+     1     4     1    1
+     2     5     1    1
+     3     1     2    1
+     4     1     3    1
+"""
+
+# molecule= just needs to be a valid XYZ (surface-generation + box purposes);
+# unrelated to the pdb2pqr ligand (MTH), which is entirely inside the PDB.
+PDB2PQR_LIGAND_XYZ = """\
+1
+probe
+C 20.000 -17.000 -12.000
+"""
+
+
+@pytest.fixture
+def pdb2pqr_fixture(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
+    monkeypatch.chdir(tmp_path)
+    (tmp_path / "complex.pdb").write_text(PDB2PQR_PROTEIN_PDB)
+    (tmp_path / "methane.mol2").write_text(PDB2PQR_METHANE_MOL2)
+    (tmp_path / "ligand.xyz").write_text(PDB2PQR_LIGAND_XYZ)
+    return tmp_path

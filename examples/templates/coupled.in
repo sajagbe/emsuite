@@ -2,12 +2,23 @@
 
 molecule = 'molecule.xyz'
 # protein = 'protein.xyz'
-# ligand_atoms = 'present'    # or 'absent'
+# ligand_atoms = 'present'    # 'present' (q=0 cavity), 'absent', or 'charged' (real charge, protein_format='pdb' only)
 output_surf = 'coupled.surf'
 surface_density = 0.5
 surface_scale = 1.0
 potential_method = 'apbs'
 potential_quantity = 'charge'
+
+# Protein as a real PDB via pdb2pqr instead of Gasteiger-on-XYZ (same fields
+# as potential.in — see that template for details).
+# protein = 'complex.pdb'
+# protein_format = 'pdb'
+# ligand_resname = 'LIG'
+# ligand_chain = None
+# ligand_resseq = None
+# ligand_mol2 = 'ligand.mol2'    # required for ligand_atoms='present'/'charged'
+# forcefield = 'AMBER'
+# ph = 7.0
 
 # Reuse an already-produced potential .surf instead of recomputing potential.
 # When set, potential_method/potential_quantity/protein/ligand_atoms above are

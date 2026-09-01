@@ -247,6 +247,13 @@ class CoupledInput:
     protein: str | None = None
     ligand_atoms: str = "present"
     potential_surf: str | None = None
+    protein_format: str = "xyz"
+    ligand_resname: str | None = None
+    ligand_chain: str | None = None
+    ligand_resseq: int | None = None
+    ligand_mol2: str | None = None
+    forcefield: str = "AMBER"
+    ph: float | None = 7.0
 
     @classmethod
     def from_mapping(cls, params: dict[str, Any]) -> Self:
@@ -297,6 +304,13 @@ class CoupledInput:
                 ligand=self.ligand or self.molecule,
                 protein=self.protein,
                 ligand_atoms=self.ligand_atoms,
+                protein_format=self.protein_format,
+                ligand_resname=self.ligand_resname,
+                ligand_chain=self.ligand_chain,
+                ligand_resseq=self.ligand_resseq,
+                ligand_mol2=self.ligand_mol2,
+                forcefield=self.forcefield,
+                ph=self.ph,
             ).run()
         surface_file = potential.path or potential.to_surf(self.output_surf)
         tuning = TuningInput(

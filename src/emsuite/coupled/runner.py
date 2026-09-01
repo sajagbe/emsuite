@@ -32,6 +32,13 @@ COUPLED_DEFAULTS = {
     "protein": None,
     "ligand_atoms": "present",
     "potential_surf": None,
+    "protein_format": "xyz",
+    "ligand_resname": None,
+    "ligand_chain": None,
+    "ligand_resseq": None,
+    "ligand_mol2": None,
+    "forcefield": "AMBER",
+    "ph": 7.0,
 }
 
 
