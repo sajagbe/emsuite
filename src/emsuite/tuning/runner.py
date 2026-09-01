@@ -522,22 +522,22 @@ def startup_message():
 
 
 ##########################################################
-def main(tuning_input="tuning.in"):
+def run_tuning_calculation(config):
     #######################################
     #           Preliminary Setup         #
     #######################################
     """Main entry point for tuning calculations.
 
     Args:
-        tuning_input (str | Path | dict): Path to a tuning.in file, or a
-            parameter dict (defaults are supplied per-key below).
+        config (str | Path | dict | TuningInput): Path to a tuning.in file, or a
+            parameter dict/TuningInput (defaults are supplied per-key below).
     """
     # Print startup message
     startup_message()
 
     from emsuite.inputs import TuningInput
 
-    tuning_params = TuningInput.from_any(tuning_input).to_dict()
+    tuning_params = TuningInput.from_any(config).to_dict()
 
     # Extract all parameters
     molecule = tuning_params.get("molecule") or tuning_params.get("xyz_file")

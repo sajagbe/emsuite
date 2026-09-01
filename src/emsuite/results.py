@@ -7,7 +7,7 @@ from pathlib import Path
 
 import numpy as np
 
-from emsuite.surface.io import load_surf, save_surf
+from emsuite.surface.io import load_surf, save_mol2, save_surf
 
 
 @dataclass(frozen=True)
@@ -30,6 +30,26 @@ class SurfaceResult:
         if not output:
             raise ValueError("to_surf requires a path")
         save_surf(self.coords, self.values, output)
+        return output
+
+    def to_xyz(self, path: str | Path | None = None) -> str:
+        """Write surface points as pseudo-atoms (element 'H') for viewing in a molecular viewer."""
+        output = str(path or (Path(self.path).with_suffix(".xyz") if self.path else ""))
+        if not output:
+            raise ValueError("to_xyz requires a path")
+        with open(output, "w") as f:
+            f.write(f"{len(self.coords)}\n")
+            f.write("Surface points\n")
+            for x, y, z in self.coords:
+                f.write(f"H {x:.6f} {y:.6f} {z:.6f}\n")
+        return output
+
+    def to_mol2(self, path: str | Path | None = None) -> str:
+        """Write surface points as MOL2 pseudo-atoms with ``values`` in the charge column."""
+        output = str(path or (Path(self.path).with_suffix(".mol2") if self.path else ""))
+        if not output:
+            raise ValueError("to_mol2 requires a path")
+        save_mol2(self.coords, self.values, output)
         return output
 
 

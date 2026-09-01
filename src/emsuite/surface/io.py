@@ -74,4 +74,34 @@ def save_surf(coords, charges, output_path, heterogenous=False):
     print(f"Surface saved to: {output_path} ({n_points} points)")
 
 
+def save_mol2(coords, values, output_path, name="SURF"):
+    """
+    Save surface points as MOL2 pseudo-atoms (element H), with ``values`` in the
+    charge column so any MOL2-reading viewer (PyMOL, Avogadro, VMD) can color by it.
+
+    Args:
+        coords (numpy.ndarray): Surface coordinates with shape [N, 3]
+        values (numpy.ndarray): Per-point scalar (e.g. potential or charge), shape [N]
+        output_path (str): Path to save the mol2 file
+        name (str): Substructure name written per atom. Defaults to "SURF".
+    """
+    n_points = coords.shape[0]
+
+    with open(output_path, "w") as f:
+        f.write("@<TRIPOS>MOLECULE\n")
+        f.write(f"{name}\n")
+        f.write(f"{n_points:5d} 0 0 0\n")
+        f.write("SMALL\n")
+        f.write("GASTEIGER\n")
+
+        f.write("@<TRIPOS>ATOM\n")
+        for i in range(n_points):
+            x, y, z = coords[i]
+            f.write(
+                f"{i + 1:5d} H    {x:8.4f} {y:8.4f} {z:8.4f} H1   1 {name:8s} {values[i]:10.6f}\n"
+            )
+
+    print(f"Surface saved to: {output_path} ({n_points} points)")
+
+
 ##############################################

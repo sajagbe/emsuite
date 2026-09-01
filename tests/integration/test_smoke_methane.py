@@ -7,7 +7,7 @@ from pathlib import Path
 import pytest
 
 from emsuite.surface import run_surface_calculation
-from emsuite.tuning import main as run_tuning
+from emsuite.tuning import run_tuning_calculation
 
 from .helpers import record_assertions
 
@@ -54,7 +54,7 @@ def test_methane_surface_to_tuning_smoke(tmp_path: Path, monkeypatch: pytest.Mon
     surf_lines = Path(surf_path).read_text().strip().splitlines()
     assert len(surf_lines) >= 11  # header + at least 10 surface points
 
-    run_tuning("tuning.in")
+    run_tuning_calculation("tuning.in")
 
     results_dirs = sorted(tmp_path.glob("results_methane_*"))
     assert results_dirs, "expected timestamped results_methane_* directory"

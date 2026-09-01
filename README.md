@@ -55,50 +55,54 @@ emsuite -c coupled.in      # Potential → tuning pipeline
 
 ## Python API
 
-The most accessible way to drive EMSuite is the keyword-argument API in
-`emsuite.api` — pass only what you care about; defaults handle the rest:
+Every channel is a frozen dataclass — `SurfaceInput`, `TuningInput`,
+`PotentialInput`, `CoupledInput` — built once and run:
 
 ```python
-from emsuite import api
+from emsuite import SurfaceInput, TuningInput, PotentialInput, CoupledInput
 
-api.surface(input_type="SMILES", input_data="CCO", output_surf="CCO.surf")
-api.tune(molecule="CCO.xyz", surface_file="CCO.surf", properties=["homo", "gap"])
-api.potential(molecule="CCO.xyz", quantity="potential")
-api.coupled(molecule="CCO.xyz", properties=["homo", "lumo"])
+SurfaceInput.from_config(input_type="SMILES", input_data="CCO", output_surf="CCO.surf").run()
+TuningInput.from_config(molecule="CCO.xyz", surface_file="CCO.surf", properties=["homo", "gap"]).run()
+PotentialInput.from_config(molecule="CCO.xyz", quantity="potential").run()
+CoupledInput.from_config(molecule="CCO.xyz", properties=["homo", "lumo"]).run()
 
 # Ligand in a protein field (surface from the ligand; charges from the protein):
-api.potential(
+PotentialInput.from_config(
     ligand="ligand.xyz",
     protein="protein.xyz",
     ligand_atoms="present",   # ligand in the PQR at q=0 (cavity)
     quantity="charge",
-)
-api.potential(
+).run()
+PotentialInput.from_config(
     ligand="ligand.xyz",
     protein="protein.xyz",
     ligand_atoms="absent",    # ligand omitted from the PQR
     quantity="charge",
-)
+).run()
 ```
 
-Every channel also accepts `config=` (a `.in` file path **or** a dict), and
+`from_config` also accepts `config=` (a `.in` file path **or** a dict), and
 explicit keyword arguments override values loaded from `config`:
 
 ```python
-api.tune(config="tuning.in")                 # load a file
-api.tune(config="tuning.in", parallel=False) # load a file, override one value
-api.tune(config={"molecule": "m.xyz", "surface_file": "m.surf"})  # pass a dict
+TuningInput.from_config(config="tuning.in").run()                 # load a file
+TuningInput.from_config(config="tuning.in", parallel=False).run() # load a file, override one value
+TuningInput.from_config(config={"molecule": "m.xyz", "surface_file": "m.surf"}).run()  # pass a dict
 ```
 
-`emsuite.tune` is also exported at the top level as a shorthand for `api.tune`.
-
-### File-path API (unchanged)
+Or build from a file directly with `from_file`, which is what the CLI does:
 
 ```python
 import emsuite
 
+emsuite.SurfaceInput.from_file("surface.in").run()
+emsuite.TuningInput.from_file("tuning.in").run()
+emsuite.PotentialInput.from_file("potential.in").run()
+emsuite.CoupledInput.from_file("coupled.in").run()
+
+# Or call the underlying calculation function directly with a file path:
 emsuite.run_surface_calculation("surface.in")
-emsuite.run_tuning("tuning.in")
+emsuite.run_tuning_calculation("tuning.in")
 emsuite.run_potential_calculation("potential.in")
 emsuite.run_coupled_calculation("coupled.in")
 ```

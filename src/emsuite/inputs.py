@@ -207,9 +207,9 @@ class TuningInput:
         return _to_dict(self)
 
     def run(self) -> TuningResult:
-        from emsuite.tuning.runner import main as run_tuning
+        from emsuite.tuning.runner import run_tuning_calculation
 
-        results_dir = run_tuning(self)
+        results_dir = run_tuning_calculation(self)
         return TuningResult(results_dir=str(results_dir) if results_dir else None)
 
 

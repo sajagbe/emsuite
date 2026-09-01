@@ -7,14 +7,18 @@ All notable changes to this project are documented in this file.
 ### Added
 - Public `SurfaceInput` / `PotentialInput` / `TuningInput` / `CoupledInput` and matching `*Result` types; `.in` files load inputs.
 - `Geometry.from_xyz` and `PotentialResult.to_surf()`.
+- `SurfaceResult.to_xyz()` (pseudo-atom point cloud) and `SurfaceResult.to_mol2()` (pseudo-atoms with `values` in the charge column), plus `surface.io.save_mol2()`, for visualizing a `.surf` in a molecular viewer.
 - Protein/ligand APBS occupancy: `ligand_atoms='present'` (ligand in PQR at q=0) vs `'absent'` (ligand omitted). Box always spans protein and ligand coordinates.
 
 ### Changed
-- CLI and `emsuite.api` construct Input objects and call `.run()`.
+- CLI and Python code both construct `*Input` objects (`.from_file()` or `.from_config(**kwargs)`) and call `.run()`.
+- `emsuite.tuning.runner.main` renamed to `run_tuning_calculation(config)`, matching `run_surface_calculation` / `run_potential_calculation` / `run_coupled_calculation`.
+- `run_coupled_calculation` now returns the `CoupledResult` instead of discarding it and returning `None`.
 - Coupled pipeline calls potential then tuning in memory (no throwaway `coupled_*.in` files).
 - Potential mapping is APBS only. Gasteiger remains the temporary charge helper for PQR writing.
 
 ### Removed
+- `emsuite.api` (`surface()`, `tune()`, `potential()`, `coupled()`) and the top-level `emsuite.tune` shorthand — redundant with `*Input.from_config(**kwargs).run()`, which already accepted the same kwargs and `config=`.
 - Bond-axis scan (`bond_scan_atoms` / `bond_scan.py`).
 - MLIP/xTB engines and the `mlip` extra.
 - User-facing `method='coulomb'` vacuum ESP (no Coulomb fallback).

@@ -6,6 +6,7 @@ from pathlib import Path
 
 from emsuite.config import parse_assignments, parse_config_file
 from emsuite.config.schemas import validate_coupled_params
+from emsuite.results import CoupledResult
 
 COUPLED_DEFAULTS = {
     "molecule": None,
@@ -52,7 +53,7 @@ def parse_coupled_input(input_file: str) -> dict:
     return validate_coupled_params(params)
 
 
-def run_coupled_calculation(config) -> None:
+def run_coupled_calculation(config) -> CoupledResult:
     """
     Run APBS-derived surface values (potential or Gauss-law charge), then tuning maps.
 
@@ -60,6 +61,9 @@ def run_coupled_calculation(config) -> None:
 
     Args:
         config (str | Path | dict): Path to a coupled.in file, or a parameter dict.
+
+    Returns:
+        CoupledResult: The composed potential + tuning result.
     """
     print("\n" + "=" * 60)
     print("           Coupled Potential → Tuning Pipeline")
@@ -67,7 +71,9 @@ def run_coupled_calculation(config) -> None:
 
     from emsuite.inputs import CoupledInput
 
-    CoupledInput.from_any(config).run()
+    result = CoupledInput.from_any(config).run()
 
     print("\nCoupled calculation complete.")
     print("=" * 60 + "\n")
+
+    return result
