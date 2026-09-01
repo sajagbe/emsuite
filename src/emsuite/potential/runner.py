@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import os
+import shutil
 from pathlib import Path
 
 import numpy as np
@@ -115,16 +116,23 @@ def run_potential_calculation(config) -> str:
             f"method={method!r} is not implemented yet (planned PySCF ESP/MEP backend)"
         )
 
-    values = _apbs_values(
-        coords,
-        atoms,
-        charges,
-        box_coords,
-        pdie=float(params["pdie"]),
-        sdie=float(params["sdie"]),
-        quantity=quantity,
-        pqr_path=pqr_path,
-    )
+    try:
+        values = _apbs_values(
+            coords,
+            atoms,
+            charges,
+            box_coords,
+            pdie=float(params["pdie"]),
+            sdie=float(params["sdie"]),
+            quantity=quantity,
+            pqr_path=pqr_path,
+        )
+    finally:
+        if pqr_path is not None:
+            # Clean up occupancy's temp dir (isolated/stripped PDB + PQR files)
+            # from the pdb2pqr path — it has to outlive occupancy_atoms_and_charges
+            # so run_apbs_grids can read it, so nothing else cleans it up.
+            shutil.rmtree(Path(pqr_path).parent, ignore_errors=True)
 
     output_surf = params["output_surf"]
     save_surf(coords, values, output_surf, heterogenous=True)

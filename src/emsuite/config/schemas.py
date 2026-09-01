@@ -117,6 +117,8 @@ def validate_potential_params(params: dict[str, Any]) -> dict[str, Any]:
             raise ConfigValidationError(
                 f"ligand_atoms={ligand_atoms!r} with protein_format='pdb' requires ligand_mol2="
             )
+    elif ligand_atoms == "charged":
+        raise ConfigValidationError("ligand_atoms='charged' requires protein_format='pdb'")
     params["protein_format"] = protein_format
 
     params["method"] = method

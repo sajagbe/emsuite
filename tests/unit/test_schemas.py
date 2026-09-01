@@ -3,7 +3,7 @@
 import pytest
 
 from emsuite.config import ConfigValidationError, validate_surface_params, validate_tuning_params
-from emsuite.config.schemas import validate_coupled_params
+from emsuite.config.schemas import validate_coupled_params, validate_potential_params
 
 
 def test_validate_surface_params_requires_input():
@@ -40,3 +40,26 @@ def test_validate_coupled_params_still_validates_potential_without_potential_sur
                 "ligand_atoms": "absent",
             }
         )
+
+
+def test_ligand_atoms_charged_requires_pdb_protein_format():
+    # 'charged' only means anything on the pdb2pqr path — without it, this used to
+    # pass validation and fail later with a confusing generic ValueError from
+    # assemble_pqr instead of a clear ConfigValidationError here.
+    with pytest.raises(ConfigValidationError, match="protein_format='pdb'"):
+        validate_potential_params({"molecule": "m.xyz", "ligand_atoms": "charged"})
+
+
+def test_ligand_atoms_charged_accepted_with_pdb_protein_format():
+    params = validate_potential_params(
+        {
+            "molecule": "m.xyz",
+            "protein": "complex.pdb",
+            "protein_format": "pdb",
+            "ligand_atoms": "charged",
+            "ligand_resname": "LIG",
+            "ligand_mol2": "lig.mol2",
+        }
+    )
+    assert params["ligand_atoms"] == "charged"
+    assert params["protein_format"] == "pdb"

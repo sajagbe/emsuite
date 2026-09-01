@@ -6,6 +6,7 @@ pdb2pqr_fixture, shared with test_coupled_pdb2pqr.py.
 
 from __future__ import annotations
 
+import tempfile
 from pathlib import Path
 
 import numpy as np
@@ -87,3 +88,24 @@ def test_pdb_present_vs_charged_pqr_differ_only_in_ligand_charge(
     non_mth_charged = [line for line in charged_pqr.read_text().splitlines() if " MTH " not in line]
     non_mth_present = [line for line in present_pqr.read_text().splitlines() if " MTH " not in line]
     assert non_mth_charged == non_mth_present  # protein atoms untouched either way
+
+
+def _pdb2pqr_temp_dirs() -> set[str]:
+    return {p.name for p in Path(tempfile.gettempdir()).glob("emsuite_pdb2pqr_*")}
+
+
+@pytest.mark.slow
+def test_pdb_mode_does_not_leak_temp_dir(pdb2pqr_fixture: Path) -> None:
+    """occupancy.py's tempfile.mkdtemp() for the isolated PDB/PQR must be cleaned up."""
+    before = _pdb2pqr_temp_dirs()
+    PotentialInput.from_config(
+        molecule="ligand.xyz",
+        protein="complex.pdb",
+        protein_format="pdb",
+        ligand_atoms="absent",
+        ligand_resname="MTH",
+        quantity="potential",
+        output_surf="leak_check.surf",
+    ).run()
+    after = _pdb2pqr_temp_dirs()
+    assert after == before, f"leaked temp dir(s): {after - before}"
