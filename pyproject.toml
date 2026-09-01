@@ -12,6 +12,7 @@ dependencies = [
     "numpy",
     "ray>=2.50.1",
     "apbs-binary>=3.4.1.1",
+    "pdb2pqr>=3.7.1",
 ]
 
 [project.optional-dependencies]
@@ -28,8 +29,8 @@ gpu = [
     "cutensor-cu12==2.0.2",
 ]
 docs = [
-    "sphinx>=7.0",
-    "myst-parser>=3.0",
+    "sphinx<7.0",
+    "myst-parser<2.0",
 ]
 
 [project.scripts]

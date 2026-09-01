@@ -14,5 +14,22 @@ quantity = 'potential'     # 'potential' or 'charge' (Gauss-law)
 # ligand_atoms = 'present'   # ligand in PQR at q=0 (cavity)
 # ligand_atoms = 'absent'    # ligand omitted from PQR; box still spans ligand
 
+# Protein as a real PDB, converted via pdb2pqr instead of Gasteiger-on-XYZ
+# (real AMBER/CHARMM/PARSE force-field charges + propka protonation for the
+# protein; requires selecting the ligand residue explicitly by name).
+# protein = 'complex.pdb'
+# protein_format = 'pdb'
+# ligand_resname = 'LIG'         # HETATM residue name to select in the PDB
+# ligand_chain = None            # only needed if ligand_resname is ambiguous
+# ligand_resseq = None           # only needed if ligand_resname is ambiguous
+# forcefield = 'AMBER'           # AMBER, CHARMM, PARSE, TYL06, PEOEPB, SWANSON
+# ph = 7.0                       # propka titration pH; None to disable
+#
+# ligand_atoms also accepts a third value with protein_format='pdb':
+# ligand_atoms = 'present'   # ligand in PQR, charge zeroed, real pdb2pqr radius (needs ligand_mol2)
+# ligand_atoms = 'absent'    # ligand not in PQR at all
+# ligand_atoms = 'charged'   # ligand in PQR with pdb2pqr's own real (PEOE) charge (needs ligand_mol2)
+# ligand_mol2 = 'ligand.mol2'    # required for 'present'/'charged' with protein_format='pdb'
+
 pdie = 2.0
 sdie = 78.54

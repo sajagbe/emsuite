@@ -9,6 +9,12 @@ surface_scale = 1.0
 potential_method = 'apbs'
 potential_quantity = 'charge'
 
+# Reuse an already-produced potential .surf instead of recomputing potential.
+# When set, potential_method/potential_quantity/protein/ligand_atoms above are
+# ignored — useful for comparing calc_type='separate' vs 'combined' against
+# the same potential without repeating the (possibly slow) APBS/pdb2pqr step.
+# potential_surf = 'precomputed.surf'
+
 properties = ['homo', 'lumo', 'gap']
 basis_set = 'sto-3g'
 method = 'dft'

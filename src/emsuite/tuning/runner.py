@@ -1087,4 +1087,4 @@ def run_tuning_calculation(config):
 
 if __name__ == "__main__":
     tuning_file = sys.argv[1] if len(sys.argv) > 1 else "tuning.in"
-    main(tuning_file)
+    run_tuning_calculation(tuning_file)

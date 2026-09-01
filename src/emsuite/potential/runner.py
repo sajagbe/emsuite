@@ -50,10 +50,14 @@ def _apbs_values(
     pdie: float,
     sdie: float,
     quantity: str,
+    pqr_path: str | None = None,
 ) -> np.ndarray:
-    grids = run_apbs_grids(
-        atoms=atoms, charges=charges, box_coords=box_coords, pdie=pdie, sdie=sdie
-    )
+    if pqr_path is not None:
+        grids = run_apbs_grids(pqr_path=pqr_path, box_coords=box_coords, pdie=pdie, sdie=sdie)
+    else:
+        grids = run_apbs_grids(
+            atoms=atoms, charges=charges, box_coords=box_coords, pdie=pdie, sdie=sdie
+        )
     if quantity == "charge":
         values = charges_at_points(grids.potential, grids.dielx, grids.diely, grids.dielz, coords)
         print("Computed Gauss-law surface charges from APBS potential and dielectric maps")
@@ -84,17 +88,26 @@ def run_potential_calculation(config) -> str:
     if not os.path.exists(molecule):
         raise FileNotFoundError(f"Molecule XYZ not found: {molecule}")
     protein = params.get("protein")
+    protein_format = str(params.get("protein_format") or "xyz")
     if protein and not os.path.exists(protein):
-        raise FileNotFoundError(f"Protein XYZ not found: {protein}")
+        label = "PDB" if protein_format == "pdb" else "XYZ"
+        raise FileNotFoundError(f"Protein {label} not found: {protein}")
 
     coords = _surface_coords(params)
     method = str(params["method"]).lower()
     quantity = str(params["quantity"]).lower()
-    atoms, charges, box_coords = occupancy_atoms_and_charges(
+    atoms, charges, box_coords, pqr_path = occupancy_atoms_and_charges(
         ligand_xyz=molecule,
         protein_xyz=protein,
         ligand_atoms=str(params.get("ligand_atoms") or "present"),
         ligand_charge=int(params.get("charge") or 0),
+        protein_format=protein_format,
+        ligand_resname=params.get("ligand_resname"),
+        ligand_chain=params.get("ligand_chain"),
+        ligand_resseq=params.get("ligand_resseq"),
+        ligand_mol2=params.get("ligand_mol2"),
+        forcefield=str(params.get("forcefield") or "AMBER"),
+        ph=params.get("ph"),
     )
 
     if method in _FUTURE_METHODS:
@@ -110,6 +123,7 @@ def run_potential_calculation(config) -> str:
         pdie=float(params["pdie"]),
         sdie=float(params["sdie"]),
         quantity=quantity,
+        pqr_path=pqr_path,
     )
 
     output_surf = params["output_surf"]

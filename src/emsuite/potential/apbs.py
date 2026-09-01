@@ -101,16 +101,28 @@ def run_apbs_grids(
     workdir: str | Path | None = None,
     atoms: list[tuple[str, float, float, float]] | None = None,
     box_coords: np.ndarray | None = None,
+    pqr_path: str | Path | None = None,
 ) -> ApbsGrids:
-    """Run APBS and return potential plus dielectric grids."""
-    if atoms is None:
-        if xyz_path is None:
-            raise ValueError("run_apbs_grids requires xyz_path or atoms")
-        atoms = read_xyz(xyz_path)
-    if charges is None:
-        charges = np.zeros(len(atoms))
-    atom_coords = np.array([[x, y, z] for _, x, y, z in atoms], dtype=float)
-    extent_coords = atom_coords if box_coords is None else np.asarray(box_coords, dtype=float)
+    """Run APBS and return potential plus dielectric grids.
+
+    ``pqr_path``, if given, points APBS at an already-written PQR (e.g. from
+    pdb2pqr) directly — ``atoms``/``charges``/``write_pqr`` are skipped
+    entirely. ``box_coords`` is then required (there's no atoms list here to
+    derive the box extent from).
+    """
+    if pqr_path is not None:
+        if box_coords is None:
+            raise ValueError("run_apbs_grids requires box_coords when pqr_path is given")
+        extent_coords = np.asarray(box_coords, dtype=float)
+    else:
+        if atoms is None:
+            if xyz_path is None:
+                raise ValueError("run_apbs_grids requires xyz_path or atoms")
+            atoms = read_xyz(xyz_path)
+        if charges is None:
+            charges = np.zeros(len(atoms))
+        atom_coords = np.array([[x, y, z] for _, x, y, z in atoms], dtype=float)
+        extent_coords = atom_coords if box_coords is None else np.asarray(box_coords, dtype=float)
     cglen, fglen = _box_lengths(extent_coords)
 
     if workdir is None:
@@ -122,10 +134,13 @@ def run_apbs_grids(
         tmp = None
 
     try:
-        pqr_path = write_pqr(atoms, charges.tolist(), work_path / "input.pqr")
+        if pqr_path is not None:
+            input_pqr = Path(pqr_path).resolve()
+        else:
+            input_pqr = write_pqr(atoms, charges.tolist(), work_path / "input.pqr")
         prefix = "potential"
         apbs_in = _write_apbs_input(
-            pqr_path.name, prefix, pdie, sdie, cglen, fglen, dime, work_path
+            str(input_pqr), prefix, pdie, sdie, cglen, fglen, dime, work_path
         )
         result = subprocess.run(
             [apbs_binary.APBS_BIN_PATH, str(apbs_in)],

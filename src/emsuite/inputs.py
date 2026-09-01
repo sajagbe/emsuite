@@ -125,6 +125,13 @@ class PotentialInput:
     ligand: str | None = None
     protein: str | None = None
     ligand_atoms: str = "present"
+    protein_format: str = "xyz"
+    ligand_resname: str | None = None
+    ligand_chain: str | None = None
+    ligand_resseq: int | None = None
+    ligand_mol2: str | None = None
+    forcefield: str = "AMBER"
+    ph: float | None = 7.0
 
     @classmethod
     def from_mapping(cls, params: dict[str, Any]) -> Self:
@@ -239,6 +246,7 @@ class CoupledInput:
     ligand: str | None = None
     protein: str | None = None
     ligand_atoms: str = "present"
+    potential_surf: str | None = None
 
     @classmethod
     def from_mapping(cls, params: dict[str, Any]) -> Self:
@@ -271,22 +279,25 @@ class CoupledInput:
         return _to_dict(self)
 
     def run(self) -> CoupledResult:
-        potential = PotentialInput(
-            molecule=self.molecule,
-            surface_file=self.surface_file,
-            output_surf=self.output_surf,
-            surface_density=self.surface_density,
-            surface_scale=self.surface_scale,
-            method=self.potential_method,
-            quantity=self.potential_quantity,
-            pdie=self.pdie,
-            sdie=self.sdie,
-            charge=self.charge,
-            spin=self.spin,
-            ligand=self.ligand or self.molecule,
-            protein=self.protein,
-            ligand_atoms=self.ligand_atoms,
-        ).run()
+        if self.potential_surf:
+            potential = PotentialResult.from_surf(self.potential_surf, quantity=self.potential_quantity)
+        else:
+            potential = PotentialInput(
+                molecule=self.molecule,
+                surface_file=self.surface_file,
+                output_surf=self.output_surf,
+                surface_density=self.surface_density,
+                surface_scale=self.surface_scale,
+                method=self.potential_method,
+                quantity=self.potential_quantity,
+                pdie=self.pdie,
+                sdie=self.sdie,
+                charge=self.charge,
+                spin=self.spin,
+                ligand=self.ligand or self.molecule,
+                protein=self.protein,
+                ligand_atoms=self.ligand_atoms,
+            ).run()
         surface_file = potential.path or potential.to_surf(self.output_surf)
         tuning = TuningInput(
             molecule=self.molecule,

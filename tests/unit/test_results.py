@@ -22,6 +22,24 @@ def test_potential_result_to_surf_roundtrip(tmp_path: Path):
     np.testing.assert_allclose(again.values, values)
 
 
+def test_potential_result_to_mol2(tmp_path: Path):
+    coords = np.array([[0.0, 0.0, 0.0], [1.0, 0.0, 0.0]])
+    values = np.array([0.1, -0.2])
+    result = PotentialResult(coords=coords, values=values, quantity="charge")
+
+    written = result.to_mol2(tmp_path / "potential.mol2")
+    lines = Path(written).read_text().splitlines()
+    assert lines[0] == "@<TRIPOS>MOLECULE"
+    assert "0.100000" in lines[6]
+    assert "-0.200000" in lines[7]
+
+    result_with_path = PotentialResult(
+        coords=coords, values=values, quantity="charge", path=str(tmp_path / "potential.surf")
+    )
+    default_written = result_with_path.to_mol2()
+    assert default_written == str(tmp_path / "potential.mol2")
+
+
 def test_surface_result_to_xyz(tmp_path: Path):
     coords = np.array([[0.0, 0.0, 0.0], [1.0, 0.0, 0.0]])
     values = np.array([0.1, 0.2])

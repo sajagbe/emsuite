@@ -76,6 +76,14 @@ class PotentialResult:
         save_surf(self.coords, self.values, output, heterogenous=True)
         return output
 
+    def to_mol2(self, path: str | Path | None = None) -> str:
+        """Write surface points as MOL2 pseudo-atoms with ``values`` in the charge column."""
+        output = str(path or (Path(self.path).with_suffix(".mol2") if self.path else ""))
+        if not output:
+            raise ValueError("to_mol2 requires a path")
+        save_mol2(self.coords, self.values, output)
+        return output
+
 
 @dataclass(frozen=True)
 class TuningResult:

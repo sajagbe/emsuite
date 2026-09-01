@@ -38,6 +38,7 @@ The protein-field use case needs a ligand surface, protein charges only, and a c
 - KTD5. Coupled is `PotentialInput` (quantity charge) then `TuningInput` on the ligand. No throwaway `.in` files.
 - KTD6. Gasteiger stays only as the temporary protein charge source until a PQR/PDB charge path exists. It is not a user-facing `method='coulomb'`.
 - KTD7. GPU, Ray, and resume stay. They are not scientific goals; tuning maps need them.
+- KTD8. Closes KTD6: `protein_format='pdb'` converts via `pdb2pqr` (real AMBER/CHARMM/PARSE force-field charges + propka protonation for the protein), selecting the ligand explicitly by `(ligand_resname, ligand_chain, ligand_resseq)` rather than trusting pdb2pqr's own `--ligand` atom-name matching, which has no residue-identity check and can silently mismatch a different HETATM residue with the same atom names. `ligand_atoms` gains a third value, `'charged'`, alongside `'present'`/`'absent'`: pdb2pqr can now give a selected ligand a real (PEOE) nonzero charge, which the old Gasteiger-on-XYZ path never could — extending the existing field keeps KTD3's "one field, one concept" rule rather than adding a second orthogonal knob. The XYZ+Gasteiger path (`protein_format='xyz'`, still the default) is unchanged.
 
 ## High-Level Technical Design
 

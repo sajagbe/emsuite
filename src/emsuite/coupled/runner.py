@@ -2,9 +2,7 @@
 
 from __future__ import annotations
 
-from pathlib import Path
-
-from emsuite.config import parse_assignments, parse_config_file
+from emsuite.config import parse_config_file
 from emsuite.config.schemas import validate_coupled_params
 from emsuite.results import CoupledResult
 
@@ -33,6 +31,7 @@ COUPLED_DEFAULTS = {
     "ligand": None,
     "protein": None,
     "ligand_atoms": "present",
+    "potential_surf": None,
 }
 
 

@@ -9,19 +9,24 @@ All notable changes to this project are documented in this file.
 - `Geometry.from_xyz` and `PotentialResult.to_surf()`.
 - `SurfaceResult.to_xyz()` (pseudo-atom point cloud) and `SurfaceResult.to_mol2()` (pseudo-atoms with `values` in the charge column), plus `surface.io.save_mol2()`, for visualizing a `.surf` in a molecular viewer.
 - Protein/ligand APBS occupancy: `ligand_atoms='present'` (ligand in PQR at q=0) vs `'absent'` (ligand omitted). Box always spans protein and ligand coordinates.
+- `PotentialInput.protein_format='pdb'`: convert a real PDB via `pdb2pqr` (AMBER/CHARMM/PARSE/etc. force-field charges + propka pH-dependent protonation) instead of Gasteiger-on-XYZ. New `ligand_resname`/`ligand_chain`/`ligand_resseq` select the ligand residue explicitly (not via pdb2pqr's own atom-name-matching `--ligand`, which has no residue-identity check and can collide with other HETATM residues). `ligand_atoms` gains a third value, `'charged'` — pdb2pqr's own real (PEOE) nonzero ligand charge, alongside existing `'present'` (charge zeroed) / `'absent'` (excluded). New `potential/pdb2pqr_runner.py`, `potential/pdb_select.py`, and `potential.pqr.{read_pqr_coords,zero_ligand_charges}`.
+- `PotentialResult.to_mol2()`, mirroring `SurfaceResult.to_mol2()`.
+- `CoupledInput.potential_surf`: reuse an already-produced potential `.surf` directly for tuning (`calc_type='separate'`/`'combined'`) instead of always recomputing potential.
 
 ### Fixed
 - APBS input template was missing the required `bcfl` and `sdens` keywords, so every real APBS run failed with `PBEparm_check` errors; the potential and coupled channels could not previously complete a run against a real APBS binary. Added `bcfl mdh` and `sdens 10.0`.
 - `partial_charges_from_xyz` computed Gasteiger charges on a bond-free RDKit molecule (`Chem.MolFromXYZFile` doesn't perceive bonds from 3D coordinates), so charges didn't propagate across the molecule and didn't sum to the formal charge. Now calls `rdDetermineBonds.DetermineBonds()` first.
 - The potential channel's `charge` input was parsed and validated but never used; it's now passed through to Gasteiger charge assignment for the ligand.
 - `run_apbs_grids(workdir=...)` broke when given a relative path (`subprocess.run(cwd=work_path)` double-prefixed it) and didn't create the directory if missing. Now resolves to absolute and creates it.
+- `tuning/runner.py`'s `if __name__ == "__main__"` block still referenced `main`, from before this session's `main` → `run_tuning_calculation` rename.
 
 ### Changed
 - CLI and Python code both construct `*Input` objects (`.from_file()` or `.from_config(**kwargs)`) and call `.run()`.
 - `emsuite.tuning.runner.main` renamed to `run_tuning_calculation(config)`, matching `run_surface_calculation` / `run_potential_calculation` / `run_coupled_calculation`.
 - `run_coupled_calculation` now returns the `CoupledResult` instead of discarding it and returning `None`.
 - Coupled pipeline calls potential then tuning in memory (no throwaway `coupled_*.in` files).
-- Potential mapping is APBS only. Gasteiger remains the temporary charge helper for PQR writing.
+- Potential mapping is APBS only. Gasteiger remains the temporary charge helper for the XYZ path only (`protein_format='xyz'`, still the default); pdb2pqr is now the charge source for `protein_format='pdb'`.
+- New dependency `pdb2pqr>=3.7.1`. Downgraded the `docs` extra to `sphinx<7.0`/`myst-parser<2.0`: every `sphinx>=7.0` release requires `docutils>=0.18`, which is unconditionally incompatible with `pdb2pqr`'s `docutils<0.18` pin — not resolvable by adjusting either package's version range. The Sphinx docs site is separately slated for replacement, so this isn't load-bearing.
 
 ### Removed
 - Redundant post-merge key loops in `parse_potential_input` / `parse_coupled_input` — `parse_config_file(..., defaults=...)` already merges every default key from the parsed file; the extra loops were dead code re-applying the same assignment.
