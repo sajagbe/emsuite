@@ -350,9 +350,110 @@ Acceptance criteria:
 - No existing Sphinx file is removed during this proof step.
 - Runtime dependencies and tests remain unchanged.
 
+## Step 2 — Repository Zensical implementation (complete)
+
+Date: 2026-09-01
+
+Branch preparation:
+
+- The documentation branch was realigned on runtime commit `b3177b8`.
+- Planning commit `468aed3` was retained on `feat/zensical-docs`.
+- The pre-realignment branch tip remains available as
+  `archive/zensical-docs-pre-realign`.
+
+Implemented:
+
+- Replaced the incompatible Sphinx docs extra with `zensical==0.0.57` and
+  regenerated `uv.lock`.
+- Added `zensical.toml`, Calcflow-inspired theme configuration, navigation,
+  Geist typography, light/dark palettes, search, code-copy controls, and
+  repository metadata.
+- Added 17 public Markdown pages: Home, Quick Start, Concepts, five Guides,
+  six Reference pages, and three Developer pages.
+- Reused the existing Water animation at
+  `docs/assets/images/water-test.gif` and added focused site CSS.
+- Added `site/` to `.gitignore`.
+- Moved private engineering/session records to `internal-docs/` and preserved
+  the complete former Sphinx source under `internal-docs/legacy-sphinx/`.
+- Added `.github/workflows/docs.yml` for strict pull-request builds and GitHub
+  Pages deployment from `main`.
+
+Dependency and first strict-build command:
+
+```bash
+uv lock
+uv run --extra docs zensical build --clean --strict
+```
+
+The first repository build correctly failed strict mode with two broken links,
+both originating in private `ROADMAP.md` and `SESSION_HANDOFF.md` files that
+Zensical discovered under the public source directory. Moving those records to
+`internal-docs/` fixed the content boundary without deleting history.
+
+Final strict-build command:
+
+```bash
+uv run --extra docs zensical build --clean --strict
+```
+
+Result: **PASS**
+
+```text
+Build started
+No issues found
+Build finished in 0.39s
+```
+
+Generated-route and asset checks:
+
+```bash
+test -f site/index.html
+test -f site/quick-start/index.html
+test -f site/reference/python-api/index.html
+rg -n 'water-test.gif|lucide/atom' site/index.html
+```
+
+Result: all routes exist; the Water image resolves as
+`assets/images/water-test.gif`. An invalid icon-as-image logo override found
+during HTML inspection was removed before the final build.
+
+CLI verification command:
+
+```bash
+env -u PYTHONPATH uv run --project \
+  /Users/stephenajagbe/orca/emsuite emsuite --help
+```
+
+Result: **PASS** — the executable exposes the documented `-s/--surface`,
+`-p/--potential`, `-t/--tuning`, and `-c/--coupled` modes.
+
+Runtime regression command:
+
+```bash
+env -u PYTHONPATH uv run --extra dev pytest tests/unit tests/regression -q
+```
+
+Result: **PASS**
+
+```text
+63 passed in 1.31s
+```
+
+Locked CI simulation:
+
+```bash
+uv sync --extra docs --locked
+uv run --extra docs zensical build --clean --strict
+```
+
+Result: **PASS** — lock resolution completed without changes and the strict
+build reported no issues in 0.42 seconds.
+
+Parallel-work safeguard: edits present in `src/emsuite/config/schemas.py` and
+`src/emsuite/potential/runner.py` were not made by this documentation work and
+must remain outside the documentation commit.
+
 ## Next action
 
-Complete Step 2 by replacing the broken Sphinx `docs` dependency group with
-`zensical==0.0.57`, adding the repository site skeleton, updating `uv.lock`, and
-running the strict build. Do not migrate all pages or delete the Sphinx sources
-until the repository-local proof passes.
+Inspect the deployed GitHub Pages result after this branch is merged to `main`,
+then expand scientific examples with additional validated output captures.

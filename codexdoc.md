@@ -136,8 +136,8 @@ surface:
 
 - `SurfaceInput`, `PotentialInput`, `TuningInput`, `CoupledInput`;
 - `SurfaceResult`, `PotentialResult`, `TuningResult`, `CoupledResult`;
-- `Geometry`;
-- `api.surface`, `api.potential`, `api.tune`, and `api.coupled`;
+- `run_surface_calculation`, `run_potential_calculation`,
+  `run_tuning_calculation`, and `run_coupled_calculation`;
 - `emsuite -s`, `-p`, `-t`, and `-c`;
 - `.from_file()`, `.from_mapping()`, `.from_config()`, `.to_dict()`, `.run()`,
   and `.to_surf()` where applicable.

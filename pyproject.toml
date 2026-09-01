@@ -29,8 +29,7 @@ gpu = [
     "cutensor-cu12==2.0.2",
 ]
 docs = [
-    "sphinx<7.0",
-    "myst-parser<2.0",
+    "zensical==0.0.57",
 ]
 
 [project.scripts]
