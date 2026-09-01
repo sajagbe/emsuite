@@ -117,7 +117,8 @@ def run_apbs_grids(
         tmp = tempfile.TemporaryDirectory()
         work_path = Path(tmp.name)
     else:
-        work_path = Path(workdir)
+        work_path = Path(workdir).resolve()
+        work_path.mkdir(parents=True, exist_ok=True)
         tmp = None
 
     try:

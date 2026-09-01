@@ -14,6 +14,7 @@ All notable changes to this project are documented in this file.
 - APBS input template was missing the required `bcfl` and `sdens` keywords, so every real APBS run failed with `PBEparm_check` errors; the potential and coupled channels could not previously complete a run against a real APBS binary. Added `bcfl mdh` and `sdens 10.0`.
 - `partial_charges_from_xyz` computed Gasteiger charges on a bond-free RDKit molecule (`Chem.MolFromXYZFile` doesn't perceive bonds from 3D coordinates), so charges didn't propagate across the molecule and didn't sum to the formal charge. Now calls `rdDetermineBonds.DetermineBonds()` first.
 - The potential channel's `charge` input was parsed and validated but never used; it's now passed through to Gasteiger charge assignment for the ligand.
+- `run_apbs_grids(workdir=...)` broke when given a relative path (`subprocess.run(cwd=work_path)` double-prefixed it) and didn't create the directory if missing. Now resolves to absolute and creates it.
 
 ### Changed
 - CLI and Python code both construct `*Input` objects (`.from_file()` or `.from_config(**kwargs)`) and call `.run()`.
