@@ -1,0 +1,21 @@
+# Water GPU tuning — quick smoke (homo/lumo/gap, ~30 surface points)
+# Prerequisite: emsuite -s surface.in
+# Run: emsuite -t tuning_smoke.in
+
+molecule = 'Water.xyz'
+surface_file = 'Water.surf'
+
+charge = 0
+spin = 0
+basis_set = '6-31G*'
+method = 'dft'
+functional = 'b3lyp'
+solvent = None
+
+calc_type = 'separate'
+properties = ['homo', 'lumo', 'gap']
+state_of_interest = 1
+triplet = False
+
+parallel = True
+num_procs = 1

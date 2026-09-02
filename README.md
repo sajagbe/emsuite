@@ -1,6 +1,7 @@
 # EMSuite - Electrostatic Map Suite
 
-A comprehensive Python package for calculating electrostatic tuning effects on molecular properties using quantum mechanical methods.
+A Python package for electrostatic tuning maps, APBS potential surfaces, and coupled
+potential→tuning workflows on molecular systems.
 
 
 ![Water molecule tuning example](docs/_static/water-test.gif)
@@ -11,325 +12,484 @@ A comprehensive Python package for calculating electrostatic tuning effects on m
 
 ## Overview
 
-EMSuite is aimed at qualifying and quantifying the influence of external electrostatic fields on electronic structure and corresponding chemistry. The suite provides four channels: **surface** generation, **tuning** maps for molecular properties, **potential** maps on surfaces, and a **coupled** potential→tuning pipeline. The tuning module extends the electrostatic spectral tuning approach ([Gozem et al., 2019](https://pubs.acs.org/doi/10.1021/acs.jpcb.9b00489)) to a core set of electronic properties.
+EMSuite qualifies and quantifies how external electrostatic environments shift
+electronic structure. Four channels work together:
 
-## Features
+| Channel | CLI | Role |
+|---------|-----|------|
+| **Surface** | `emsuite -s surface.in` | Build a VDW surface (`.surf`) from SMILES or XYZ |
+| **Tuning** | `emsuite -t tuning.in` | QM/MM tuning maps for molecular properties |
+| **Potential** | `emsuite -p potential.in` | APBS φ or Gauss-law charges on a surface |
+| **Coupled** | `emsuite -c coupled.in` | Potential map → tuning in one run |
 
-- **Four-Channel Workflow**: Surface → tuning; or potential → coupled → tuning
-- **Multiple Input Formats**: Support for SMILES strings (with automatic optimization) and XYZ coordinate files
-- **Comprehensive Property Calculations**: Ground state, orbital, thermodynamic, reactivity, and excited-state properties
-- **GPU Acceleration**: Full GPU support via GPU4PySCF for enhanced computational speed (CPU fallback immediately available).
-- **Implicit Solvation**: Built-in support for solvent effects using the PCM model.
-- **Visualization Output**: Raw and normalized MOL2 files for 3D visualization, plus CSV summaries.
-- **Resume Support**: Interrupted tuning runs can be resumed from log metadata.
+The tuning channel extends the electrostatic spectral tuning approach
+([Gozem et al., 2019](https://pubs.acs.org/doi/10.1021/acs.jpcb.9b00489)).
 
 ## Installation
 
 ```bash
-
-#CPU Installation
-pip install emsuite
-
-#GPU Installation
-pip install emsuite[gpu]
-
+pip install emsuite          # CPU
+pip install emsuite[gpu]     # CPU + GPU4PySCF + CuPy (CUDA 12.x)
 ```
 
-EMSuite automatically detects available hardware and uses GPU acceleration when available, falling back to CPU mode otherwise.
+EMSuite detects GPUs automatically and falls back to CPU when none are available.
 
-## Command-Line Interface
+---
 
-EMSuite exposes four mutually exclusive workflows:
+## Command-line interface
+
+The CLI is the primary interface. Every workflow is driven by a **`.in` file**
+(a Python-syntax assignment list). Copy a template from `examples/templates/`,
+edit paths and parameters, then run one command.
 
 ```bash
-emsuite -s surface.in      # VDW surface generation
-emsuite -t tuning.in       # Electrostatic tuning maps
-emsuite -p potential.in    # Electrostatic potential on surface
-emsuite -c coupled.in      # Potential → tuning pipeline
+emsuite -s surface.in      # generate VDW surface
+emsuite -t tuning.in         # electrostatic tuning maps
+emsuite -p potential.in      # APBS potential / Gauss-law charge map
+emsuite -c coupled.in        # potential → tuning pipeline
+emsuite --help
 ```
 
-- `-s, --surface INPUT_FILE`: Generate a `.surf` file from SMILES or XYZ input.
-- `-t, --tuning INPUT_FILE`: Run electrostatic tuning using an XYZ structure and `.surf` file.
-- `-p, --potential INPUT_FILE`: Map APBS potential or Gauss-law charge onto a VDW surface.
-- `-c, --coupled INPUT_FILE`: Run potential mapping, then tuning with the heterogeneous surface.
+| Flag | Channel | Input |
+|------|---------|-------|
+| `-s`, `--surface` | Surface | `surface.in` |
+| `-t`, `--tuning` | Tuning | `tuning.in` |
+| `-p`, `--potential` | Potential | `potential.in` |
+| `-c`, `--coupled` | Coupled | `coupled.in` |
 
-## Python API
+### Typical workflows
 
-Every channel is a frozen dataclass — `SurfaceInput`, `TuningInput`,
-`PotentialInput`, `CoupledInput` — built once and run:
+**A. Homogeneous probe charge (SMILES → surface → tuning)**
 
-```python
-from emsuite import SurfaceInput, TuningInput, PotentialInput, CoupledInput
-
-SurfaceInput.from_config(input_type="SMILES", input_data="CCO", output_surf="CCO.surf").run()
-TuningInput.from_config(molecule="CCO.xyz", surface_file="CCO.surf", properties=["homo", "gap"]).run()
-PotentialInput.from_config(molecule="CCO.xyz", quantity="potential").run()
-CoupledInput.from_config(molecule="CCO.xyz", properties=["homo", "lumo"]).run()
-
-# Ligand in a protein field (surface from the ligand; charges from the protein):
-PotentialInput.from_config(
-    ligand="ligand.xyz",
-    protein="protein.xyz",
-    ligand_atoms="present",   # ligand in the PQR at q=0 (cavity)
-    quantity="charge",
-).run()
-PotentialInput.from_config(
-    ligand="ligand.xyz",
-    protein="protein.xyz",
-    ligand_atoms="absent",    # ligand omitted from the PQR
-    quantity="charge",
-).run()
+```text
+SMILES/XYZ  ──►  emsuite -s surface.in  ──►  molecule.surf + molecule.xyz
+                                                      │
+                                                      ▼
+                                            emsuite -t tuning.in
+                                                      │
+                                                      ▼
+                                            results_{molecule}_{timestamp}/
 ```
 
-`from_config` also accepts `config=` (a `.in` file path **or** a dict), and
-explicit keyword arguments override values loaded from `config`:
+**B. Protein field (potential → coupled tuning)**
 
-```python
-TuningInput.from_config(config="tuning.in").run()                 # load a file
-TuningInput.from_config(config="tuning.in", parallel=False).run() # load a file, override one value
-TuningInput.from_config(config={"molecule": "m.xyz", "surface_file": "m.surf"}).run()  # pass a dict
+```text
+ligand.xyz + protein.pdb  ──►  emsuite -c coupled.in
+                                        │
+                    APBS Gauss-law charges on ligand VDW
+                                        │
+                                        ▼
+                              tuning maps on heterogeneous .surf
 ```
 
-Or build from a file directly with `from_file`, which is what the CLI does:
+**C. Potential only (inspect φ or charges before tuning)**
 
-```python
-import emsuite
-
-emsuite.SurfaceInput.from_file("surface.in").run()
-emsuite.TuningInput.from_file("tuning.in").run()
-emsuite.PotentialInput.from_file("potential.in").run()
-emsuite.CoupledInput.from_file("coupled.in").run()
-
-# Or call the underlying calculation function directly with a file path:
-emsuite.run_surface_calculation("surface.in")
-emsuite.run_tuning_calculation("tuning.in")
-emsuite.run_potential_calculation("potential.in")
-emsuite.run_coupled_calculation("coupled.in")
+```text
+molecule.xyz  ──►  emsuite -p potential.in  ──►  potential.surf (+ .csv)
 ```
 
-Templates live in `examples/templates/`.
+---
 
-## Quick Start
+### Tutorial 1 — Water from SMILES (GPU tuning)
 
-1. **Create and run surface generation input** (`surface.in`):
+A complete worked example lives in `examples/water-gpu/`.
+
+**Step 1 — `surface.in`**
 
 ```python
-input_type = 'SMILES'      # 'SMILES' or 'XYZ'
-input_data = 'CCO'         # SMILES string or XYZ path
+input_type = 'SMILES'
+input_data = 'O'
+
+output_surf = 'Water.surf'
+optimized_xyz = 'Water.xyz'
 
 surface_density = 1.0
-surface_scale = 1.0
 surface_type = 'homogenous'
-surface_charge = 0.10
-output_surf = 'CCO.surf'
+surface_charge = 0.10          # uniform +0.10 e probe on every point
 
 optimize = True
-optimize_method = 'uff'    # 'mmff', 'uff', or 'pyscf'
-optimized_xyz = 'CCO_opt.xyz'
+optimize_method = 'uff'
 ```
 
 ```bash
 emsuite -s surface.in
 ```
 
-2. **Create and run tuning input** (`tuning.in`):
+Produces `Water.xyz` (UFF geometry) and `Water.surf` (~30 VDW points).
+
+**Step 2 — `tuning.in`**
 
 ```python
-molecule = 'CCO_opt.xyz'
-surface_file = 'CCO.surf'
+molecule = 'Water.xyz'
+surface_file = 'Water.surf'
 
-charge = 0
-spin = 0
 basis_set = '6-31G*'
 method = 'dft'
 functional = 'b3lyp'
+charge = 0
+spin = 0
 solvent = None
 
-calc_type = 'separate'     # 'separate' or 'combined'
-properties = ['exe']
+calc_type = 'separate'         # one QM/MM calc per surface point
+properties = ['homo', 'lumo', 'gap']
 state_of_interest = 1
 triplet = False
 
-parallel = True
-num_procs = None           # Auto-detect if None
+parallel = True                # Ray + GPU when available
+num_procs = 1                  # one GPU worker (set to match --gres=gpu:N)
 ```
 
 ```bash
 emsuite -t tuning.in
 ```
 
-## Available Properties
+On a SLURM cluster, run from `examples/water-gpu/`:
 
-The following molecular properties can be calculated:
+```bash
+./run_gpu.sh              # smoke (CLI)
+./run_gpu.sh --full       # full property set (see tuning.in in that folder)
+```
 
-| Property | Description | Units |
-|----------|-------------|-------|
-| `'gse'` | Ground state energy | kcal/mol |
-| `'homo'` | HOMO energy | eV |
-| `'lumo'` | LUMO energy | eV |
-| `'gap'` | HOMO-LUMO gap | eV |
-| `'dm'` | Dipole moment magnitude | Debye |
-| `'ie'` | Ionization energy | kcal/mol |
-| `'ea'` | Electron affinity | kcal/mol |
-| `'cp'` | Chemical potential | kcal/mol |
-| `'eng'` | Electronegativity | eV |
-| `'hard'` | Chemical hardness | eV |
-| `'efl'` | Electrophilicity | eV |
-| `'nfl'` | Nucleophilicity | eV |
-| `'spin'` | Spin magnitude | dimensionless |
-| `'fukui_plus'` | Nucleophilic Fukui index | eV |
-| `'fukui_minus'` | Electrophilic Fukui index | eV |
-| `'exe'` | Excitation energies | eV |
-| `'osc'` | Oscillator strengths | dimensionless |
+---
 
-Use `'all'` to calculate all available properties.
+### Tutorial 2 — Ethanol excited-state tuning
 
-## Input File Reference
+**`surface.in`**
 
-### surface.in (`emsuite -s surface.in`)
-
-Required keys:
-- `input_type`: `'SMILES'` or `'XYZ'`
-- `input_data`: SMILES string or XYZ file path
-
-Optional keys and defaults:
-- `output_surf = 'surface.surf'`
-- `optimized_xyz = None`
-- `surface_density = 1.0`
-- `surface_scale = 1.0`
-- `surface_type = 'homogenous'`
-- `surface_charge = 0.10`
-- `optimize = None` (auto behavior: optimize for SMILES, do not optimize for XYZ)
-- `optimize_method = 'mmff'` (`'mmff'`, `'uff'`, `'pyscf'`)
-- `method = 'dft'`
-- `basis_set = '6-31G*'`
-- `functional = 'b3lyp'`
-- `solvent = None`
-- `charge = 0`
-- `spin = 0`
-
-Notes:
-- If `input_type = 'XYZ'`, geometry optimization is only supported with `optimize_method = 'pyscf'`.
-- `surface_type = 'heterogenous'` writes zero-valued placeholder charges for manual editing.
-
-### tuning.in (`emsuite -t tuning.in`)
-
-Required keys:
-- `molecule` or `xyz_file`: Path to XYZ file
-- `surface_file`: Path to `.surf` file
-
-Optional keys and defaults:
-- `basis_set = '6-31G*'`
-- `method = 'dft'`
-- `functional = 'b3lyp'`
-- `charge = 0`
-- `spin = 0`
-- `solvent = None`
-- `calc_type = 'separate'` (`'separate'` or `'combined'`)
-- `properties = ['all']`
-- `state_of_interest = 2`
-- `triplet = False`
-- `parallel = True`
-- `num_procs = None` (auto-detect CPU/GPU worker count)
-
-### potential.in (`emsuite -p potential.in`)
-
-Required keys:
-- `molecule` or `ligand`: Path to the ligand (or standalone molecule) XYZ
-
-Optional keys and defaults:
-- `protein = None` (protein XYZ; when set, APBS charges come from the protein only)
-- `ligand_atoms = 'present'` (`'present'` = ligand atoms in the PQR at charge 0; `'absent'` = ligand omitted from the PQR)
-- `surface_file = None` (generate ligand VDW surface if missing)
-- `output_surf = 'potential.surf'`
-- `surface_density = 0.5`
-- `surface_scale = 1.0`
-- `method = 'apbs'` (ESP/MEP via PySCF planned)
-- `quantity = 'potential'` (`'potential'` or `'charge'`). `'charge'` is Gauss-law conversion
-- `pdie = 2.0`
-- `sdie = 78.54`
-
-The `.surf` fourth column is interpolated APBS potential when `quantity='potential'`, or Gauss-law charge (e) when `quantity='charge'`.
-
-When `protein` is set, the APBS box is sized from protein **and** ligand coordinates even if `ligand_atoms='absent'`, so a pocket ligand is not clipped. Compare `present` vs `absent` with both quantities, then tune the ligand on the charge surfaces.
-
-### coupled.in (`emsuite -c coupled.in`)
-
-Combines potential and tuning parameters. Required: `molecule` (or `ligand`), `properties`.
-Defaults to APBS Gauss-law surface charges (`potential_method='apbs'`, `potential_quantity='charge'`), then runs tuning on the ligand. Same `protein` / `ligand_atoms` occupancy flags as potential.
-See `examples/templates/coupled.in` for a minimal example.
-
-### Methods and Basis Sets
-- **Methods**: `'dft'`, `'hf'`
-- **Functionals**: See `method-info/functionals.csv` on GitHub for complete list
-- **Basis Sets**: See `method-info/basis-sets/` on GitHub for available options
-- **Solvents**: See `method-info/solvents/` on GitHub for available solvents
-
-## Output Files
-
-For each tuning run, EMSuite creates a timestamped results directory:
-
-- `results_{molecule_name}_{timestamp}/`
-
-Typical contents:
-
-1. **Raw MOL2 files**: `{molecule_name}_{property}.mol2`
-2. **Normalized MOL2 files**: `{molecule_name}_{property}_normalized.mol2`
-3. **CSV summary**: `{molecule_name}_tuning_summary.csv`
-4. **Logs directory**: `logs/` containing point logs, summary output, and `.resume_metadata.json`
-5. **Run summary file**: `README.txt`
-
-
-## Example Usage
-
-### Example A: Generate surface from SMILES (CCO)
 ```python
 input_type = 'SMILES'
 input_data = 'CCO'
-surface_density = 1.0
-surface_scale = 1.0
-surface_type = 'homogenous'
-surface_charge = 0.1
-output_surf = 'CCO2.surf'
+output_surf = 'CCO.surf'
+optimized_xyz = 'CCO.xyz'
+surface_charge = 0.10
 optimize = True
 optimize_method = 'uff'
-optimized_xyz = 'CCO_opt2.xyz'
 ```
 
-### Example B: Run tuning on generated files
+**`tuning.in`**
+
 ```python
-molecule = 'CCO_opt2.xyz'
-surface_file = 'CCO2.surf'
-basis_set = '6-31G*'
-method = 'dft'
-functional = 'b3lyp'
-properties = ['exe']
+molecule = 'CCO.xyz'
+surface_file = 'CCO.surf'
+properties = ['exe', 'osc']
+state_of_interest = 1
+triplet = False
 calc_type = 'separate'
 parallel = True
-num_procs = 16
 ```
 
-### Example C: Excited-state analysis
+```bash
+emsuite -s surface.in
+emsuite -t tuning.in
+```
+
+Sample inputs and outputs: `examples/tuning/CCO2-exe/`.
+
+---
+
+### Tutorial 3 — Ligand in a protein field (coupled)
+
+Use when the electrostatic environment comes from a macromolecule and you want
+Gauss-law surface charges feeding tuning.
+
+**`coupled.in`**
+
 ```python
-molecule = 'molecule.xyz'
-surface_file = 'molecule.surf'
-properties = ['exe', 'osc']
-state_of_interest = 5
-triplet = True
+molecule = 'ligand.xyz'        # ligand geometry; VDW surface is built on this
+
+protein = 'complex.pdb'
+protein_format = 'pdb'
+ligand_resname = 'LIG'
+ligand_atoms = 'present'       # 'present' | 'absent' | 'charged'
+ligand_mol2 = 'ligand.mol2'    # required for present/charged with PDB protein
+
+output_surf = 'coupled.surf'
+potential_method = 'apbs'
+potential_quantity = 'charge'  # Gauss-law q (e) at each surface point
+
+properties = ['homo', 'lumo', 'gap']
+basis_set = '6-31G*'
+calc_type = 'separate'
+parallel = True
+num_procs = 1
 ```
 
-Sample inputs and outputs for tuning runs are available in `examples/tuning/CCO2-exe/`.
+```bash
+emsuite -c coupled.in
+```
+
+To run potential and tuning separately instead:
+
+```bash
+emsuite -p potential.in      # writes heterogeneous potential.surf
+# edit tuning.in to point surface_file at that .surf
+emsuite -t tuning.in
+```
+
+Reuse a precomputed potential surface in coupled mode (skip APBS on repeat runs):
+
+```python
+potential_surf = 'precomputed.surf'   # skips potential channel entirely
+```
+
+---
+
+### Tutorial 4 — Potential map only
+
+**`potential.in`**
+
+```python
+molecule = 'ligand.xyz'
+surface_file = None            # auto-generate ligand VDW if omitted
+output_surf = 'potential.surf'
+method = 'apbs'
+quantity = 'potential'         # 'potential' = interpolated φ; 'charge' = Gauss-law q
+
+# Optional protein field (XYZ Gasteiger or PDB via pdb2pqr):
+# protein = 'protein.xyz'
+# ligand_atoms = 'absent'
+
+pdie = 2.0
+sdie = 78.54
+```
+
+```bash
+emsuite -p potential.in
+```
+
+The `.surf` fourth column holds APBS potential (when `quantity='potential'`) or
+Gauss-law charge in *e* (when `quantity='charge'`). A companion `.csv` is written
+alongside the `.surf` file.
+
+---
+
+## Input file reference
+
+Templates with comments: `examples/templates/{surface,tuning,potential,coupled}.in`.
+
+### `surface.in` — `emsuite -s`
+
+| Key | Default | Description |
+|-----|---------|-------------|
+| `input_type` | *(required)* | `'SMILES'` or `'XYZ'` |
+| `input_data` | *(required)* | SMILES string or path to XYZ |
+| `output_surf` | `'surface.surf'` | Output `.surf` path |
+| `optimized_xyz` | auto | Path for optimized geometry |
+| `surface_density` | `1.0` | Points per Å² |
+| `surface_scale` | `1.0` | VDW radii scale factor |
+| `surface_type` | `'homogenous'` | `'homogenous'` or `'heterogenous'` |
+| `surface_charge` | `0.10` | Uniform charge (homogenous only) |
+| `optimize` | auto | `True` for SMILES, `False` for XYZ |
+| `optimize_method` | `'mmff'` | `'mmff'`, `'uff'`, or `'pyscf'` |
+| `method`, `basis_set`, `functional` | DFT defaults | Used when `optimize_method='pyscf'` |
+| `charge`, `spin` | `0`, `0` | Molecular charge and 2S spin |
+| `solvent` | `None` | PCM solvent name or `None` |
+
+`heterogenous` writes zero charges as placeholders for hand-editing.
+
+### `tuning.in` — `emsuite -t`
+
+| Key | Default | Description |
+|-----|---------|-------------|
+| `molecule` | *(required)* | Path to XYZ geometry |
+| `surface_file` | *(required)* | Path to `.surf` file |
+| `properties` | `['all']` | Property codes (see table below) |
+| `basis_set` | `'6-31G*'` | Basis set |
+| `method` | `'dft'` | `'dft'` or `'hf'` |
+| `functional` | `'b3lyp'` | XC functional (DFT only) |
+| `charge`, `spin` | `0`, `0` | Molecular charge and 2S spin |
+| `solvent` | `None` | PCM solvent |
+| `calc_type` | `'separate'` | `'separate'` (per-point) or `'combined'` |
+| `state_of_interest` | `2` | TD states (for `exe`/`osc`) |
+| `triplet` | `False` | Triplet TD states |
+| `parallel` | `True` | Ray parallel workers |
+| `num_procs` | `None` | Worker count (`None` = auto-detect GPUs/CPUs) |
+
+Interrupted runs resume from `logs_*/.resume_metadata.json` when parameters match.
+
+### `potential.in` — `emsuite -p`
+
+| Key | Default | Description |
+|-----|---------|-------------|
+| `molecule` | *(required)* | Ligand / molecule XYZ (`ligand` alias) |
+| `protein` | `None` | Protein XYZ or PDB for the external field |
+| `protein_format` | `'xyz'` | `'xyz'` (Gasteiger) or `'pdb'` (pdb2pqr) |
+| `ligand_atoms` | `'present'` | `'present'`, `'absent'`, or `'charged'` (PDB only) |
+| `ligand_resname` | `None` | HETATM residue name (PDB) |
+| `ligand_mol2` | `None` | Ligand MOL2 for pdb2pqr occupancy |
+| `forcefield` | `'AMBER'` | pdb2pqr force field |
+| `ph` | `7.0` | pdb2pqr protonation pH (`None` to disable) |
+| `surface_file` | `None` | Existing VDW surface; generated if omitted |
+| `output_surf` | `'potential.surf'` | Output heterogeneous `.surf` |
+| `surface_density` | `0.5` | VDW density when generating surface |
+| `method` | `'apbs'` | APBS Poisson–Boltzmann |
+| `quantity` | `'potential'` | `'potential'` or `'charge'` (Gauss-law) |
+| `pdie`, `sdie` | `2.0`, `78.54` | APBS dielectric constants |
+
+When `protein` is set, the APBS box spans protein **and** ligand coordinates so a
+pocket ligand is not clipped.
+
+### `coupled.in` — `emsuite -c`
+
+Accepts all **potential** keys (prefixed `potential_` where needed) plus all
+**tuning** keys. Notable defaults:
+
+| Key | Default | Description |
+|-----|---------|-------------|
+| `potential_method` | `'apbs'` | Potential backend |
+| `potential_quantity` | `'charge'` | Gauss-law charges for tuning |
+| `potential_surf` | `None` | Skip potential step; reuse this `.surf` |
+| `calc_type` | `'separate'` | Tuning mode |
+| `parallel` | `False` | Parallel tuning (set `True` on GPU) |
+
+---
+
+## Available tuning properties
+
+| Property | Description | Units |
+|----------|-------------|-------|
+| `gse` | Ground state energy | kcal/mol |
+| `homo` | HOMO energy | eV |
+| `lumo` | LUMO energy | eV |
+| `gap` | HOMO–LUMO gap | eV |
+| `dm` | Dipole moment magnitude | Debye |
+| `spin` | Spin magnitude | dimensionless |
+| `ie` | Ionization energy | kcal/mol |
+| `ea` | Electron affinity | kcal/mol |
+| `cp` | Chemical potential | kcal/mol |
+| `eng` | Electronegativity | eV |
+| `hard` | Chemical hardness | eV |
+| `efl` | Electrophilicity | eV |
+| `nfl` | Nucleophilicity | eV |
+| `fukui_plus` | Nucleophilic Fukui index | eV |
+| `fukui_minus` | Electrophilic Fukui index | eV |
+| `exe` | Excitation energies | eV |
+| `osc` | Oscillator strengths | dimensionless |
+
+Use `properties = ['all']` for the full registry. Dependencies (e.g. `gap` pulls
+in `homo` and `lumo`) are resolved automatically.
+
+---
+
+## Output
+
+### Tuning (`emsuite -t` / coupled tuning step)
+
+```
+results_{molecule}_{timestamp}/
+├── {molecule}_tuning_summary.csv
+├── {molecule}_{property}.mol2
+├── {molecule}_{property}_normalized.mol2
+├── logs/
+│   ├── calculation_summary.out
+│   ├── .resume_metadata.json
+│   └── point_*.log
+└── README.txt
+```
+
+### Potential (`emsuite -p` / coupled potential step)
+
+```
+potential.surf          # heterogeneous x, y, z, value
+potential.csv           # same data, tabular
+```
+
+### Surface (`emsuite -s`)
+
+```
+molecule.surf           # x, y, z, q
+molecule.xyz            # optimized geometry (when optimize=True)
+```
+
+---
+
+## Python API
+
+The CLI is a thin wrapper around frozen input dataclasses. Every `.in` file maps
+to `from_file()`; every key maps to `from_config(**kwargs)`.
+
+```python
+from emsuite import SurfaceInput, TuningInput, PotentialInput, CoupledInput
+
+# Equivalent to: emsuite -s surface.in
+SurfaceInput.from_file("surface.in").run()
+
+# Equivalent to: emsuite -t tuning.in
+TuningInput.from_file("tuning.in").run()
+
+# Build inline (no .in file):
+surf = SurfaceInput.from_config(
+    input_type="SMILES", input_data="O",
+    output_surf="Water.surf", optimized_xyz="Water.xyz",
+    surface_charge=0.10,
+).run()
+
+TuningInput.from_config(
+    molecule="Water.xyz",
+    surface_file=surf.path,
+    properties=["homo", "lumo", "gap"],
+    parallel=True,
+    num_procs=1,
+).run()
+```
+
+`from_config` accepts `config=` (path or dict) with keyword overrides:
+
+```python
+TuningInput.from_config(config="tuning.in", parallel=False).run()
+```
+
+Lower-level runners (same calculations, no result objects):
+
+```python
+import emsuite
+
+emsuite.run_surface_calculation("surface.in")
+emsuite.run_tuning_calculation("tuning.in")
+emsuite.run_potential_calculation("potential.in")
+emsuite.run_coupled_calculation("coupled.in")
+```
+
+See `examples/water-gpu/run_api.py` for a full SMILES→tuning script.
+
+---
+
+## GPU notes
+
+- Install with `pip install emsuite[gpu]` on the compute node (or in your job env).
+- Set `parallel = True` and `num_procs` to the number of GPUs allocated.
+- Verify: `python -c "import gpu4pyscf.dft; from emsuite.core import check_gpu_info; print(check_gpu_info())"`
+- Integration tests: `scripts/run_gpu_integration.sh`
+- Water benchmark: `examples/water-gpu/run_gpu.sh`
+
+If `gpu4pyscf` import fails after install, reinstall cleanly:
+
+```bash
+pip uninstall -y gpu4pyscf-cuda12x gpu4pyscf-libxc-cuda12x gpu4pyscf-libxc-cuda11x
+rm -rf ~/.local/lib/python*/site-packages/gpu4pyscf
+pip install --no-cache-dir 'gpu4pyscf-cuda12x==1.4.3'
+```
+
+---
+
+## Examples
+
+| Path | Contents |
+|------|----------|
+| `examples/templates/` | Annotated `.in` templates for all four channels |
+| `examples/water-gpu/` | SMILES water → GPU tuning (CLI + Python) |
+| `examples/tuning/CCO2-exe/` | Ethanol `exe` tuning sample outputs |
+
+---
 
 ## Citation
-
-If you use EMSuite in your research, please cite:
 
 > Gozem, S., et al. "Electrostatic Tuning of Molecular Properties" *J. Phys. Chem. B* **2019**, DOI: [10.1021/acs.jpcb.9b00489](https://pubs.acs.org/doi/10.1021/acs.jpcb.9b00489)
 
 ## License
 
-This project is licensed under the MIT License - see the LICENSE file for details.
+MIT License — see [LICENSE](LICENSE).
 
 ## Support
 
-For questions, bug reports, or feature requests, please open an issue on GitHub.
+Open an issue on GitHub for bugs and feature requests.

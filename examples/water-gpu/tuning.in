@@ -1,0 +1,21 @@
+# Water GPU tuning — full property set (matches CodexTest.md historical run)
+# Prerequisite: emsuite -s surface.in
+# Run: emsuite -t tuning.in
+
+molecule = 'Water.xyz'
+surface_file = 'Water.surf'
+
+charge = 0
+spin = 0
+basis_set = '6-31G*'
+method = 'dft'
+functional = 'b3lyp'
+solvent = None
+
+calc_type = 'separate'
+properties = ['gse', 'homo', 'lumo', 'gap', 'dm', 'ie', 'ea', 'cp', 'eng', 'hard', 'efl', 'nfl']
+state_of_interest = 1
+triplet = False
+
+parallel = True
+num_procs = 1

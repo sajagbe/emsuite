@@ -1,0 +1,16 @@
+# Water VDW surface from SMILES — GPU tuning workflow (step 1)
+# Run: emsuite -s surface.in
+
+input_type = 'SMILES'
+input_data = 'O'
+
+output_surf = 'Water.surf'
+optimized_xyz = 'Water.xyz'
+
+surface_density = 1.0
+surface_scale = 1.0
+surface_type = 'homogenous'
+surface_charge = 0.10
+
+optimize = True
+optimize_method = 'uff'
