@@ -103,6 +103,70 @@ else
 fi
 echo ""
 
+echo "--- Step 3b: workdir contract test ---"
+WORKDIR_STATUS=0
+SUBMIT_ALL="$SCRIPTS_DIR/submit_all.sh"
+if [[ -f "$SUBMIT_ALL" ]]; then
+    if grep -qE 'id=\$\(sbatch[[:space:]]+"\$script"' "$SUBMIT_ALL" \
+        || grep -qE 'id=\$\(sbatch[[:space:]]+"\$LF_PROTO_ROOT' "$SUBMIT_ALL"; then
+        echo "ERROR: $SUBMIT_ALL submits run.slurm by absolute path without cd to calc dir" >&2
+        echo "       SLURM_SUBMIT_DIR will be lf-proto root, not the calc subdir." >&2
+        echo "       Fix: (cd \"\$calc_dir\" && sbatch run.slurm)" >&2
+        WORKDIR_STATUS=1
+    else
+        echo "OK: submit_all.sh uses cd-to-calc-dir before sbatch"
+    fi
+else
+    echo "WARN: missing $SUBMIT_ALL"
+    WORKDIR_STATUS=1
+fi
+
+declare -a CALC_DIRS=(
+    prep
+    lf-homogeneous/singlet
+    lf-homogeneous/triplet
+)
+declare -A CALC_INPUT=(
+    [prep]=surface.in
+    [lf-homogeneous/singlet]=tuning.in
+    [lf-homogeneous/triplet]=tuning.in
+)
+declare -A CALC_SLURM=(
+    [prep]=run_surface.slurm
+)
+for sys in AT1 AT2 AS1 AS2 CR1 CR2; do
+    CALC_DIRS+=("lov-protein/potential/$sys" "lov-protein/coupled/$sys")
+    CALC_INPUT["lov-protein/potential/$sys"]=potential.in
+    CALC_INPUT["lov-protein/coupled/$sys"]=coupled.in
+done
+
+for rel_dir in "${CALC_DIRS[@]}"; do
+    calc_dir="$LF_PROTO_ROOT/$rel_dir"
+    input_file="${CALC_INPUT[$rel_dir]}"
+    slurm_base="${CALC_SLURM[$rel_dir]:-run.slurm}"
+    slurm="$calc_dir/$slurm_base"
+    if [[ ! -f "$calc_dir/$input_file" ]]; then
+        echo "ERROR: missing $calc_dir/$input_file" >&2
+        WORKDIR_STATUS=1
+        continue
+    fi
+    if [[ ! -f "$slurm" ]]; then
+        echo "ERROR: missing $slurm" >&2
+        WORKDIR_STATUS=1
+        continue
+    fi
+    if grep -qE 'SLURM_SUBMIT_DIR|#SBATCH --chdir=' "$slurm"; then
+        echo "OK: $rel_dir/$slurm_base has workdir guard, $input_file present"
+    else
+        echo "ERROR: $slurm missing workdir guard (cd SLURM_SUBMIT_DIR or #SBATCH --chdir=)" >&2
+        WORKDIR_STATUS=1
+    fi
+done
+echo ""
+echo "NOTE: sbatch --test-only validates partition/account/resources only;"
+echo "      it does NOT execute the script body and cannot catch wrong WorkDir."
+echo ""
+
 SMOKE_STATUS=0
 if [[ "$RUN_SMOKE" -eq 1 ]]; then
     echo "--- Step 4: smoke jobs via sbatch (--run-smoke) ---"
@@ -162,6 +226,6 @@ else
     echo "--- Step 4: smoke jobs skipped (pass --run-smoke to submit) ---"
 fi
 
-OVERALL=$(( INPUT_STATUS || PATH_STATUS || SLURM_STATUS || SMOKE_STATUS ))
+OVERALL=$(( INPUT_STATUS || PATH_STATUS || SLURM_STATUS || WORKDIR_STATUS || SMOKE_STATUS ))
 echo "=== validation complete (exit $OVERALL) ==="
 exit "$OVERALL"

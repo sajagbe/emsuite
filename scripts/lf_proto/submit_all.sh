@@ -93,14 +93,16 @@ if [[ -f "$LF_PROTO_ROOT/prep/LF.surf" ]]; then
     ln -sfn "$LF_PROTO_ROOT/prep/LF.surf" "$LF_PROTO_ROOT/lf-homogeneous/triplet/LF.surf"
 fi
 
-# Submit jobs
+# Submit jobs — must cd into each calc dir so SLURM_SUBMIT_DIR points at tuning.in / potential.in / coupled.in
 JOB_IDS=()
 submit() {
     local script="$1"
-    local id
-    id=$(sbatch "$script" | awk '{print $4}')
+    local calc_dir base id
+    calc_dir="$(dirname "$script")"
+    base="$(basename "$script")"
+    id=$(cd "$calc_dir" && sbatch "$base" | awk '{print $4}')
     JOB_IDS+=("$id")
-    echo "Submitted $script -> job $id"
+    echo "Submitted $calc_dir/$base -> job $id"
 }
 
 submit "$LF_PROTO_ROOT/lf-homogeneous/singlet/run.slurm"
