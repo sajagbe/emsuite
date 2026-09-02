@@ -7,6 +7,30 @@
 
 set -uo pipefail
 
+_wait_slurm_job() {
+    local job_id="$1"
+    local label="${2:-smoke}"
+    while squeue -j "$job_id" -h 2>/dev/null | grep -q .; do
+        sleep 15
+    done
+    local state batch_flag
+    state="$(sacct -j "$job_id" --format=State -n -P 2>/dev/null | head -1 | cut -d'|' -f1)"
+    state="${state:-UNKNOWN}"
+    batch_flag="$(sacct -j "$job_id" --format=BatchFlag -n -P 2>/dev/null | head -1 | cut -d'|' -f1)"
+    echo "$label job $job_id final state: $state (BatchFlag=${batch_flag:-?})"
+    if [[ "${batch_flag:-}" != "1" ]]; then
+        echo "ERROR: $label job $job_id was not submitted via sbatch" >&2
+        return 1
+    fi
+    case "$state" in
+        COMPLETED) return 0 ;;
+        *)
+            echo "ERROR: $label job $job_id did not complete successfully (state=$state)" >&2
+            return 1
+            ;;
+    esac
+}
+
 _SCRIPTS_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 if [[ "$(basename "$_SCRIPTS_DIR")" == scripts ]]; then
     LF_PROTO_ROOT="${LF_PROTO_ROOT:-$(cd "$_SCRIPTS_DIR/.." && pwd)}"
@@ -46,9 +70,10 @@ python3 "$SCRIPTS_DIR/check_paths.py" "$LF_PROTO_ROOT"
 PATH_STATUS=$?
 echo ""
 
-echo "--- Step 3: sbatch --test-only on production run.slurm ---"
+echo "--- Step 3: sbatch --test-only on SLURM scripts ---"
 SLURM_STATUS=0
 RUN_SLURMS=(
+    "$LF_PROTO_ROOT/prep/run_surface.slurm"
     "$LF_PROTO_ROOT/lf-homogeneous/singlet/run.slurm"
     "$LF_PROTO_ROOT/lf-homogeneous/triplet/run.slurm"
 )
@@ -80,18 +105,17 @@ echo ""
 
 SMOKE_STATUS=0
 if [[ "$RUN_SMOKE" -eq 1 ]]; then
-    echo "--- Step 4: smoke jobs (--run-smoke) ---"
+    echo "--- Step 4: smoke jobs via sbatch (--run-smoke) ---"
     if ! command -v sbatch >/dev/null 2>&1; then
-        echo "ERROR: --run-smoke requires sbatch" >&2
+        echo "ERROR: --run-smoke requires sbatch (no srun/interactive fallback)" >&2
         exit 1
     fi
-    if command -v nvidia-smi >/dev/null 2>&1; then
-        echo "GPU devices:"
-        nvidia-smi -L || true
-        echo ""
-    else
-        echo "WARN: nvidia-smi not found — smoke jobs may fail on CPU nodes"
+    if ! command -v sacct >/dev/null 2>&1; then
+        echo "ERROR: --run-smoke requires sacct to verify batch submission" >&2
+        exit 1
     fi
+    echo "Smoke jobs are submitted with sbatch only (never srun or login-node emsuite)."
+    echo ""
 
     SMOKE_SLURMS=(
         "$LF_PROTO_ROOT/lf-homogeneous/singlet/run_smoke.slurm"
@@ -107,31 +131,27 @@ if [[ "$RUN_SMOKE" -eq 1 ]]; then
         fi
         calc_dir="$(dirname "$script")"
         base="$(basename "$script")"
-        echo "Submitting smoke from $calc_dir: $base"
-        job_id="$(cd "$calc_dir" && sbatch --parsable "$base")"
+        echo "Submitting smoke via sbatch from $calc_dir: $base"
+        job_id="$(cd "$calc_dir" && sbatch --parsable "$base" 2>&1)" || {
+            echo "ERROR: sbatch failed for $calc_dir/$base" >&2
+            SMOKE_STATUS=1
+            continue
+        }
+        if [[ ! "$job_id" =~ ^[0-9]+$ ]]; then
+            echo "ERROR: sbatch returned invalid job id for $base: $job_id" >&2
+            SMOKE_STATUS=1
+            continue
+        fi
         echo "  job_id=$job_id"
         SMOKE_JOBS+=("$job_id")
     done
 
     if [[ ${#SMOKE_JOBS[@]} -gt 0 ]]; then
-        echo "Waiting for smoke jobs: ${SMOKE_JOBS[*]}"
+        echo "Waiting for smoke jobs (squeue/sacct poll): ${SMOKE_JOBS[*]}"
         for job_id in "${SMOKE_JOBS[@]}"; do
-            while squeue -j "$job_id" -h 2>/dev/null | grep -q .; do
-                sleep 15
-            done
-        done
-
-        for job_id in "${SMOKE_JOBS[@]}"; do
-            state="$(sacct -j "$job_id" --format=State -n -P 2>/dev/null | head -1 | cut -d'|' -f1)"
-            state="${state:-UNKNOWN}"
-            echo "Smoke job $job_id final state: $state"
-            case "$state" in
-                COMPLETED) ;;
-                *)
-                    echo "ERROR: smoke job $job_id did not complete successfully (state=$state)" >&2
-                    SMOKE_STATUS=1
-                    ;;
-            esac
+            if ! _wait_slurm_job "$job_id" "smoke"; then
+                SMOKE_STATUS=1
+            fi
         done
 
         echo ""

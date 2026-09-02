@@ -47,13 +47,23 @@ surface_charge = 0.10
 optimize = False
 EOF
 
-cat > "$LF_PROTO_ROOT/prep/run_surface.sh" <<'EOF'
+cat > "$LF_PROTO_ROOT/prep/run_surface.slurm" <<'EOF'
 #!/usr/bin/env bash
+#SBATCH --job-name=lf-proto-surface
+#SBATCH --partition=qCPU120
+#SBATCH --account=CHEM9C4
+#SBATCH --nodes=1
+#SBATCH --cpus-per-task=8
+#SBATCH --mem=23000MB
+#SBATCH --time=04:00:00
+#SBATCH --output=slurm-surface-%j.out
+
 set -euo pipefail
-cd "$(dirname "$0")"
+export OMP_NUM_THREADS="${SLURM_CPUS_PER_TASK:-8}"
+cd "${SLURM_SUBMIT_DIR:-$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)}"
 emsuite -s surface.in
 EOF
-chmod +x "$LF_PROTO_ROOT/prep/run_surface.sh"
+chmod +x "$LF_PROTO_ROOT/prep/run_surface.slurm"
 
 # --- homogeneous tuning inputs ---
 write_tuning() {
@@ -308,17 +318,13 @@ EOF
 
 write_smoke_slurm "$LF_PROTO_ROOT/lov-protein/coupled/AT1/run_smoke.slurm" lf-proto-coup-AT1-smoke coupled_smoke.in c ../../..
 
-# Surface prep if missing
-if [[ -f "$LF_PROTO_ROOT/prep/LF.surf" ]]; then
-    echo "prep/LF.surf already exists — skipping surface generation"
-else
-    echo "Running surface prep..."
-    (cd "$LF_PROTO_ROOT/prep" && bash run_surface.sh) || echo "WARNING: surface prep failed or emsuite unavailable"
-fi
-
+# Surface prep: sbatch-only (submit via submit_all.sh or manually)
 if [[ -f "$LF_PROTO_ROOT/prep/LF.surf" ]]; then
     ln -sfn "$LF_PROTO_ROOT/prep/LF.surf" "$LF_PROTO_ROOT/lf-homogeneous/singlet/LF.surf"
     ln -sfn "$LF_PROTO_ROOT/prep/LF.surf" "$LF_PROTO_ROOT/lf-homogeneous/triplet/LF.surf"
+else
+    echo "prep/LF.surf missing — submit surface prep with:"
+    echo "  cd $LF_PROTO_ROOT/prep && sbatch run_surface.slurm"
 fi
 
 echo "lf-proto work directory ready at $LF_PROTO_ROOT"

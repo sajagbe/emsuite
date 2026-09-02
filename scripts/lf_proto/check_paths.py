@@ -37,6 +37,7 @@ def expected_paths(root: Path) -> list[tuple[str, Path]]:
     paths: list[tuple[str, Path]] = [
         ("prep/LF.xyz", root / "prep" / "LF.xyz"),
         ("prep/surface.in", root / "prep" / "surface.in"),
+        ("prep/run_surface.slurm", root / "prep" / "run_surface.slurm"),
         ("prep/LF.surf", root / "prep" / "LF.surf"),
         ("lf-homogeneous/singlet/LF.xyz", root / "lf-homogeneous" / "singlet" / "LF.xyz"),
         ("lf-homogeneous/singlet/LF.surf", root / "lf-homogeneous" / "singlet" / "LF.surf"),

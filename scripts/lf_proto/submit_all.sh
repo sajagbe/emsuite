@@ -10,36 +10,47 @@
 set -euo pipefail
 
 LF_PROTO_ROOT="${LF_PROTO_ROOT:-$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)}"
-EMSUITE_ROOT="${EMSUITE_ROOT:-$(cd "$LF_PROTO_ROOT/../../../packages/emsuite" 2>/dev/null && pwd || cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)}"
+if [[ -z "${EMSUITE_ROOT:-}" ]]; then
+    if [[ -d "$LF_PROTO_ROOT/../../../packages/emsuite" ]]; then
+        EMSUITE_ROOT="$(cd "$LF_PROTO_ROOT/../../../packages/emsuite" && pwd)"
+    else
+        EMSUITE_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+    fi
+fi
 SCRIPTS_DIR="${LF_PROTO_SCRIPTS:-$EMSUITE_ROOT/scripts/lf_proto}"
 GRO_ROOT="${LF_PROTO_GRO_ROOT:-$LF_PROTO_ROOT/../Selected100-L1vL2}"
 LF_XYZ_SRC="${LF_PROTO_LF_XYZ:-$LF_PROTO_ROOT/../ChargeUpdates/LumiflavinRESP2025/LF/LF.xyz}"
 
 export LF_PROTO_ROOT
-export SLURM_GPUS="${SLURM_GPUS:-4}"
-export SLURM_CPUS="${SLURM_CPUS:-32}"
-export SLURM_PARTITION_GPU="${SLURM_PARTITION_GPU:-qGPU48}"
-export SLURM_PARTITION_CPU="${SLURM_PARTITION_CPU:-qCPU120}"
-export SLURM_ACCOUNT="${SLURM_ACCOUNT:-CHEM9C4}"
-export SLURM_TIME_GPU="${SLURM_TIME_GPU:-47:59:00}"
-export SLURM_TIME_CPU="${SLURM_TIME_CPU:-120:00:00}"
-export SLURM_CPUS_GPU="${SLURM_CPUS_GPU:-32}"
-export SLURM_CPUS_CPU="${SLURM_CPUS_CPU:-16}"
+export SLURM_CPUS="${SLURM_CPUS:-16}"
+
+_wait_slurm_job() {
+    local job_id="$1"
+    local label="${2:-job}"
+    while squeue -j "$job_id" -h 2>/dev/null | grep -q .; do
+        sleep 15
+    done
+    local state batch_flag
+    state="$(sacct -j "$job_id" --format=State -n -P 2>/dev/null | head -1 | cut -d'|' -f1)"
+    state="${state:-UNKNOWN}"
+    batch_flag="$(sacct -j "$job_id" --format=BatchFlag -n -P 2>/dev/null | head -1 | cut -d'|' -f1)"
+    echo "$label job $job_id final state: $state (BatchFlag=${batch_flag:-?})"
+    if [[ "${batch_flag:-}" != "1" ]]; then
+        echo "ERROR: $label job $job_id was not submitted via sbatch" >&2
+        return 1
+    fi
+    if [[ "$state" != "COMPLETED" ]]; then
+        echo "ERROR: $label job $job_id did not complete successfully" >&2
+        return 1
+    fi
+}
 
 SYSTEMS=(AT1 AT2 AS1 AS2 CR1 CR2)
 GRO_NAMES=(AT1Sel AT2Sel AS1Sel AS2Sel CR1Sel CR2Sel)
 
 echo "LF_PROTO_ROOT=$LF_PROTO_ROOT"
 echo "EMSUITE_ROOT=$EMSUITE_ROOT"
-echo "SLURM_PARTITION_GPU=$SLURM_PARTITION_GPU"
-echo "SLURM_PARTITION_CPU=$SLURM_PARTITION_CPU"
-echo "SLURM_ACCOUNT=$SLURM_ACCOUNT"
-echo "SLURM_TIME_GPU=$SLURM_TIME_GPU"
-echo "SLURM_TIME_CPU=$SLURM_TIME_CPU"
-echo "SLURM_GPUS=$SLURM_GPUS"
 echo "SLURM_CPUS=$SLURM_CPUS"
-echo "SLURM_CPUS_GPU=$SLURM_CPUS_GPU"
-echo "SLURM_CPUS_CPU=$SLURM_CPUS_CPU"
 
 mkdir -p "$LF_PROTO_ROOT"/{prep,lf-homogeneous/{singlet,triplet},lov-protein/frames,lov-protein/potential,lov-protein/coupled}
 
@@ -60,12 +71,21 @@ for i in "${!SYSTEMS[@]}"; do
     python3 "$SCRIPTS_DIR/prepare_frames.py" --gro "$gro" --out-dir "$out" --system "$sys"
 done
 
-# Surface prep (local or sbatch)
+# Surface prep (sbatch only — qCPU120)
 if [[ -f "$LF_PROTO_ROOT/prep/LF.surf" ]]; then
     echo "prep/LF.surf already exists — skipping surface generation"
+elif [[ ! -f "$LF_PROTO_ROOT/prep/run_surface.slurm" ]]; then
+    echo "ERROR: missing $LF_PROTO_ROOT/prep/run_surface.slurm (re-run bootstrap_workdir.sh)" >&2
+    exit 1
 else
-    echo "Running surface prep..."
-    (cd "$LF_PROTO_ROOT/prep" && bash run_surface.sh) || echo "WARNING: surface prep failed or emsuite unavailable"
+    echo "Submitting surface prep via sbatch..."
+    surface_job_id="$(cd "$LF_PROTO_ROOT/prep" && sbatch --parsable run_surface.slurm)"
+    if [[ ! "$surface_job_id" =~ ^[0-9]+$ ]]; then
+        echo "ERROR: sbatch failed for prep/run_surface.slurm: $surface_job_id" >&2
+        exit 1
+    fi
+    echo "  surface prep job_id=$surface_job_id"
+    _wait_slurm_job "$surface_job_id" "surface prep"
 fi
 
 if [[ -f "$LF_PROTO_ROOT/prep/LF.surf" ]]; then
