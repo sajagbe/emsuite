@@ -54,7 +54,7 @@ def calculate_point_effect_cpu(
             triplet,
             properties_to_calculate,
             required_calculations,
-            functional,
+            force_single_gpu=False,
         )
         os.chdir(original_dir)
         return {
@@ -121,6 +121,7 @@ def calculate_point_effect_gpu(
     triplet,
     properties_to_calculate,
     required_calculations,
+    functional,
     point_index,
 ):
     gpu_id = ray.get_gpu_ids()[0]

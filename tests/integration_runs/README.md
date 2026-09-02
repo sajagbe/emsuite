@@ -30,3 +30,24 @@ uv run pytest tests/integration -v -m slow
 ```
 
 Archiving is enabled only when `EMSUITE_INTEGRATION_RUN_DIR` is set (the audit script does this automatically).
+
+## GPU channel validation
+
+Requires a CUDA GPU (gpu4pyscf + CuPy). From the repo root:
+
+```bash
+chmod +x scripts/run_gpu_integration.sh
+./scripts/run_gpu_integration.sh
+```
+
+This allocates `srun --partition=qDEV --gres=gpu:1` (override with `SLURM_PARTITION`, etc.), runs preflight, then:
+
+```bash
+python -m pytest tests/integration/test_gpu_channels.py -v -m gpu
+```
+
+Artifacts land in `tests/integration_runs/gpu-<timestamp>/` (gitignored). If you are already on a GPU node:
+
+```bash
+./scripts/run_gpu_integration.sh --local
+```

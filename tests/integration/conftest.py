@@ -47,6 +47,55 @@ INTEGRATION_FEATURE_TRACE: dict[str, dict[str, object]] = {
         "summary": "Potential → tuning coupled channel smoke test",
         "code_paths": ["src/emsuite/coupled/runner.py"],
     },
+    "tests/integration/test_gpu_channels.py::test_gpu_preflight": {
+        "feature_id": "gpu-preflight",
+        "version": "1.3.0",
+        "channel": "gpu",
+        "summary": "CuPy/gpu4pyscf GPU detection on compute node",
+        "code_paths": ["src/emsuite/core/hardware.py"],
+    },
+    "tests/integration/test_gpu_channels.py::test_gpu_surface_uff_smoke": {
+        "feature_id": "gpu-surface-uff",
+        "version": "1.3.0",
+        "channel": "surface",
+        "summary": "Surface channel smoke on GPU allocation (UFF)",
+        "code_paths": ["src/emsuite/surface/"],
+    },
+    "tests/integration/test_gpu_channels.py::test_gpu_surface_pyscf_optimize": {
+        "feature_id": "gpu-surface-pyscf",
+        "version": "1.3.0",
+        "channel": "surface",
+        "summary": "PySCF geometry optimization on GPU (surface channel)",
+        "code_paths": ["src/emsuite/surface/optimize.py", "src/emsuite/core/molecule.py"],
+    },
+    "tests/integration/test_gpu_channels.py::test_gpu_potential_apbs_potential": {
+        "feature_id": "gpu-potential-phi",
+        "version": "1.3.0",
+        "channel": "potential",
+        "summary": "APBS potential map on GPU node",
+        "code_paths": ["src/emsuite/potential/runner.py"],
+    },
+    "tests/integration/test_gpu_channels.py::test_gpu_potential_apbs_gauss_charge": {
+        "feature_id": "gpu-potential-charge",
+        "version": "1.3.0",
+        "channel": "potential",
+        "summary": "Gauss-law charges from APBS on GPU node",
+        "code_paths": ["src/emsuite/potential/gauss.py"],
+    },
+    "tests/integration/test_gpu_channels.py::test_gpu_tuning_parallel": {
+        "feature_id": "gpu-tuning-parallel",
+        "version": "1.3.0",
+        "channel": "tuning",
+        "summary": "Parallel Ray + gpu4pyscf tuning",
+        "code_paths": ["src/emsuite/tuning/runner.py", "src/emsuite/tuning/parallel.py"],
+    },
+    "tests/integration/test_gpu_channels.py::test_gpu_coupled_parallel": {
+        "feature_id": "gpu-coupled-parallel",
+        "version": "1.3.0",
+        "channel": "coupled",
+        "summary": "APBS charges → parallel GPU tuning (coupled)",
+        "code_paths": ["src/emsuite/coupled/runner.py", "src/emsuite/inputs.py"],
+    },
 }
 
 
@@ -123,7 +172,7 @@ def pytest_runtest_makereport(item: pytest.Item, call: pytest.CallInfo[None]):
                 shutil.copy2(src, inputs_dir / src.name)
 
     if report.failed:
-        (test_dir / "failure.txt").write_text(str(report.longrepr))
+        (test_dir / "failure.txt").write_text(str(report.longrepr), encoding="utf-8")
 
 
 # --- pdb2pqr fixture (shared by test_potential_pdb2pqr.py, test_coupled_pdb2pqr.py) ---
