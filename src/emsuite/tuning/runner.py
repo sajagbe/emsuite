@@ -5,6 +5,7 @@ import logging
 import os
 import shutil
 import sys
+import tempfile
 from datetime import datetime
 
 import numpy as np
@@ -38,6 +39,25 @@ from .resume import (
 )
 
 os.environ["HDF5_USE_FILE_LOCKING"] = "FALSE"
+
+
+def _stage_chkfiles_for_parallel(base_chkfiles: dict) -> tuple[dict, str]:
+    """Copy checkpoint files to local storage before Ray dispatch.
+
+    NFS workdirs can lose visibility of freshly-written .chk files when Ray
+    workers try to read them from the network path. Staging avoids races.
+    """
+    local_root = os.environ.get("SLURM_TMPDIR") or os.environ.get("TMPDIR") or "/tmp"
+    staging_dir = tempfile.mkdtemp(prefix="emsuite_chk_stage_", dir=local_root)
+    staged: dict = {}
+    for key, chkfile in base_chkfiles.items():
+        if chkfile:
+            staged_path = os.path.join(staging_dir, os.path.basename(chkfile))
+            shutil.copy2(chkfile, staged_path)
+            staged[key] = staged_path
+        else:
+            staged[key] = None
+    return staged, staging_dir
 
 
 def calculate_surface_effect_at_point(
@@ -891,6 +911,8 @@ def run_tuning_calculation(config):
                     No_of_CPUs if No_of_GPUs < 1 else No_of_GPUs, int(num_procs)
                 )
 
+            parallel_chkfiles, chk_staging_dir = _stage_chkfiles_for_parallel(base_chkfiles)
+
             if No_of_GPUs < 1:
                 ray.init(
                     num_cpus=parallel_processes,
@@ -916,64 +938,66 @@ def run_tuning_calculation(config):
             # MODIFIED: Only submit jobs for points_to_calculate
             batch_size: int = parallel_processes
             assert points_to_calculate is not None, "points_to_calculate must be initialized"
-            for batch_start in range(0, len(points_to_calculate), batch_size):
-                batch_end = min(batch_start + batch_size, len(points_to_calculate))
-                batch_indices = [points_to_calculate[i] for i in range(batch_start, batch_end)]
+            try:
+                for batch_start in range(0, len(points_to_calculate), batch_size):
+                    batch_end = min(batch_start + batch_size, len(points_to_calculate))
+                    batch_indices = [points_to_calculate[i] for i in range(batch_start, batch_end)]
 
-                futures = [
-                    calculate_point_effect.remote(
-                        base_chkfiles,
-                        surface_coords[i],
-                        point_charges[i],
-                        solvent,
-                        state_of_interest,
-                        triplet,
-                        properties_to_calculate,
-                        required_calculations,
-                        functional,
-                        i,
-                    )
-                    for i in batch_indices
-                ]
+                    futures = [
+                        calculate_point_effect.remote(
+                            parallel_chkfiles,
+                            surface_coords[i],
+                            point_charges[i],
+                            solvent,
+                            state_of_interest,
+                            triplet,
+                            properties_to_calculate,
+                            required_calculations,
+                            functional,
+                            i,
+                        )
+                        for i in batch_indices
+                    ]
 
-                # Get results and log them IMMEDIATELY after each completes
-                for result in ray.get(futures):
-                    point_index = result["point_index"]
-                    all_effects[point_index] = result["effects"]
+                    # Get results and log them IMMEDIATELY after each completes
+                    for result in ray.get(futures):
+                        point_index = result["point_index"]
+                        all_effects[point_index] = result["effects"]
 
-                    # Log individual point file
-                    log_point_result(
-                        logs_dir,
-                        point_index,
-                        result["coord"],
-                        result["charge"],
-                        result["effects"],
-                        success=result["success"],
-                        error_msg=result["error_msg"],
-                    )
+                        # Log individual point file
+                        log_point_result(
+                            logs_dir,
+                            point_index,
+                            result["coord"],
+                            result["charge"],
+                            result["effects"],
+                            success=result["success"],
+                            error_msg=result["error_msg"],
+                        )
 
-                    # Append to summary file IMMEDIATELY
-                    append_point_to_summary(
-                        summary_file,
-                        point_index,
-                        result["coord"],
-                        result["charge"],
-                        result["effects"],
-                        success=result["success"],
-                        error_msg=result["error_msg"],
-                        total_points=len(surface_coords),
-                    )
+                        # Append to summary file IMMEDIATELY
+                        append_point_to_summary(
+                            summary_file,
+                            point_index,
+                            result["coord"],
+                            result["charge"],
+                            result["effects"],
+                            success=result["success"],
+                            error_msg=result["error_msg"],
+                            total_points=len(surface_coords),
+                        )
 
-                    # Update resume metadata
-                    update_resume_metadata(logs_dir, point_index, result["success"])
+                        # Update resume metadata
+                        update_resume_metadata(logs_dir, point_index, result["success"])
 
-                    status = "SUCCESS" if result["success"] else "FAILED"
-                    completed_so_far = len([e for e in all_effects if e is not None])
-                    print(
-                        f"Point {point_index + 1}/{len(surface_coords)}: {status} ({completed_so_far}/{len(surface_coords)} total)"
-                    )
-
-            ray.shutdown()
+                        status = "SUCCESS" if result["success"] else "FAILED"
+                        completed_so_far = len([e for e in all_effects if e is not None])
+                        print(
+                            f"Point {point_index + 1}/{len(surface_coords)}: {status} ({completed_so_far}/{len(surface_coords)} total)"
+                        )
+            finally:
+                ray.shutdown()
+                shutil.rmtree(chk_staging_dir, ignore_errors=True)
 
         else:
             # Sequential processing
