@@ -9,6 +9,15 @@ GRO_ROOT="${LF_PROTO_GRO_ROOT:-$LF_PROTO_ROOT/../Selected100-L1vL2}"
 LF_XYZ_SRC="${LF_PROTO_LF_XYZ:-$LF_PROTO_ROOT/../ChargeUpdates/LumiflavinRESP2025/LF/LF.xyz}"
 SYSTEMS=(AT1 AT2 AS1 AS2 CR1 CR2)
 GRO_NAMES=(AT1Sel AT2Sel AS1Sel AS2Sel CR1Sel CR2Sel)
+QMMM_ROOT="${LF_PROTO_QMMM_ROOT:-$LF_PROTO_ROOT/..}"
+MOL2_SOURCES=(
+    "$QMMM_ROOT/atLOV1/2Z6D_FMN_APEC_Calculation_Files/2Z6D_FMN.mol2"
+    "$QMMM_ROOT/mutantTests/realatLOV2/4eep_FMN_APEC_Calculation_Files/4eep_FMN.mol2"
+    "$QMMM_ROOT/asLOV1/0NaBak/asLOV1_FMN.mol2"
+    "$QMMM_ROOT/asLOV2/2V1A_FMN_APEC_Calculation_Files/2V1A_FMN.mol2"
+    "$QMMM_ROOT/crLOV1/1n9l_FMN_APEC_Calculation_Files/1n9l_FMN.mol2"
+    "$QMMM_ROOT/crLOV2/crLOV2_FMN_APEC_Calculation_Files/crLOV2_FMN.mol2"
+)
 
 export LF_PROTO_ROOT="$LF_PROTO_ROOT"
 
@@ -167,11 +176,19 @@ for i in "${!SYSTEMS[@]}"; do
     sys="${SYSTEMS[$i]}"
     gro="${GRO_ROOT}/${GRO_NAMES[$i]}.gro"
     out="$LF_PROTO_ROOT/lov-protein/frames/$sys"
+    mol2_src="${MOL2_SOURCES[$i]}"
     if [[ -f "$gro" ]]; then
-        python3 "$SCRIPTS_DIR/prepare_frames.py" --gro "$gro" --out-dir "$out" --system "$sys"
+        python3 "$SCRIPTS_DIR/prepare_frames.py" \
+            --gro "$gro" \
+            --out-dir "$out" \
+            --system "$sys" \
+            --mol2-source "$mol2_src"
     else
         echo "WARN: missing $gro — skipping frame extraction for $sys"
         mkdir -p "$out"
+    fi
+    if [[ ! -f "$out/CHR.mol2" && -f "$mol2_src" ]]; then
+        echo "WARN: CHR.mol2 not written for $sys (mol2 remap failed?)"
     fi
 done
 
@@ -181,15 +198,27 @@ for sys in "${SYSTEMS[@]}"; do
     coup_dir="$LF_PROTO_ROOT/lov-protein/coupled/$sys"
     mkdir -p "$pot_dir" "$coup_dir"
 
+    ln -sfn "../../frames/$sys/ligand.xyz" "$pot_dir/ligand.xyz"
+    ln -sfn "../../frames/$sys/complex.pdb" "$pot_dir/complex.pdb"
+    ln -sfn "../../frames/$sys/CHR.mol2" "$pot_dir/CHR.mol2"
+    ln -sfn "../../frames/$sys/ligand.xyz" "$coup_dir/ligand.xyz"
+    ln -sfn "../../frames/$sys/complex.pdb" "$coup_dir/complex.pdb"
+    ln -sfn "../../frames/$sys/CHR.mol2" "$coup_dir/CHR.mol2"
+
     cat > "$pot_dir/potential.in" <<EOF
-molecule = '../../frames/$sys/ligand.xyz'
-protein = '../../frames/$sys/protein.xyz'
+molecule = 'ligand.xyz'
+protein = 'complex.pdb'
+protein_format = 'pdb'
+ligand_resname = 'CHR'
+ligand_mol2 = 'CHR.mol2'
 output_surf = 'potential.surf'
 surface_density = 0.5
 surface_scale = 1.0
 method = 'apbs'
 quantity = 'charge'
 ligand_atoms = 'present'
+forcefield = 'AMBER'
+ph = 7.0
 pdie = 2.0
 sdie = 78.54
 charge = 0
@@ -197,14 +226,19 @@ spin = 0
 EOF
 
     cat > "$coup_dir/coupled.in" <<EOF
-molecule = '../../frames/$sys/ligand.xyz'
-protein = '../../frames/$sys/protein.xyz'
+molecule = 'ligand.xyz'
+protein = 'complex.pdb'
+protein_format = 'pdb'
+ligand_resname = 'CHR'
+ligand_mol2 = 'CHR.mol2'
 output_surf = 'coupled.surf'
 surface_density = 0.5
 surface_scale = 1.0
 potential_method = 'apbs'
 potential_quantity = 'charge'
 ligand_atoms = 'present'
+forcefield = 'AMBER'
+ph = 7.0
 pdie = 2.0
 sdie = 78.54
 properties = ['homo', 'lumo', 'gap']
@@ -243,14 +277,19 @@ done
 
 # AT1 coupled smoke only
 cat > "$LF_PROTO_ROOT/lov-protein/coupled/AT1/coupled_smoke.in" <<'EOF'
-molecule = '../../frames/AT1/ligand.xyz'
-protein = '../../frames/AT1/protein.xyz'
+molecule = 'ligand.xyz'
+protein = 'complex.pdb'
+protein_format = 'pdb'
+ligand_resname = 'CHR'
+ligand_mol2 = 'CHR.mol2'
 output_surf = 'coupled_smoke.surf'
 surface_density = 0.3
 surface_scale = 1.0
 potential_method = 'apbs'
 potential_quantity = 'charge'
 ligand_atoms = 'present'
+forcefield = 'AMBER'
+ph = 7.0
 pdie = 2.0
 sdie = 78.54
 properties = ['homo', 'lumo', 'gap']

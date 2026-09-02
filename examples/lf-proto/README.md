@@ -10,7 +10,7 @@ Work directory (outside the repo):
 lf-proto/
 ├── prep/                  # LF surface generation
 ├── lf-homogeneous/        # singlet + triplet exe tuning on bare LF
-├── lov-protein/frames/    # extracted GROMACS frames (ligand.xyz, protein.xyz)
+├── lov-protein/frames/    # extracted GROMACS frames (ligand.xyz, complex.pdb, CHR.mol2)
 ├── lov-protein/potential/ # APBS charge maps per system (CPU)
 ├── lov-protein/coupled/   # potential → HOMO/LUMO/gap tuning (GPU)
 ├── submit_all.sh
@@ -119,7 +119,7 @@ export LF_PROTO_ROOT=/path/to/lf-proto
 
 | Script | Purpose |
 |--------|---------|
-| `scripts/lf_proto/prepare_frames.py` | Middle frame from `.gro` → `ligand.xyz` + `protein.xyz` |
+| `scripts/lf_proto/prepare_frames.py` | Middle frame from `.gro` → `ligand.xyz` + `complex.pdb` |
 | `scripts/lf_proto/patch_num_procs.py` | Set `num_procs` from `SLURM_GPUS_ON_NODE` at job start |
 | `scripts/lf_proto/validate_inputs.py` | Parse all `.in` files and check referenced paths |
 | `scripts/lf_proto/check_paths.py` | Standalone lf-proto tree path checker |
@@ -136,7 +136,11 @@ python3 scripts/lf_proto/prepare_frames.py \
   --system AT1
 ```
 
-Writes `ligand.xyz` (CHR), `protein.xyz` (no CHR/SOL/ions), and `metadata.json`. Coordinates are converted nm → Å (×10).
+Writes `ligand.xyz` (CHR, for VDW surface), `complex.pdb` (protein + CHR HETATM for pdb2pqr), and `metadata.json`. Coordinates are converted nm → Å (×10). Symlink FMN MOL2 as `CHR.mol2` per system (see `bootstrap_workdir.sh` for source paths).
+
+### Protein field (pdb2pqr path)
+
+Potential and coupled jobs use `protein_format = 'pdb'` with the full complex PDB (protein + CHR HETATM). EMSuite selects the CHR residue by `ligand_resname`, runs pdb2pqr with AMBER charges at pH 7.0, and uses `CHR.mol2` for ligand cavity radii (`ligand_atoms = 'present'`). No `protein.xyz` or RDKit Gasteiger charges are needed on this path.
 
 ## Job breakdown (14 total)
 
