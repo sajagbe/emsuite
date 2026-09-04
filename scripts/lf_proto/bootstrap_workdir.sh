@@ -94,8 +94,9 @@ num_procs = None
 EOF
 }
 
-write_tuning "$LF_PROTO_ROOT/lf-homogeneous/singlet" False tuning.in '6-31G*' "['homo', 'lumo', 'gap']" 2
-write_tuning "$LF_PROTO_ROOT/lf-homogeneous/triplet" True tuning.in '6-31G*' "['homo', 'lumo', 'gap']" 2
+# Production LF homogeneous: excited-state exe with soi=3 (not homo/lumo/gap)
+write_tuning "$LF_PROTO_ROOT/lf-homogeneous/singlet" False tuning.in '6-31G*' "['exe']" 3
+write_tuning "$LF_PROTO_ROOT/lf-homogeneous/triplet" True tuning.in '6-31G*' "['exe']" 3
 write_tuning "$LF_PROTO_ROOT/lf-homogeneous/singlet" False tuning_smoke.in 'sto-3g' "['homo']" 1
 write_tuning "$LF_PROTO_ROOT/lf-homogeneous/triplet" True tuning_smoke.in 'sto-3g' "['homo']" 1
 

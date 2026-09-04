@@ -129,10 +129,19 @@ def to_numpy(arr):
         return arr.get()
     return arr
 
+# Energies + xy are required for exe. Oscillator strengths are optional:
+# gpu4pyscf can raise in td.oscillator_strength() (einsum unpack error)
+# even after a successful TDDFT kernel; parent reconstructs from e/xy only.
+osc = None
+try:
+    osc = to_numpy(td.oscillator_strength()).tolist()
+except Exception as osc_err:
+    print(f"WARNING: td.oscillator_strength() failed ({{osc_err}}); continuing with energies only")
+
 results = {{
     'e': to_numpy(td.e).tolist(),
     'xy': [[to_numpy(xy[0]).tolist(), to_numpy(xy[1]).tolist()] for xy in td.xy],
-    'oscillator_strength': to_numpy(td.oscillator_strength()).tolist(),
+    'oscillator_strength': osc,
 }}
 
 with open('td_results.pkl', 'wb') as f:
