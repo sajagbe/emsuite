@@ -59,6 +59,9 @@ def create_qmmm_molecule_object(mf, coord_mm, q_mm, chkfile=None):
     if chkfile:
         mf_new.chkfile = chkfile
         mf_new.init_guess = "chkfile"
+    # Tag so TDDFT skips multi-GPU pickle path (which strips MM charges).
+    # GPU path patches get_hcore rather than wrapping as pyscf.qmmm, so class checks alone are insufficient.
+    mf_new._emsuite_has_mm = True
     mf_new.kernel()
     if not mf_new.converged:
         print("SCF did not converge with MM charges. Trying SOSCF...")
@@ -68,4 +71,5 @@ def create_qmmm_molecule_object(mf, coord_mm, q_mm, chkfile=None):
             print("SOSCF also did not converge.")
         else:
             print("SOSCF converged.")
+        mf_new._emsuite_has_mm = True
     return mf_new

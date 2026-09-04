@@ -132,6 +132,7 @@ def calculate_surface_effect_at_point(
             state_of_interest,
             triplet,
             required_calculations,
+            force_single_gpu=force_single_gpu,
         )
 
         # Apply solvation if needed
@@ -243,7 +244,8 @@ def calculate_combined_surface_effect(
             molecule_alone, nstates=state_of_interest, triplet=triplet
         )
 
-    # Create QM/MM objects with ALL charges at once
+    # Create QM/MM objects with ALL charges at once.
+    # force_single_gpu=True: multi-GPU TDDFT pickle path strips MM charges.
     molecule_wsc, anion_wsc, cation_wsc, td_wsc = create_wsc_objects(
         [molecule_alone, anion_alone, cation_alone, td_alone],
         coords,
@@ -251,6 +253,7 @@ def calculate_combined_surface_effect(
         state_of_interest,
         triplet,
         required_calculations,
+        force_single_gpu=True,
     )
 
     # Apply solvation if needed
@@ -424,7 +427,9 @@ def create_molecule_objects(
     return [molecules.get(k) for k in ["neutral", "anion", "cation"]] + [td_obj]
 
 
-def create_wsc_objects(molecules, coord, q_mm, state_of_interest, triplet, required_calculations):
+def create_wsc_objects(
+    molecules, coord, q_mm, state_of_interest, triplet, required_calculations, force_single_gpu=False
+):
     """
     Create QM/MM molecule objects with external point charges.
 
@@ -438,6 +443,7 @@ def create_wsc_objects(molecules, coord, q_mm, state_of_interest, triplet, requi
         state_of_interest (int): Number of excited states for TD calculations
         triplet (bool): Whether to calculate triplet excited states
         required_calculations (dict): Dictionary specifying needed calculations
+        force_single_gpu (bool): Skip TD subprocess isolation (for Ray workers)
 
     Returns:
         list: [molecule_wsc, anion_wsc, cation_wsc, td_wsc] QM/MM objects
@@ -461,10 +467,16 @@ def create_wsc_objects(molecules, coord, q_mm, state_of_interest, triplet, requi
         if mol is not None:
             qmmm_objects[name] = core.create_qmmm_molecule_object(mol, coord, q_mm, chkfile)
 
-    # Only create TD if explicitly needed
+    # Only create TD if explicitly needed.
+    # Always force_single_gpu for wsc TDDFT: MM charges are lost if multi-GPU
+    # subprocess pickles vacuum SCF (atom/basis/MOs only).
     if qmmm_objects.get("molecule_wsc") and required_calculations.get("td", False):
         qmmm_objects["td_wsc"] = core.create_td_molecule_object(
-            qmmm_objects["molecule_wsc"], nstates=state_of_interest, triplet=triplet
+            qmmm_objects["molecule_wsc"],
+            nstates=state_of_interest,
+            triplet=triplet,
+            # MM present; OR with caller flag (Ray already passes True)
+            force_single_gpu=True or force_single_gpu,
         )
 
     return [qmmm_objects.get(k) for k in ["molecule_wsc", "anion_wsc", "cation_wsc", "td_wsc"]]
@@ -520,12 +532,17 @@ def apply_solvation(molecules, solvent, state_of_interest, triplet, required_cal
 
     if required_calculations.get("td", False):
         if solvated[0]:
+            # Vacuum baseline: multi-GPU subprocess OK (no MM to drop)
             td_alone_new = core.create_td_molecule_object(
                 solvated[0], nstates=state_of_interest, triplet=triplet
             )
         if solvated[3]:
+            # wsc has MM; must not use pickle subprocess
             td_wsc_new = core.create_td_molecule_object(
-                solvated[3], nstates=state_of_interest, triplet=triplet
+                solvated[3],
+                nstates=state_of_interest,
+                triplet=triplet,
+                force_single_gpu=True,
             )
 
     return solvated[:3] + [td_alone_new] + solvated[3:] + [td_wsc_new]

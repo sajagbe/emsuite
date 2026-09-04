@@ -259,6 +259,7 @@ def solvate_molecule(mf, solvent="water"):
         - Solvent parameters are taken from the PySCF SMD database
     """
     solvent = solvent.lower()
+    had_mm = getattr(mf, "_emsuite_has_mm", False)
     mf = mf.PCM()
     mf.with_solvent.eps = smd.solvent_db[solvent][5]
     mf.with_solvent.method = "C-PCM"
@@ -272,6 +273,8 @@ def solvate_molecule(mf, solvent="water"):
             print("SOSCF also did not converge.")
         else:
             print("SOSCF converged.")
+    if had_mm:
+        mf._emsuite_has_mm = True
     return mf
 
 

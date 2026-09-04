@@ -8,6 +8,16 @@ from pyscf import tdscf
 from ._gpu import GPU_AVAILABLE
 
 
+def _mf_has_mm_charges(mf):
+    """True if mf carries external MM / surface charges that must not be pickled away."""
+    if getattr(mf, "_emsuite_has_mm", False):
+        return True
+    # CPU pyscf.qmmm wrappers (e.g. QMMMRKS)
+    if "qmmm" in type(mf).__module__:
+        return True
+    return hasattr(mf, "mm_mol")
+
+
 def create_td_molecule_object(mf, nstates=5, triplet=False, force_single_gpu=False):
     """
     Create a time-dependent (TD) calculation object for excited states.
@@ -28,6 +38,11 @@ def create_td_molecule_object(mf, nstates=5, triplet=False, force_single_gpu=Fal
     # Check if multiple GPUs are visible
     current_cuda_devices = os.environ.get("CUDA_VISIBLE_DEVICES", "0")
     visible_devices = current_cuda_devices.split(",")
+
+    # MM + multi-GPU pickle path drops surface charges (subprocess rebuilds vacuum SCF).
+    # Keep TDDFT in-process whenever MM is attached (combined / wsc / Ray separate).
+    if _mf_has_mm_charges(mf) and not force_single_gpu:
+        force_single_gpu = True
 
     # Determine if we should use subprocess isolation
     use_subprocess = (
@@ -104,16 +119,22 @@ mf = mf.to_gpu()
 
 # CRITICAL: Don't set chkfile to prevent checkpoint corruption
 mf.chkfile = None
-mf.verbose = 0
+mf.verbose = 4
 
-# Inject MO data directly (NO SCF needed!)
+# Inject MOs as the density guess, then re-converge SCF on this single GPU.
+# Multi-GPU SCF MOs injected without re-SCF often trigger:
+#   RuntimeError: GGT matrix is not positive definite
+# on larger chromophores (e.g. retinal) even when SCF energy looked fine.
 import cupy as cp
 mf.mo_energy = cp.asarray(data['mo_energy'])
 mf.mo_coeff = cp.asarray(data['mo_coeff'])
 mf.mo_occ = cp.asarray(data['mo_occ'])
-
-# Manually set converged flag
-mf.converged = True
+dm0 = mf.make_rdm1(mf.mo_coeff, mf.mo_occ)
+print('Re-converging SCF on single GPU before TDDFT...')
+mf.kernel(dm0=dm0)
+if not mf.converged:
+    raise RuntimeError('Single-GPU SCF re-convergence failed before TDDFT')
+print(f'Single-GPU SCF converged: E = {{float(mf.e_tot):.10f}} Ha')
 
 # Create and run TDDFT
 td = mf.TDDFT() if data['is_dft'] else mf.TDHF()
@@ -129,6 +150,10 @@ def to_numpy(arr):
         return arr.get()
     return arr
 
+e_np = to_numpy(td.e)
+if e_np is None or len(e_np) == 0 or not np.isfinite(e_np).all():
+    raise RuntimeError(f'TDDFT returned non-finite energies: {{e_np}}')
+
 # Energies + xy are required for exe. Oscillator strengths are optional:
 # gpu4pyscf can raise in td.oscillator_strength() (einsum unpack error)
 # even after a successful TDDFT kernel; parent reconstructs from e/xy only.
@@ -139,7 +164,7 @@ except Exception as osc_err:
     print(f"WARNING: td.oscillator_strength() failed ({{osc_err}}); continuing with energies only")
 
 results = {{
-    'e': to_numpy(td.e).tolist(),
+    'e': e_np.tolist(),
     'xy': [[to_numpy(xy[0]).tolist(), to_numpy(xy[1]).tolist()] for xy in td.xy],
     'oscillator_strength': osc,
 }}
@@ -176,8 +201,11 @@ with open('td_results.pkl', 'wb') as f:
             td.e = np.array(results["e"])
             td.xy = [(np.array(xy[0]), np.array(xy[1])) for xy in results["xy"]]
             td.converged = True
+            if td.e.size == 0 or not np.isfinite(td.e).all():
+                raise RuntimeError(f"TDDFT subprocess returned non-finite energies: {td.e}")
 
             print(f"TDDFT completed in subprocess on GPU {visible_devices[0]}, states: {len(td.e)}")
+            sys.stdout.flush()
 
         except subprocess.CalledProcessError as e:
             print("\n" + "=" * 70)
@@ -213,6 +241,7 @@ with open('td_results.pkl', 'wb') as f:
     else:
         # Single GPU or CPU - normal path
         print(f"Running TDDFT in current process (force_single_gpu={force_single_gpu})")
+        sys.stdout.flush()
 
         if hasattr(mf, "with_solvent"):
             td = tdscf.TDDFT(mf) if hasattr(mf, "xc") else tdscf.TDHF(mf)
@@ -222,6 +251,13 @@ with open('td_results.pkl', 'wb') as f:
         td.singlet = not triplet
         td.nstates = nstates
         td.kernel()
+
+        e = td.e
+        if hasattr(e, "get"):
+            e = e.get()
+        e = np.asarray(e)
+        if e.size == 0 or not np.isfinite(e).all():
+            raise RuntimeError(f"TDDFT returned non-finite energies: {e}")
 
         return td
 
