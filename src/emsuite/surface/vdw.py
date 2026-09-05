@@ -6,6 +6,35 @@ import subprocess
 import numpy as np
 
 
+def _vdw_surface_candidates(xyz_file: str) -> list[str]:
+    """
+    Paths where vsg may write ``{stem}_vdw_surface.txt``.
+
+    ``vsg`` names outputs from the XYZ basename and writes them in the
+    process CWD, not necessarily next to a relative XYZ path like
+    ``../ligand.xyz``. Prefer CWD, then alongside the XYZ file.
+    """
+    stem = os.path.splitext(os.path.basename(xyz_file))[0]
+    name = f"{stem}_vdw_surface.txt"
+    xyz_dir = os.path.dirname(os.path.abspath(xyz_file))
+    # Preserve historical relative join (../ligand -> ../ligand_vdw_surface.txt)
+    rel_base, _ = os.path.splitext(xyz_file)
+    candidates = [
+        os.path.join(os.getcwd(), name),
+        os.path.join(xyz_dir, name),
+        f"{rel_base}_vdw_surface.txt",
+    ]
+    # Deduplicate while preserving order
+    seen: set[str] = set()
+    ordered: list[str] = []
+    for path in candidates:
+        key = os.path.normpath(path)
+        if key not in seen:
+            seen.add(key)
+            ordered.append(path)
+    return ordered
+
+
 def get_vdw_surface_coordinates(xyz_file, surface_density=1.0, surface_scale=1.0):
     """
     Generate van der Waals surface coordinates for a molecule.
@@ -37,28 +66,22 @@ def get_vdw_surface_coordinates(xyz_file, surface_density=1.0, surface_scale=1.0
     if ret.returncode != 0:
         raise RuntimeError(f"vsg failed: {ret.stderr}")
 
-    base, _ = os.path.splitext(xyz_file)
-    surface_file = f"{base}_vdw_surface.txt"
-
-    if not os.path.isfile(surface_file):
-        raise FileNotFoundError(f"Expected surface file not found: {surface_file}")
+    surface_file = next((p for p in _vdw_surface_candidates(xyz_file) if os.path.isfile(p)), None)
+    if surface_file is None:
+        tried = ", ".join(_vdw_surface_candidates(xyz_file))
+        raise FileNotFoundError(f"Expected surface file not found (tried: {tried})")
 
     coords = np.loadtxt(surface_file, dtype=float)
     if coords.ndim == 1 and coords.size == 3:
         coords = coords.reshape(1, 3)
 
-    # Clean up temporary file
-    try:
-        os.remove(surface_file)
-    except OSError as e:
-        print(f"Warning: could not remove {surface_file}: {e}")
-
-    # Also clean up the xyz surface file if created
-    xyz_surface_file = f"{base}_vdw_surface.xyz"
-    if os.path.exists(xyz_surface_file):
-        try:
-            os.remove(xyz_surface_file)
-        except OSError:
-            pass
+    # Clean up temporary files (txt + companion xyz) at all candidate locations
+    for txt_path in _vdw_surface_candidates(xyz_file):
+        for path in (txt_path, f"{os.path.splitext(txt_path)[0]}.xyz"):
+            if os.path.exists(path):
+                try:
+                    os.remove(path)
+                except OSError as e:
+                    print(f"Warning: could not remove {path}: {e}")
 
     return coords

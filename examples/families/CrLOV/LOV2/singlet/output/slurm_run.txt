@@ -1,0 +1,196 @@
+
+4 GPU(s) detected.
+
+Patched coupled.in -> num_procs = 4 (SLURM_GPUS_ON_NODE='4')
+/home/users/sajagbe2/.local/lib/python3.11/site-packages/pyscf/dft/libxc.py:511: UserWarning: Since PySCF-2.3, B3LYP (and B3P86) are changed to the VWN-RPA variant, corresponding to the original definition by Stephens et al. (issue 1480) and the same as the B3LYP functional in Gaussian. To restore the VWN5 definition, you can put the setting "B3LYP_WITH_VWN5 = True" in pyscf_conf.py
+  warnings.warn('Since PySCF-2.3, B3LYP (and B3P86) are changed to the VWN-RPA variant, '
+
+
+============================================================
+                   Electrostatic Map Suite
+                    By Stephen O. Ajagbe
+============================================================
+============================================================
+                  Electrostatic Tuning Maps
+             Built on efforts by the Gozem Lab
+   See: https://pubs.acs.org/doi/10.1021/acs.jpcb.9b00489
+============================================================
+
+
+
+4 GPU(s) detected.
+
+Calculating Tuning of:  ['exe']
+Using molecular states: {'neutral': True, 'td': True}
+
+
+============================================================
+                Calculation Type: combined
+                Number of surface points: 154
+                Parallel Processing: True
+============================================================
+
+
+Logging results to: logs_20260904_223650
+
+WARN: SCF failed to converge
+
+SCF not converged.
+SCF energy = -1896.63118113777
+converged SCF energy = -1896.6313118891
+Spin 0 (2S+1=1) converged: E = -1896.631312 Ha
+
+Lowest energy: spin=0 (2S+1=1), E=-1896.631312 Ha
+Saving GPU object type: <class 'gpu4pyscf.scf.soscf.SecondOrderRKS'>
+Saving functional (from parameter): b3lyp
+Saved to molecule_alone.chk, Energy: -1896.631311889104 (GPU)
+Multi-GPU detected. Using subprocess for single-GPU TDDFT...
+TDDFT completed in subprocess on GPU 0, states: 3
+
+
+============================================================
+                Raw Properties (No Surface)
+                Total raw properties calculated: 3
+                s1_exe: 0.074615
+                s2_exe: 0.621871
+                s3_exe: 0.753196
+============================================================
+
+
+Running combined calculation with all 154 surface points...
+Summary log initialized: logs_20260904_223650/calculation_summary.out
+
+=== Resurrecting /data/PHO_WORK/sajagbe2/QMMM/LOVCalculations/lf-proto/lov-protein/coupled-combined/CR2/singlet/molecule_alone.chk ===
+Loaded XC functional: b3lyp
+Creating DFT object with xc=b3lyp
+Converting <class 'pyscf.dft.rks.RKS'> to GPU...
+Successfully converted to GPU: <class 'gpu4pyscf.dft.rks.RKS'>
+
+
+******** <class 'gpu4pyscf.dft.rks.RKS'> ********
+method = RKS
+initial guess = chkfile
+damping factor = 0
+level_shift factor = 0
+DIIS = <class 'gpu4pyscf.scf.diis.CDIIS'>
+diis_start_cycle = 1
+diis_space = 8
+diis_damp = 0
+SCF conv_tol = 1e-09
+SCF conv_tol_grad = None
+SCF max_cycles = 50
+direct_scf = True
+direct_scf_tol = 1e-13
+chkfile to save SCF result = /tmp/tmpe6qod2mx.chk
+max_memory 4000 MB (current use 1894 MB)
+XC library gpu4pyscf.dft.libxc version 7.0.0 (CUDA)
+    unable to decode the reference due to https://github.com/NVIDIA/cuda-python/issues/29
+XC functionals = b3lyp
+small_rho_cutoff = 1e-07
+Set gradient conv threshold to 3.16228e-05
+init E= -1896.63131188922
+  HOMO = 0.0655357939951026  LUMO = 0.0762687120528799
+cycle= 1 E= -1896.63131188921  delta_E= 1.09e-11  |g|= 1.14e-05  |ddm|= 3.4e-05
+converged SCF energy = -1896.63131188921
+Resurrected GPU DFT object: <class 'gpu4pyscf.dft.rks.RKS'>, Energy: -1896.6313118892058
+Multi-GPU detected. Using subprocess for single-GPU TDDFT...
+TDDFT completed in subprocess on GPU 0, states: 3
+
+
+******** <class 'gpu4pyscf.dft.rks.RKS'> ********
+method = RKS
+initial guess = chkfile
+damping factor = 0
+level_shift factor = 0
+DIIS = <class 'gpu4pyscf.scf.diis.CDIIS'>
+diis_start_cycle = 1
+diis_space = 8
+diis_damp = 0
+SCF conv_tol = 1e-09
+SCF conv_tol_grad = None
+SCF max_cycles = 50
+direct_scf = True
+direct_scf_tol = 1e-13
+chkfile to save SCF result = molecule_alone.chk
+max_memory 4000 MB (current use 2027 MB)
+XC library gpu4pyscf.dft.libxc version 7.0.0 (CUDA)
+    unable to decode the reference due to https://github.com/NVIDIA/cuda-python/issues/29
+XC functionals = b3lyp
+small_rho_cutoff = 1e-07
+Overwritten attributes  energy_nuc get_hcore  of <class 'gpu4pyscf.dft.rks.RKS'>
+<class 'gpu4pyscf.dft.rks.RKS'> does not have attributes  basis charge spin
+Set gradient conv threshold to 3.16228e-05
+init E= -1896.69633853925
+  HOMO = 0.0278450923633569  LUMO = 0.0598823621036098
+cycle= 1 E= -1896.65959548575  delta_E= 0.0367  |g|= 0.266  |ddm|= 0.847
+  HOMO = 0.0863659162041069  LUMO = 0.112584185590303
+cycle= 2 E= -1888.37046890251  delta_E= 8.29  |g|= 3.24  |ddm|= 4.68
+  HOMO = 0.0463219689882878  LUMO = 0.0509584909913076
+cycle= 3 E= -1896.2085546443  delta_E= -7.84  |g|= 0.986  |ddm|= 4.14
+  HOMO = 0.0431924537843493  LUMO = 0.0558593449345819
+cycle= 4 E= -1896.66556302319  delta_E= -0.457  |g|= 0.217  |ddm|=  2.1
+  HOMO = 0.0478073510585422  LUMO = 0.0536750359950139
+cycle= 5 E= -1896.23984337897  delta_E= 0.426  |g|= 0.898  |ddm|= 2.09
+  HOMO = 0.0479027756053341  LUMO = 0.0522736267202336
+cycle= 6 E= -1896.38914175846  delta_E= -0.149  |g|= 0.801  |ddm|= 0.394
+  HOMO = 0.0481726016636953  LUMO = 0.0515529175287917
+cycle= 7 E= -1896.57117896003  delta_E= -0.182  |g|= 0.544  |ddm|= 0.513
+  HOMO = 0.0445457566506166  LUMO = 0.0538388139841794
+cycle= 8 E= -1896.69626440162  delta_E= -0.125  |g|= 0.0554  |ddm|= 0.974
+  HOMO = 0.0447263082168778  LUMO = 0.0538570212507126
+cycle= 9 E= -1896.69611762203  delta_E= 0.000147  |g|= 0.0556  |ddm|= 0.21
+  HOMO = 0.044370184080114  LUMO = 0.054065485745694
+cycle= 10 E= -1896.69447521416  delta_E= 0.00164  |g|= 0.0811  |ddm|= 0.0516
+  HOMO = 0.0439782070435915  LUMO = 0.0542244041247113
+cycle= 11 E= -1896.69708579376  delta_E= -0.00261  |g|= 0.0312  |ddm|= 0.0967
+  HOMO = 0.0436989875594557  LUMO = 0.0544056237495593
+cycle= 12 E= -1896.69753457115  delta_E= -0.000449  |g|= 0.00393  |ddm|= 0.054
+  HOMO = 0.0436387709290209  LUMO = 0.0543801232106342
+cycle= 13 E= -1896.69754072004  delta_E= -6.15e-06  |g|= 0.00117  |ddm|= 0.00609
+  HOMO = 0.0436486762640578  LUMO = 0.0543901323365741
+cycle= 14 E= -1896.69754113977  delta_E= -4.2e-07  |g|= 0.000446  |ddm|= 0.00133
+  HOMO = 0.0436443294396131  LUMO = 0.0543945681616967
+cycle= 15 E= -1896.69754119615  delta_E= -5.64e-08  |g|= 0.000262  |ddm|= 0.00139
+  HOMO = 0.0436454352533024  LUMO = 0.0543952750064271
+cycle= 16 E= -1896.69754121744  delta_E= -2.13e-08  |g|= 0.000154  |ddm|= 0.000247
+  HOMO = 0.0436465322780724  LUMO = 0.054393509065198
+cycle= 17 E= -1896.69754122866  delta_E= -1.12e-08  |g|= 1.88e-05  |ddm|= 0.000345
+  HOMO = 0.0436467997714368  LUMO = 0.0543935804253908
+cycle= 18 E= -1896.6975412284  delta_E= 2.54e-10  |g|= 2.93e-05  |ddm|= 3.42e-05
+converged SCF energy = -1896.6975412284
+Running TDDFT in current process (force_single_gpu=True)
+
+
+******** <class 'gpu4pyscf.tdscf.rks.TDDFT'> for <class 'gpu4pyscf.dft.rks.RKS'> ********
+nstates = 3 singlet
+deg_eia_thresh = 1.000e-03
+wfnsym = None
+conv_tol = 1e-05
+eigh lindep = 1e-12
+eigh level_shift = 0
+eigh max_cycle = 100
+chkfile = molecule_alone.chk
+max_memory 4000 MB (current use 2008 MB)
+
+
+Excited State energies (eV)
+[0.07979217 0.65077539 0.77118003]
+Combined effects: {'s1_exe_effect': 0.005267371340146876, 's2_exe_effect': 0.0289083188138477, 's3_exe_effect': 0.01799753818053207}
+
+Final statistics written to: logs_20260904_223650/calculation_summary.out
+Raw properties appended to: logs_20260904_223650/calculation_summary.out
+Created: ligand_s1_exe.mol2
+Created: ligand_s2_exe.mol2
+Created: ligand_s3_exe.mol2
+Created: ligand_s1_exe_normalized.mol2
+Created: ligand_s2_exe_normalized.mol2
+Created: ligand_s3_exe_normalized.mol2
+
+Created: ligand_tuning_summary.csv
+
+Organizing results into: results_ligand_2026-09-04_22-40-19/
+  Moved: ligand_tuning_summary.csv
+  Moved 6 MOL2 files
+  Added normalization parameters to summary
+  Moved: logs_20260904_223650/ -> logs/
+All expected output files were created.

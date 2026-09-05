@@ -1,0 +1,7 @@
+@<TRIPOS>MOLECULE
+s1_exe_normalized | baseline=0.136674
+    1 0 0 0
+SMALL
+GASTEIGER
+@<TRIPOS>ATOM
+    1 H     32.0926  35.7308  38.4244 H1   1 S1_EXE     0.000000

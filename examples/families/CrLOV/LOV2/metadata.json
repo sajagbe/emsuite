@@ -1,0 +1,16 @@
+{
+  "system": "CR2",
+  "source_gro": "/data/PHO_WORK/sajagbe2/QMMM/LOVCalculations/Selected100-L1vL2/CR2Sel.gro",
+  "n_frames": 700,
+  "frame_index": 350,
+  "frame_number_1based": 351,
+  "n_ligand_atoms": 50,
+  "n_protein_atoms": 2461,
+  "n_complex_atoms": 2511,
+  "ligand_xyz": "/data/PHO_WORK/sajagbe2/QMMM/LOVCalculations/lf-proto/lov-protein/frames/CR2/ligand.xyz",
+  "complex_pdb": "/data/PHO_WORK/sajagbe2/QMMM/LOVCalculations/lf-proto/lov-protein/frames/CR2/complex.pdb",
+  "ligand_mol2": "/data/PHO_WORK/sajagbe2/QMMM/LOVCalculations/crLOV2/crLOV2_FMN_APEC_Calculation_Files/crLOV2_FMN.mol2",
+  "ligand_resname": "CHR",
+  "coord_units": "angstrom",
+  "coord_scale": 10.0
+}

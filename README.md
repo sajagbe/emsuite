@@ -459,7 +459,7 @@ See `examples/water-gpu/run_api.py` for a full SMILES→tuning script.
 - Install with `pip install emsuite[gpu]` on the compute node (or in your job env).
 - Set `parallel = True` and `num_procs` to the number of GPUs allocated.
 - Verify: `python -c "import gpu4pyscf.dft; from emsuite.core import check_gpu_info; print(check_gpu_info())"`
-- Integration tests: `scripts/run_gpu_integration.sh`
+- Integration tests: `pytest -m gpu` (CUDA required)
 - Water benchmark: `examples/water-gpu/run_gpu.sh`
 
 If `gpu4pyscf` import fails after install, reinstall cleanly:
@@ -479,6 +479,7 @@ pip install --no-cache-dir 'gpu4pyscf-cuda12x==1.4.3'
 | `examples/templates/` | Annotated `.in` templates for all four channels |
 | `examples/water-gpu/` | SMILES water → GPU tuning (CLI + Python) |
 | `examples/tuning/CCO2-exe/` | Ethanol `exe` tuning sample outputs |
+| `examples/families/` | LOV / miniSOG / SOPP3 combined `exe` examples by family |
 
 ---
 

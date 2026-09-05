@@ -1,6 +1,6 @@
 """EMSuite — Electrostatic Map Suite."""
 
-__version__ = "1.3.0"
+__version__ = "1.6.0"
 
 from emsuite.coupled import run_coupled_calculation
 from emsuite.inputs import CoupledInput, PotentialInput, SurfaceInput, TuningInput

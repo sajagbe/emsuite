@@ -1,0 +1,295 @@
+
+4 GPU(s) detected.
+
+Patched coupled.in -> num_procs = 4 (SLURM_GPUS_ON_NODE='4')
+/home/users/sajagbe2/.local/lib/python3.11/site-packages/pyscf/dft/libxc.py:511: UserWarning: Since PySCF-2.3, B3LYP (and B3P86) are changed to the VWN-RPA variant, corresponding to the original definition by Stephens et al. (issue 1480) and the same as the B3LYP functional in Gaussian. To restore the VWN5 definition, you can put the setting "B3LYP_WITH_VWN5 = True" in pyscf_conf.py
+  warnings.warn('Since PySCF-2.3, B3LYP (and B3P86) are changed to the VWN-RPA variant, '
+
+
+============================================================
+                   Electrostatic Map Suite
+                    By Stephen O. Ajagbe
+============================================================
+============================================================
+                  Electrostatic Tuning Maps
+             Built on efforts by the Gozem Lab
+   See: https://pubs.acs.org/doi/10.1021/acs.jpcb.9b00489
+============================================================
+
+
+
+4 GPU(s) detected.
+
+Calculating Tuning of:  ['exe']
+Using molecular states: {'neutral': True, 'td': True}
+
+
+============================================================
+                Calculation Type: combined
+                Number of surface points: 155
+                Parallel Processing: True
+============================================================
+
+
+Logging results to: logs_20260904_223152
+
+WARN: SCF failed to converge
+
+SCF not converged.
+SCF energy = -1896.05437730851
+
+WARN: canonicalized orbital HOMO 0.09757498529067235 > LUMO 0.0016662837382223714 
+
+converged SCF energy = -1896.49521237608
+Spin 0 (2S+1=1) converged: E = -1896.495212 Ha
+
+Lowest energy: spin=0 (2S+1=1), E=-1896.495212 Ha
+Saving GPU object type: <class 'gpu4pyscf.scf.soscf.SecondOrderRKS'>
+Saving functional (from parameter): b3lyp
+Saved to molecule_alone.chk, Energy: -1896.495212376079 (GPU)
+Multi-GPU detected. Using subprocess for single-GPU TDDFT...
+TDDFT completed in subprocess on GPU 0, states: 3
+
+
+============================================================
+                Raw Properties (No Surface)
+                Total raw properties calculated: 3
+                s1_exe: 0.137448
+                s2_exe: 0.553961
+                s3_exe: 0.823391
+============================================================
+
+
+Running combined calculation with all 155 surface points...
+Summary log initialized: logs_20260904_223152/calculation_summary.out
+
+=== Resurrecting /data/PHO_WORK/sajagbe2/QMMM/LOVCalculations/lf-proto/lov-protein/coupled-combined/AT2/singlet/molecule_alone.chk ===
+Loaded XC functional: b3lyp
+Creating DFT object with xc=b3lyp
+Converting <class 'pyscf.dft.rks.RKS'> to GPU...
+Successfully converted to GPU: <class 'gpu4pyscf.dft.rks.RKS'>
+
+
+******** <class 'gpu4pyscf.dft.rks.RKS'> ********
+method = RKS
+initial guess = chkfile
+damping factor = 0
+level_shift factor = 0
+DIIS = <class 'gpu4pyscf.scf.diis.CDIIS'>
+diis_start_cycle = 1
+diis_space = 8
+diis_damp = 0
+SCF conv_tol = 1e-09
+SCF conv_tol_grad = None
+SCF max_cycles = 50
+direct_scf = True
+direct_scf_tol = 1e-13
+chkfile to save SCF result = /tmp/tmp92l7ddvj.chk
+max_memory 4000 MB (current use 2002 MB)
+XC library gpu4pyscf.dft.libxc version 7.0.0 (CUDA)
+    unable to decode the reference due to https://github.com/NVIDIA/cuda-python/issues/29
+XC functionals = b3lyp
+small_rho_cutoff = 1e-07
+Set gradient conv threshold to 3.16228e-05
+init E= -1896.49521237618
+  HOMO = 0.00166628374694584  LUMO = 0.0975749853077962
+cycle= 1 E= -1896.51548591762  delta_E= -0.0203  |g|= 0.574  |ddm|= 2.39
+  HOMO = 0.142440107140205  LUMO = 0.165985251822086
+cycle= 2 E= -1873.08136330875  delta_E= 23.4  |g|=    5  |ddm|= 6.59
+  HOMO = 0.0164159712681838  LUMO = 0.0804999208728377
+cycle= 3 E= -1896.52886733198  delta_E= -23.4  |g|= 0.562  |ddm|= 6.46
+  HOMO = 0.0590639323317446  LUMO = 0.0816875623959682
+cycle= 4 E= -1896.59109617949  delta_E= -0.0622  |g|= 0.244  |ddm|= 0.638
+  HOMO = 0.103994315154103  LUMO = 0.105909197503901
+cycle= 5 E= -1893.29180348253  delta_E=  3.3  |g|=  2.1  |ddm|= 3.64
+  HOMO = 0.0819847224235013  LUMO = 0.109693826489409
+cycle= 6 E= -1896.01781472021  delta_E= -2.73  |g|=    1  |ddm|= 2.76
+  HOMO = 0.0653265792054528  LUMO = 0.0909203860672928
+cycle= 7 E= -1896.06787408846  delta_E= -0.0501  |g|= 0.913  |ddm|= 0.333
+  HOMO = 0.0692559223175623  LUMO = 0.0823857217737766
+cycle= 8 E= -1896.08843604728  delta_E= -0.0206  |g|= 0.875  |ddm|= 0.152
+
+WARN: HOMO 0.0726801365926165 == LUMO 0.0731580909731148
+
+cycle= 9 E= -1896.6068315902  delta_E= -0.518  |g|= 0.25  |ddm|= 2.31
+  HOMO = 0.0707615098135984  LUMO = 0.0782092406795065
+cycle= 10 E= -1896.10808653508  delta_E= 0.499  |g|= 0.871  |ddm|= 2.25
+  HOMO = 0.0719271996653688  LUMO = 0.074840442527896
+cycle= 11 E= -1896.54217786589  delta_E= -0.434  |g|= 0.487  |ddm|= 1.36
+  HOMO = 0.0645862705101751  LUMO = 0.0895696993423408
+cycle= 12 E= -1896.07608824633  delta_E= 0.466  |g|= 0.92  |ddm|= 1.41
+  HOMO = 0.0682362707222703  LUMO = 0.0890441764289561
+cycle= 13 E= -1896.1172141562  delta_E= -0.0411  |g|= 0.901  |ddm|= 0.235
+  HOMO = 0.0686408904097028  LUMO = 0.101160074833441
+cycle= 14 E= -1896.057915362  delta_E= 0.0593  |g|= 0.956  |ddm|= 0.227
+  HOMO = 0.0628264619249802  LUMO = 0.094518811110637
+cycle= 15 E= -1896.07632726094  delta_E= -0.0184  |g|= 0.934  |ddm|= 0.0772
+  HOMO = 0.0633369356687085  LUMO = 0.09463884577491
+cycle= 16 E= -1896.07463694851  delta_E= 0.00169  |g|= 0.936  |ddm|= 0.0906
+  HOMO = 0.0655879192773835  LUMO = 0.0918070948260627
+cycle= 17 E= -1896.08937868881  delta_E= -0.0147  |g|= 0.916  |ddm|= 0.116
+  HOMO = 0.0607519184069668  LUMO = 0.0978158586586988
+cycle= 18 E= -1896.53736706586  delta_E= -0.448  |g|= 0.568  |ddm|= 2.32
+  HOMO = 0.0697356350126257  LUMO = 0.079578152934022
+cycle= 19 E= -1896.39117169414  delta_E= 0.146  |g|= 0.734  |ddm|= 1.87
+  HOMO = 0.0674142710762478  LUMO = 0.0806722790803531
+cycle= 20 E= -1896.16372596372  delta_E= 0.227  |g|= 0.904  |ddm|= 0.619
+  HOMO = 0.0642924756452846  LUMO = 0.0880674102651659
+cycle= 21 E= -1896.0895023695  delta_E= 0.0742  |g|= 0.931  |ddm|= 0.308
+  HOMO = 0.0377171170288915  LUMO = 0.0758130892635389
+cycle= 22 E= -1896.54147184215  delta_E= -0.452  |g|= 0.548  |ddm|= 2.33
+  HOMO = 0.0519866423061554  LUMO = 0.0839452095843747
+cycle= 23 E= -1896.57614658661  delta_E= -0.0347  |g|= 0.358  |ddm|= 0.576
+  HOMO = 0.0617057553401828  LUMO = 0.0780185941059107
+cycle= 24 E= -1896.58787665522  delta_E= -0.0117  |g|= 0.294  |ddm|= 0.201
+  HOMO = 0.0710487827282379  LUMO = 0.073427022325211
+cycle= 25 E= -1896.64047973463  delta_E= -0.0526  |g|= 0.0991  |ddm|= 1.12
+  HOMO = 0.0707668591407975  LUMO = 0.0783571343356898
+cycle= 26 E= -1896.53923217706  delta_E= 0.101  |g|=  0.5  |ddm|= 0.685
+  HOMO = 0.069882488326617  LUMO = 0.0780533294899366
+cycle= 27 E= -1896.54285018413  delta_E= -0.00362  |g|= 0.485  |ddm|= 0.104
+  HOMO = 0.0699408163953101  LUMO = 0.0780989457848214
+cycle= 28 E= -1896.53593901032  delta_E= 0.00691  |g|= 0.501  |ddm|= 0.0261
+  HOMO = 0.0703298115620009  LUMO = 0.0783916790642704
+cycle= 29 E= -1896.57089724497  delta_E= -0.035  |g|= 0.417  |ddm|= 0.171
+  HOMO = 0.0686174146621851  LUMO = 0.0786943789995892
+cycle= 30 E= -1896.48436026457  delta_E= 0.0865  |g|= 0.602  |ddm|= 0.335
+  HOMO = 0.069375991159583  LUMO = 0.0791764767972999
+cycle= 31 E= -1896.49562315441  delta_E= -0.0113  |g|= 0.582  |ddm|= 0.0438
+  HOMO = 0.0688242512761339  LUMO = 0.0785869440123159
+cycle= 32 E= -1896.49536923907  delta_E= 0.000254  |g|= 0.583  |ddm|= 0.0376
+  HOMO = 0.0676208656312996  LUMO = 0.0780447868691598
+cycle= 33 E= -1896.63253889674  delta_E= -0.137  |g|= 0.161  |ddm|= 0.668
+  HOMO = 0.0644956011570905  LUMO = 0.0782707342777593
+cycle= 34 E= -1896.63673268399  delta_E= -0.00419  |g|= 0.124  |ddm|= 0.533
+  HOMO = 0.0664796748913396  LUMO = 0.0774962696050683
+cycle= 35 E= -1896.64394691507  delta_E= -0.00721  |g|= 0.0205  |ddm|= 0.215
+  HOMO = 0.0670817472348116  LUMO = 0.0774640299957752
+cycle= 36 E= -1896.6432942634  delta_E= 0.000653  |g|= 0.0444  |ddm|= 0.116
+  HOMO = 0.0670057262898328  LUMO = 0.0774936482839113
+cycle= 37 E= -1896.64360767477  delta_E= -0.000313  |g|= 0.034  |ddm|= 0.0196
+  HOMO = 0.0668513969061721  LUMO = 0.077519086669911
+cycle= 38 E= -1896.64402717809  delta_E= -0.00042  |g|= 0.0154  |ddm|= 0.0348
+  HOMO = 0.0667960474316569  LUMO = 0.0775060476736544
+cycle= 39 E= -1896.64412106345  delta_E= -9.39e-05  |g|= 0.00593  |ddm|= 0.0185
+  HOMO = 0.0667608974512131  LUMO = 0.0774970744206397
+cycle= 40 E= -1896.64413698282  delta_E= -1.59e-05  |g|= 0.00101  |ddm|= 0.0127
+  HOMO = 0.0667607883841325  LUMO = 0.0774859327706409
+cycle= 41 E= -1896.64413733243  delta_E= -3.5e-07  |g|= 0.000157  |ddm|= 0.0016
+  HOMO = 0.0667677040015598  LUMO = 0.0774906752572779
+cycle= 42 E= -1896.64413734559  delta_E= -1.32e-08  |g|= 0.000118  |ddm|= 0.00068
+  HOMO = 0.0667639465760738  LUMO = 0.0774881806771088
+cycle= 43 E= -1896.64413734724  delta_E= -1.65e-09  |g|= 0.000104  |ddm|= 0.000263
+  HOMO = 0.0667660575405681  LUMO = 0.0774882810791536
+cycle= 44 E= -1896.64413735043  delta_E= -3.2e-09  |g|= 7.93e-05  |ddm|= 0.00041
+  HOMO = 0.0667656830523936  LUMO = 0.0774881341994831
+cycle= 45 E= -1896.64413735199  delta_E= -1.55e-09  |g|= 5.76e-05  |ddm|= 0.000182
+  HOMO = 0.0667653497145219  LUMO = 0.0774882337079141
+cycle= 46 E= -1896.64413735328  delta_E= -1.29e-09  |g|= 1.93e-05  |ddm|= 7.2e-05
+  HOMO = 0.0667652165450375  LUMO = 0.0774882522685059
+cycle= 47 E= -1896.64413735343  delta_E= -1.51e-10  |g|= 6.28e-06  |ddm|= 2.77e-05
+converged SCF energy = -1896.64413735343
+Resurrected GPU DFT object: <class 'gpu4pyscf.dft.rks.RKS'>, Energy: -1896.6441373534321
+Multi-GPU detected. Using subprocess for single-GPU TDDFT...
+TDDFT completed in subprocess on GPU 0, states: 3
+
+
+******** <class 'gpu4pyscf.dft.rks.RKS'> ********
+method = RKS
+initial guess = chkfile
+damping factor = 0
+level_shift factor = 0
+DIIS = <class 'gpu4pyscf.scf.diis.CDIIS'>
+diis_start_cycle = 1
+diis_space = 8
+diis_damp = 0
+SCF conv_tol = 1e-09
+SCF conv_tol_grad = None
+SCF max_cycles = 50
+direct_scf = True
+direct_scf_tol = 1e-13
+chkfile to save SCF result = molecule_alone.chk
+max_memory 4000 MB (current use 2128 MB)
+XC library gpu4pyscf.dft.libxc version 7.0.0 (CUDA)
+    unable to decode the reference due to https://github.com/NVIDIA/cuda-python/issues/29
+XC functionals = b3lyp
+small_rho_cutoff = 1e-07
+Overwritten attributes  energy_nuc get_hcore  of <class 'gpu4pyscf.dft.rks.RKS'>
+<class 'gpu4pyscf.dft.rks.RKS'> does not have attributes  charge spin basis
+Set gradient conv threshold to 3.16228e-05
+init E= -1896.68765185352
+  HOMO = 0.0479798878371996  LUMO = 0.0624196119389894
+cycle= 1 E= -1896.67308324187  delta_E= 0.0146  |g|= 0.172  |ddm|= 0.42
+  HOMO = 0.0899234390364409  LUMO = 0.0990076561041374
+cycle= 2 E= -1893.14600182984  delta_E= 3.53  |g|= 2.24  |ddm|= 3.52
+  HOMO = 0.0530073159946819  LUMO = 0.0605576858908857
+cycle= 3 E= -1896.41240535571  delta_E= -3.27  |g|= 0.787  |ddm|= 2.97
+  HOMO = 0.0506831926254663  LUMO = 0.0618801417724966
+cycle= 4 E= -1896.67286342079  delta_E= -0.26  |g|= 0.17  |ddm|= 1.56
+  HOMO = 0.053656271579627  LUMO = 0.061118112046442
+cycle= 5 E= -1896.67617745535  delta_E= -0.00331  |g|= 0.168  |ddm|= 0.667
+  HOMO = 0.0526472851127372  LUMO = 0.0609589533183391
+cycle= 6 E= -1896.66587988738  delta_E= 0.0103  |g|= 0.229  |ddm|= 0.113
+  HOMO = 0.0522643413682908  LUMO = 0.0611216338805041
+cycle= 7 E= -1896.67400673228  delta_E= -0.00813  |g|= 0.183  |ddm|= 0.079
+  HOMO = 0.052183287998199  LUMO = 0.0614702555845203
+cycle= 8 E= -1896.67698861521  delta_E= -0.00298  |g|= 0.16  |ddm|= 0.0356
+  HOMO = 0.0516692312809085  LUMO = 0.0615087391200434
+cycle= 9 E= -1896.68422396104  delta_E= -0.00724  |g|= 0.093  |ddm|= 0.113
+  HOMO = 0.051283573358524  LUMO = 0.0616824948697256
+cycle= 10 E= -1896.68753184999  delta_E= -0.00331  |g|= 0.034  |ddm|= 0.104
+  HOMO = 0.0509842331253593  LUMO = 0.0617893457854778
+cycle= 11 E= -1896.68805406913  delta_E= -0.000522  |g|= 0.00338  |ddm|= 0.0689
+  HOMO = 0.0509272670277285  LUMO = 0.0617172409250516
+cycle= 12 E= -1896.68805509912  delta_E= -1.03e-06  |g|= 0.00294  |ddm|= 0.00319
+  HOMO = 0.0509685485375529  LUMO = 0.0617194654824169
+cycle= 13 E= -1896.68805770672  delta_E= -2.61e-06  |g|= 0.00145  |ddm|= 0.00269
+  HOMO = 0.0509919080551719  LUMO = 0.0617199173099974
+cycle= 14 E= -1896.6880586097  delta_E= -9.03e-07  |g|= 0.000492  |ddm|= 0.0037
+  HOMO = 0.0509868889738574  LUMO = 0.0617211178190257
+cycle= 15 E= -1896.68805871149  delta_E= -1.02e-07  |g|= 7.14e-05  |ddm|= 0.000759
+  HOMO = 0.0509864480396826  LUMO = 0.0617209101380235
+cycle= 16 E= -1896.6880587134  delta_E= -1.91e-09  |g|= 3.69e-05  |ddm|= 0.000123
+  HOMO = 0.050985420980628  LUMO = 0.0617209225765386
+cycle= 17 E= -1896.68805871166  delta_E= 1.74e-09  |g|= 7.13e-05  |ddm|= 0.000208
+  HOMO = 0.0509860538317073  LUMO = 0.0617209026170027
+cycle= 18 E= -1896.68805871398  delta_E= -2.32e-09  |g|= 1.74e-05  |ddm|= 0.000111
+  HOMO = 0.0509862475880925  LUMO = 0.0617210150919142
+cycle= 19 E= -1896.68805871413  delta_E= -1.56e-10  |g|= 1.26e-05  |ddm|= 3.01e-05
+converged SCF energy = -1896.68805871413
+Running TDDFT in current process (force_single_gpu=True)
+
+
+******** <class 'gpu4pyscf.tdscf.rks.TDDFT'> for <class 'gpu4pyscf.dft.rks.RKS'> ********
+nstates = 3 singlet
+deg_eia_thresh = 1.000e-03
+wfnsym = None
+conv_tol = 1e-05
+eigh lindep = 1e-12
+eigh level_shift = 0
+eigh max_cycle = 100
+chkfile = molecule_alone.chk
+max_memory 4000 MB (current use 2123 MB)
+
+
+Excited State energies (eV)
+[0.13530791 0.56106304 0.79429093]
+Combined effects: {'s1_exe_effect': -0.00214157421046246, 's2_exe_effect': 0.007095738459319101, 's3_exe_effect': -0.02909609258490764}
+
+Final statistics written to: logs_20260904_223152/calculation_summary.out
+Raw properties appended to: logs_20260904_223152/calculation_summary.out
+Created: ligand_s1_exe.mol2
+Created: ligand_s2_exe.mol2
+Created: ligand_s3_exe.mol2
+Created: ligand_s1_exe_normalized.mol2
+Created: ligand_s2_exe_normalized.mol2
+Created: ligand_s3_exe_normalized.mol2
+
+Created: ligand_tuning_summary.csv
+
+Organizing results into: results_ligand_2026-09-04_22-37-27/
+  Moved: ligand_tuning_summary.csv
+  Moved 6 MOL2 files
+  Added normalization parameters to summary
+  Moved: logs_20260904_223152/ -> logs/
+All expected output files were created.

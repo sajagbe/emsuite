@@ -1,0 +1,7 @@
+@<TRIPOS>MOLECULE
+t2_exe_normalized | baseline=0.473287
+    1 0 0 0
+SMALL
+GASTEIGER
+@<TRIPOS>ATOM
+    1 H     36.9709  40.6104  43.3442 H1   1 T2_EXE     0.000000

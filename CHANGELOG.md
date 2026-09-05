@@ -4,7 +4,11 @@ All notable changes to this project are documented in this file.
 
 ## [Unreleased]
 
+## [1.6.0] - 2026-09-05
+
 ### Added
+- `examples/families/`: packaged combined `exe` calculations by family (AtLOV, AsLOV, CrLOV, miniSOG, SOPP3), with geometry, `coupled.in`, and lean outputs.
+- `surf2mol2` CLI entry point (`emsuite.cli.surf2mol2`).
 - Public `SurfaceInput` / `PotentialInput` / `TuningInput` / `CoupledInput` and matching `*Result` types; `.in` files load inputs.
 - `Geometry.from_xyz` and `PotentialResult.to_surf()`.
 - `SurfaceResult.to_xyz()` (pseudo-atom point cloud) and `SurfaceResult.to_mol2()` (pseudo-atoms with `values` in the charge column), plus `surface.io.save_mol2()`, for visualizing a `.surf` in a molecular viewer.
@@ -15,6 +19,7 @@ All notable changes to this project are documented in this file.
 - `CoupledInput` gains the same `protein_format='pdb'`/`ligand_resname`/`ligand_chain`/`ligand_resseq`/`ligand_mol2`/`forcefield`/`ph` fields as `PotentialInput`, so the coupled (potential → tuning) pipeline can drive the pdb2pqr path too, not just the standalone `potential` channel.
 
 ### Fixed
+- `get_vdw_surface_coordinates`: locate `vsg` outputs in the process CWD when `molecule` is a relative path (e.g. `../ligand.xyz`), so coupled/potential jobs no longer fail looking for `../ligand_vdw_surface.txt`.
 - APBS input template was missing the required `bcfl` and `sdens` keywords, so every real APBS run failed with `PBEparm_check` errors; the potential and coupled channels could not previously complete a run against a real APBS binary. Added `bcfl mdh` and `sdens 10.0`.
 - `partial_charges_from_xyz` computed Gasteiger charges on a bond-free RDKit molecule (`Chem.MolFromXYZFile` doesn't perceive bonds from 3D coordinates), so charges didn't propagate across the molecule and didn't sum to the formal charge. Now calls `rdDetermineBonds.DetermineBonds()` first.
 - The potential channel's `charge` input was parsed and validated but never used; it's now passed through to Gasteiger charge assignment for the ligand.

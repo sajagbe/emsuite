@@ -19,6 +19,7 @@ htmlcov/
 *.chk
 *.log
 *.out
+*.err
 *.tmp
 *.molden
 *.checkpoint
@@ -34,6 +35,12 @@ htmlcov/
 td_input.pkl
 td_results.pkl
 results_*/
+
+# Scratch / accidental root dumps
+/tst*
+/TST*
+/CodexTest.md
+/analysis/
 
 # Local development workspace (see dev/README.md)
 dev/*

@@ -1,0 +1,16 @@
+{
+  "system": "MSOG",
+  "source_gro": "/data/PHO_WORK/sajagbe2/QMMM/LOVCalculations/miniSOG/6gpu_FMN_APEC_Calculation_Files/wt/Step_5/MD_ASEC/Selected_100.gro",
+  "n_frames": 100,
+  "frame_index": 50,
+  "frame_number_1based": 51,
+  "n_ligand_atoms": 50,
+  "n_protein_atoms": 1880,
+  "n_complex_atoms": 1930,
+  "ligand_xyz": "/data/PHO_WORK/sajagbe2/QMMM/LOVCalculations/lf-proto/sog-protein/frames/MSOG/ligand.xyz",
+  "complex_pdb": "/data/PHO_WORK/sajagbe2/QMMM/LOVCalculations/lf-proto/sog-protein/frames/MSOG/complex.pdb",
+  "ligand_mol2": "/data/PHO_WORK/sajagbe2/QMMM/LOVCalculations/lf-proto/sog-protein/frames/MSOG/CHR.mol2",
+  "ligand_resname": "CHR",
+  "coord_units": "angstrom",
+  "coord_scale": 10.0
+}
