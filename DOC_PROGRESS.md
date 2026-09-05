@@ -515,5 +515,12 @@ Zensical: No issues found; build finished in 0.41s
 Tests: 63 passed in 4.30s
 ```
 
-Next: push `feat/zensical-docs` to `origin` with upstream tracking, keep the
-local branch checked out, and use the live preview for iterative doc updates.
+Remote publication:
+
+```bash
+git push --set-upstream origin feat/zensical-docs
+```
+
+Result: **PASS** — `origin/feat/zensical-docs` was created, upstream tracking
+was established, and the local feature branch remains checked out for the next
+round of documentation updates.
