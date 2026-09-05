@@ -1,0 +1,38 @@
+:root {
+  --emsuite-blue: #0c77e3;
+  --emsuite-red: #e80b1d;
+  --emsuite-gradient: linear-gradient(135deg, var(--emsuite-blue), var(--emsuite-red));
+}
+
+.md-header {
+  background: var(--emsuite-gradient);
+}
+
+.md-typeset h1 {
+  font-weight: 700;
+  letter-spacing: -0.025em;
+}
+
+.md-typeset .emsuite-hero {
+  border: 1px solid color-mix(in srgb, var(--emsuite-blue) 28%, transparent);
+  border-radius: 1rem;
+  padding: 1.25rem 1.4rem;
+  background: linear-gradient(
+    135deg,
+    color-mix(in srgb, var(--emsuite-blue) 9%, transparent),
+    color-mix(in srgb, var(--emsuite-red) 6%, transparent)
+  );
+}
+
+.md-typeset .emsuite-hero p:last-child {
+  margin-bottom: 0;
+}
+
+.md-typeset table:not([class]) th {
+  background: color-mix(in srgb, var(--emsuite-blue) 10%, transparent);
+}
+
+.md-typeset a:focus-visible {
+  outline: 3px solid var(--emsuite-red);
+  outline-offset: 2px;
+}
