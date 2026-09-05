@@ -85,7 +85,9 @@ def _occupancy_from_pdb(
         run_pdb2pqr(stripped, pqr_path, forcefield=forcefield, ligand_mol2=None, ph=ph)
     else:
         if not ligand_mol2:
-            raise ValueError(f"ligand_atoms={mode!r} with protein_format='pdb' requires ligand_mol2")
+            raise ValueError(
+                f"ligand_atoms={mode!r} with protein_format='pdb' requires ligand_mol2"
+            )
         isolated = isolate_residue(
             protein_pdb, ligand_resname, ligand_chain, ligand_resseq, work / "isolated.pdb"
         )

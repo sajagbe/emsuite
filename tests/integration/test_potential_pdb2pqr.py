@@ -72,7 +72,9 @@ def test_pdb_present_vs_charged_pqr_differ_only_in_ligand_charge(
     from emsuite.potential.pqr import zero_ligand_charges
 
     isolated = isolate_residue("complex.pdb", "MTH", None, None, "isolated.pdb")
-    charged_pqr = run_pdb2pqr(isolated, "charged.pqr", forcefield="AMBER", ligand_mol2="methane.mol2", ph=None)
+    charged_pqr = run_pdb2pqr(
+        isolated, "charged.pqr", forcefield="AMBER", ligand_mol2="methane.mol2", ph=None
+    )
     present_pqr = zero_ligand_charges(charged_pqr, "MTH", None, "present.pqr")
 
     charged_lines = [line for line in charged_pqr.read_text().splitlines() if " MTH " in line]

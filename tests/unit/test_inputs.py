@@ -24,9 +24,7 @@ def test_potential_input_file_matches_kwargs(tmp_path: Path):
 
 def test_tuning_input_file_matches_kwargs(tmp_path: Path):
     cfg = tmp_path / "tuning.in"
-    cfg.write_text(
-        "molecule = 'm.xyz'\nsurface_file = 'm.surf'\nproperties = ['homo', 'gap']\n"
-    )
+    cfg.write_text("molecule = 'm.xyz'\nsurface_file = 'm.surf'\nproperties = ['homo', 'gap']\n")
     from_file = TuningInput.from_file(cfg)
     from_kwargs = TuningInput.from_config(
         molecule="m.xyz", surface_file="m.surf", properties=["homo", "gap"]

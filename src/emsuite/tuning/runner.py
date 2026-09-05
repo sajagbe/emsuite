@@ -428,7 +428,13 @@ def create_molecule_objects(
 
 
 def create_wsc_objects(
-    molecules, coord, q_mm, state_of_interest, triplet, required_calculations, force_single_gpu=False
+    molecules,
+    coord,
+    q_mm,
+    state_of_interest,
+    triplet,
+    required_calculations,
+    force_single_gpu=False,
 ):
     """
     Create QM/MM molecule objects with external point charges.

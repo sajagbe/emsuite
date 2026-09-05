@@ -39,7 +39,9 @@ def select_residue_lines(
     not by line count, since a residue has multiple atom lines.
     """
     lines = Path(pdb_path).read_text().splitlines(keepends=True)
-    matched = [line for line in lines if _is_hetatm(line) and _matches(line, resname, chain, resseq)]
+    matched = [
+        line for line in lines if _is_hetatm(line) and _matches(line, resname, chain, resseq)
+    ]
     if not matched:
         raise ValueError(f"No HETATM residue named {resname!r} found in {pdb_path}")
     keys = {(line[21:22].strip(), line[22:26].strip()) for line in matched}
@@ -65,9 +67,7 @@ def strip_residue(
     select_residue_lines(pdb_path, resname, chain, resseq)  # validates uniqueness
     lines = Path(pdb_path).read_text().splitlines(keepends=True)
     kept = [
-        line
-        for line in lines
-        if not (_is_hetatm(line) and _matches(line, resname, chain, resseq))
+        line for line in lines if not (_is_hetatm(line) and _matches(line, resname, chain, resseq))
     ]
     output = Path(output_path)
     output.write_text("".join(kept))
@@ -90,9 +90,7 @@ def isolate_residue(
     select_residue_lines(pdb_path, resname, chain, resseq)  # validates uniqueness
     lines = Path(pdb_path).read_text().splitlines(keepends=True)
     kept = [
-        line
-        for line in lines
-        if not _is_hetatm(line) or _matches(line, resname, chain, resseq)
+        line for line in lines if not _is_hetatm(line) or _matches(line, resname, chain, resseq)
     ]
     output = Path(output_path)
     output.write_text("".join(kept))

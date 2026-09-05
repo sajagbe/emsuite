@@ -60,7 +60,9 @@ ATOM 5 H MOL 1 -0.363 -0.514 -0.891 0.0194 1.2000
 
 
 @pytest.mark.slow
-def test_run_apbs_grids_accepts_external_pqr(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+def test_run_apbs_grids_accepts_external_pqr(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
     """run_apbs_grids(pqr_path=...) skips write_pqr entirely (Section C, pdb2pqr path)."""
     monkeypatch.chdir(tmp_path)
     pqr = tmp_path / "external.pqr"

@@ -11,7 +11,17 @@ from emsuite.potential.pdb_select import isolate_residue, select_residue_lines, 
 from emsuite.potential.pqr import read_pqr_coords, zero_ligand_charges
 
 
-def _pdb_line(record: str, serial: int, resname: str, chain: str, resseq: int, x: float, y: float, z: float, name: str = "C1") -> str:
+def _pdb_line(
+    record: str,
+    serial: int,
+    resname: str,
+    chain: str,
+    resseq: int,
+    x: float,
+    y: float,
+    z: float,
+    name: str = "C1",
+) -> str:
     line = list(" " * 66)
     line[0 : len(record)] = record
     line[6:11] = f"{serial:>5}"

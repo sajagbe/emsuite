@@ -89,7 +89,9 @@ def zero_ligand_charges(
             body = line[: -len(newline)] if newline else line
             parts = re.split(r"(\s+)", body)
             charge_positions = [i for i, p in enumerate(parts) if p.strip()]
-            charge_idx = charge_positions[8]  # 9th token: record,serial,name,resname,resseq,x,y,z,[charge]
+            charge_idx = charge_positions[
+                8
+            ]  # 9th token: record,serial,name,resname,resseq,x,y,z,[charge]
             parts[charge_idx] = "0.0000".rjust(len(parts[charge_idx]))
             line = "".join(parts) + newline
         out_lines.append(line)

@@ -83,9 +83,7 @@ def validate_potential_params(params: dict[str, Any]) -> dict[str, Any]:
     quantity = str(params.get("quantity") or "potential").lower()
     ligand_atoms = str(params.get("ligand_atoms") or "present").lower()
     if method == "coulomb":
-        raise ConfigValidationError(
-            "method='coulomb' has been removed; use method='apbs'"
-        )
+        raise ConfigValidationError("method='coulomb' has been removed; use method='apbs'")
     if method in _FUTURE_POTENTIAL_METHODS:
         raise ConfigValidationError(
             f"method={method!r} is not implemented yet (planned PySCF ESP/MEP backend)"

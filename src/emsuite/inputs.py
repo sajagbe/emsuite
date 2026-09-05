@@ -287,7 +287,9 @@ class CoupledInput:
 
     def run(self) -> CoupledResult:
         if self.potential_surf:
-            potential = PotentialResult.from_surf(self.potential_surf, quantity=self.potential_quantity)
+            potential = PotentialResult.from_surf(
+                self.potential_surf, quantity=self.potential_quantity
+            )
         else:
             potential = PotentialInput(
                 molecule=self.molecule,

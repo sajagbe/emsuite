@@ -51,7 +51,9 @@ def test_surface_result_to_xyz(tmp_path: Path):
     assert lines[2] == "H 0.000000 0.000000 0.000000"
     assert lines[3] == "H 1.000000 0.000000 0.000000"
 
-    result_with_path = SurfaceResult(coords=coords, values=values, path=str(tmp_path / "surface.surf"))
+    result_with_path = SurfaceResult(
+        coords=coords, values=values, path=str(tmp_path / "surface.surf")
+    )
     default_written = result_with_path.to_xyz()
     assert default_written == str(tmp_path / "surface.xyz")
 
@@ -69,6 +71,8 @@ def test_surface_result_to_mol2(tmp_path: Path):
     assert "0.100000" in lines[6]
     assert "-0.200000" in lines[7]
 
-    result_with_path = SurfaceResult(coords=coords, values=values, path=str(tmp_path / "surface.surf"))
+    result_with_path = SurfaceResult(
+        coords=coords, values=values, path=str(tmp_path / "surface.surf")
+    )
     default_written = result_with_path.to_mol2()
     assert default_written == str(tmp_path / "surface.mol2")
