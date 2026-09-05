@@ -457,3 +457,63 @@ must remain outside the documentation commit.
 
 Inspect the deployed GitHub Pages result after this branch is merged to `main`,
 then expand scientific examples with additional validated output captures.
+
+## 2026-09-05 — Remote synchronization and preview recheck
+
+Starting state:
+
+- Local branch: `feat/zensical-docs`
+- Local docs tip before synchronization: `1ca73bb`
+- The former `origin/feat/zensical-docs` upstream no longer existed.
+- `origin/main` had advanced to `7354e74` (`v1.6.0`).
+
+Remote refresh and history comparison:
+
+```bash
+git fetch --prune origin
+git merge-base --is-ancestor origin/main HEAD
+git log --oneline --left-right --cherry-pick origin/main...HEAD
+```
+
+The comparison showed 11 newer upstream commits and two documentation-only
+commits on the feature branch. The documentation work was rebased onto current
+`origin/main`:
+
+```bash
+git rebase origin/main
+```
+
+Result: **PASS** — Git skipped runtime commit `12d6c6c` because its patch was
+already upstream and replayed only the documentation commits. The new local
+tips are `f9e567f` (plan/progress) and `aecce12` (Zensical migration).
+
+Preview restart and HTTP verification:
+
+```bash
+uv sync --extra docs --locked
+uv run --extra docs zensical serve --dev-addr 127.0.0.1:8001
+curl -sS -I http://127.0.0.1:8001/emsuite/
+```
+
+Result: **PASS** — Zensical rebuilt with no issues and the homepage returned
+`HTTP/1.1 200 OK` with title `EMSuite - EMSuite Docs`. Port 8001 was retained
+because port 8000 had previously been occupied by another local process.
+
+Post-rebase verification:
+
+```bash
+uv sync --extra docs --locked
+uv run --extra docs zensical build --clean --strict
+env -u PYTHONPATH uv run --extra dev pytest tests/unit tests/regression -q
+```
+
+Result: **PASS**
+
+```text
+EMSuite local package: 1.6.0
+Zensical: No issues found; build finished in 0.41s
+Tests: 63 passed in 4.30s
+```
+
+Next: push `feat/zensical-docs` to `origin` with upstream tracking, keep the
+local branch checked out, and use the live preview for iterative doc updates.
