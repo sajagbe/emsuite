@@ -5,7 +5,7 @@ import sys
 import numpy as np
 from pyscf import tdscf
 
-from ._gpu import GPU_AVAILABLE
+from ._gpu import CUPY_AVAILABLE
 
 
 def _mf_has_mm_charges(mf):
@@ -49,7 +49,7 @@ def create_td_molecule_object(mf, nstates=5, triplet=False, force_single_gpu=Fal
         len(visible_devices) > 1
         and hasattr(mf, "to_cpu")
         and callable(mf.to_cpu)
-        and GPU_AVAILABLE
+        and CUPY_AVAILABLE
         and not force_single_gpu
     )
 

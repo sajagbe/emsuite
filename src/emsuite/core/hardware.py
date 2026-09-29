@@ -1,13 +1,13 @@
 import os
 
-from ._gpu import GPU_AVAILABLE, cp
+from ._gpu import CUPY_AVAILABLE, cp
 
 
 def check_gpu_info():
     """
     This function uses CuPy to detect CUDA-capable GPUs on the system.
     """
-    if not GPU_AVAILABLE:
+    if not CUPY_AVAILABLE:
         print("\nCuPy not installed - CPU mode only.")
         print("For GPU acceleration: pip install emsuite[gpu]\n")
         return 0

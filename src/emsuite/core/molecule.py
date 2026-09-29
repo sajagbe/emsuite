@@ -6,7 +6,7 @@ import numpy as np
 from pyscf import dft, gto, lib, scf
 from pyscf.solvent import smd
 
-from ._gpu import GPU_AVAILABLE, cp
+from ._gpu import CUPY_AVAILABLE, cp
 
 
 def create_molecule_object(
@@ -77,9 +77,9 @@ def create_molecule_object(
                 raise ValueError("Method must be 'dft' or 'hf'")
 
             # Move to GPU if available and requested
-            if gpu and GPU_AVAILABLE:
+            if gpu and CUPY_AVAILABLE:
                 mf = mf.to_gpu()
-            elif gpu and not GPU_AVAILABLE:
+            elif gpu and not CUPY_AVAILABLE:
                 print("GPU requested but not available - using CPU.")
             else:
                 print("Using CPU as requested.")
@@ -122,7 +122,7 @@ def save_chkfile(mf, chkfile_name, functional=None):
     lib.chkfile.save_mol(mf.mol, chkfile_name)
 
     # Handle CuPy arrays for GPU objects
-    if is_gpu and GPU_AVAILABLE:
+    if is_gpu and CUPY_AVAILABLE:
         mo_energy = (
             cp.asnumpy(mf.mo_energy) if isinstance(mf.mo_energy, cp.ndarray) else mf.mo_energy
         )
@@ -195,7 +195,7 @@ def resurrect_mol(chkfile_name):
         mf = scf.UHF(mol) if is_unrestricted else scf.RHF(mol)
 
     # Convert to GPU if available
-    if GPU_AVAILABLE:
+    if CUPY_AVAILABLE:
         try:
             print(f"Converting {type(mf)} to GPU...")
             mf = mf.to_gpu()

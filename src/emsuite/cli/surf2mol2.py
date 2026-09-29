@@ -13,7 +13,7 @@ import argparse
 import sys
 from pathlib import Path
 
-from emsuite.results import PotentialResult
+from emsuite.results import SurfaceResult
 
 
 def _convert(surf_path: Path, out_path: Path | None = None) -> Path:
@@ -23,14 +23,14 @@ def _convert(surf_path: Path, out_path: Path | None = None) -> Path:
         raise ValueError(f"expected a .surf file, got: {surf_path}")
 
     dest = out_path or surf_path.with_suffix(".mol2")
-    PotentialResult.from_surf(surf_path, quantity="charge").to_mol2(dest)
+    SurfaceResult.from_surf(surf_path).to_mol2(dest)
     return Path(dest)
 
 
 def main(argv: list[str] | None = None) -> None:
     parser = argparse.ArgumentParser(
         prog="surf2mol2",
-        description="Convert EMSuite .surf files to MOL2 (charge column = surface values).",
+        description="Convert EMSuite .surf files to MOL2 (MOL2 charge column = surface values).",
     )
     parser.add_argument(
         "surfs",

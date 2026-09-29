@@ -17,7 +17,7 @@ from pathlib import Path
 import numpy as np
 import pytest
 
-from emsuite.core import GPU_AVAILABLE, check_gpu_info
+from emsuite.core import CUPY_AVAILABLE, check_gpu_info
 from emsuite.inputs import CoupledInput, PotentialInput, SurfaceInput, TuningInput
 
 from .helpers import METHANE_SURFACE_IN, latest_results_dir, record_assertions, write_methane_xyz
@@ -27,7 +27,7 @@ _GPU_BASIS = "sto-3g"
 
 
 def _gpu_available() -> bool:
-    return bool(GPU_AVAILABLE and (check_gpu_info() or 0) >= 1)
+    return bool(CUPY_AVAILABLE and (check_gpu_info() or 0) >= 1)
 
 
 @pytest.fixture(scope="module")
