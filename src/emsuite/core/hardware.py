@@ -1,6 +1,11 @@
+import json
 import os
+import urllib.error
+import urllib.request
 
 from ._gpu import CUPY_AVAILABLE, cp
+
+OFFICE_API = "https://officeapi.akashrajpurohit.com"
 
 
 def check_gpu_info():
@@ -59,6 +64,44 @@ def print_startup_message():
     print("                   Electrostatic Map Suite")
     print("                    By Stephen O. Ajagbe")
     print("=" * 60)
+
+
+def print_office_quote() -> None:
+    """Fetch and print a random Office quote after a successful job.
+
+    Network failures are reported but do not raise — a finished calculation
+    should not fail because of the Easter egg.
+    """
+    print("\nFetching inspirational quote...\n")
+    for name in os.listdir():
+        if name.startswith("quote") and name.endswith(".svg"):
+            try:
+                os.remove(name)
+            except OSError as exc:
+                print(f"Warning: could not remove {name}: {exc}")
+
+    url = f"{OFFICE_API}/quote/random"
+    try:
+        req = urllib.request.Request(
+            url,
+            headers={"User-Agent": "emsuite/1.6 (+https://github.com/sajagbe/emsuite)"},
+        )
+        with urllib.request.urlopen(req, timeout=10) as resp:
+            data = json.loads(resp.read().decode("utf-8"))
+        quote = data.get("quote", "").strip()
+        character = data.get("character", "").strip()
+        if quote and character:
+            print(f"\n  {quote} \n                     - {character}\n")
+        else:
+            print("(Office quote API returned an unexpected payload.)\n")
+    except (
+        urllib.error.URLError,
+        urllib.error.HTTPError,
+        TimeoutError,
+        json.JSONDecodeError,
+        OSError,
+    ) as exc:
+        print(f"(Could not fetch Office quote: {exc})\n")
 
 
 ##############################################

@@ -2,7 +2,7 @@
 
 from ._gpu import CUPY_AVAILABLE, cp
 from .excited import create_td_molecule_object
-from .hardware import check_cpu_info, check_gpu_info, print_startup_message
+from .hardware import check_cpu_info, check_gpu_info, print_office_quote, print_startup_message
 from .io import extract_xyz_name, optimize_molecule
 from .molecule import (
     create_molecule_object,
@@ -19,6 +19,7 @@ __all__ = [
     "check_cpu_info",
     "check_gpu_info",
     "print_startup_message",
+    "print_office_quote",
     "create_molecule_object",
     "save_chkfile",
     "resurrect_mol",
