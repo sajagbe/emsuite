@@ -47,6 +47,27 @@ INTEGRATION_FEATURE_TRACE: dict[str, dict[str, object]] = {
         "summary": "Potential → tuning coupled channel smoke test",
         "code_paths": ["src/emsuite/coupled/runner.py"],
     },
+    "tests/integration/test_consistency_matrix.py::test_surface_heterogenous_generates_edit_header": {
+        "feature_id": "consistency-surface-heterogenous",
+        "version": "1.6.0",
+        "channel": "surface",
+        "summary": "Heterogeneous VDW surface with editable per-point charges",
+        "code_paths": ["src/emsuite/surface/generate.py", "src/emsuite/surface/io.py"],
+    },
+    "tests/integration/test_consistency_matrix.py::test_potential_apbs_gauss_charge": {
+        "feature_id": "consistency-potential-charge",
+        "version": "1.6.0",
+        "channel": "potential",
+        "summary": "CPU APBS Gauss-law charge map on methane VDW surface",
+        "code_paths": ["src/emsuite/potential/runner.py", "src/emsuite/potential/gauss.py"],
+    },
+    "tests/integration/test_consistency_matrix.py::test_tuning_combined_methane": {
+        "feature_id": "consistency-tuning-combined",
+        "version": "1.6.0",
+        "channel": "tuning",
+        "summary": "Standalone combined-mode tuning on methane",
+        "code_paths": ["src/emsuite/tuning/runner.py", "src/emsuite/inputs.py"],
+    },
     "tests/integration/test_gpu_channels.py::test_gpu_preflight": {
         "feature_id": "gpu-preflight",
         "version": "1.3.0",

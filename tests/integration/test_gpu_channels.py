@@ -20,7 +20,7 @@ import pytest
 from emsuite.core import CUPY_AVAILABLE, check_gpu_info
 from emsuite.inputs import CoupledInput, PotentialInput, SurfaceInput, TuningInput
 
-from .helpers import METHANE_SURFACE_IN, latest_results_dir, record_assertions, write_methane_xyz
+from .helpers import install_methane_surf, latest_results_dir, record_assertions, write_methane_xyz
 
 _GPU_PROPS = ("homo", "lumo", "gap")
 _GPU_BASIS = "sto-3g"
@@ -37,10 +37,10 @@ def require_gpu() -> None:
 
 
 def _prepare_methane_surface(tmp_path: Path) -> tuple[Path, Path]:
-    """UFF VDW surface + methane.xyz in *tmp_path*."""
-    (tmp_path / "surface.in").write_text(METHANE_SURFACE_IN)
-    surf = SurfaceInput.from_file(tmp_path / "surface.in").run()
-    return Path(surf.path), tmp_path / "methane.xyz"
+    """Fixed fixture VDW surface + methane.xyz in *tmp_path*."""
+    write_methane_xyz(tmp_path)
+    surf = install_methane_surf(tmp_path)
+    return surf, tmp_path / "methane.xyz"
 
 
 @pytest.mark.gpu
@@ -76,7 +76,7 @@ def test_gpu_surface_pyscf_optimize(
     """Surface channel with PySCF geometry optimization (gpu4pyscf when available)."""
     monkeypatch.chdir(tmp_path)
     write_methane_xyz(tmp_path)
-    result = SurfaceInput.from_config(
+    result = SurfaceInput(
         input_type="XYZ",
         input_data="methane.xyz",
         output_surf="methane_pyscf.surf",
@@ -104,7 +104,7 @@ def test_gpu_potential_apbs_potential(
     """Potential channel: APBS electrostatic potential map (CPU math on GPU node)."""
     monkeypatch.chdir(tmp_path)
     surf_path, _ = _prepare_methane_surface(tmp_path)
-    result = PotentialInput.from_config(
+    result = PotentialInput(
         molecule="methane.xyz",
         surface_file=str(surf_path),
         output_surf="methane_potential.surf",
@@ -130,7 +130,7 @@ def test_gpu_potential_apbs_gauss_charge(
     """Potential channel: Gauss-law surface charges from APBS φ and dielectric maps."""
     monkeypatch.chdir(tmp_path)
     surf_path, _ = _prepare_methane_surface(tmp_path)
-    result = PotentialInput.from_config(
+    result = PotentialInput(
         molecule="methane.xyz",
         surface_file=str(surf_path),
         output_surf="methane_charge.surf",
@@ -156,7 +156,7 @@ def test_gpu_tuning_parallel(
     """Tuning channel with Ray + gpu4pyscf (parallel=True)."""
     monkeypatch.chdir(tmp_path)
     surf_path, _ = _prepare_methane_surface(tmp_path)
-    TuningInput.from_config(
+    TuningInput(
         molecule="methane.xyz",
         surface_file=str(surf_path),
         properties=_GPU_PROPS,
@@ -187,7 +187,7 @@ def test_gpu_coupled_parallel(
     """Coupled channel: APBS Gauss charges → parallel GPU tuning."""
     monkeypatch.chdir(tmp_path)
     surf_path, _ = _prepare_methane_surface(tmp_path)
-    result = CoupledInput.from_config(
+    result = CoupledInput(
         molecule="methane.xyz",
         surface_file=str(surf_path),
         output_surf="coupled_gpu.surf",

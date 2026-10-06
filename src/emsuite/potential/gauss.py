@@ -10,13 +10,15 @@ from __future__ import annotations
 
 import numpy as np
 
-from .dx import DxGrid
+from emsuite.physconst import (
+    A3_TO_M3,
+    ANGSTROM_TO_METER,
+    ELEMENTARY_CHARGE,
+    EPSILON_0,
+    KT_E_TO_V,
+)
 
-EPSILON_0 = 8.854e-12  # C / (V m)
-KT_E_TO_V = 0.02568  # 1 kT/e in volts at 298 K
-A2_TO_M2 = 1e-20
-A3_TO_M3 = 1e-30
-ELEMENTARY_CHARGE = 1.602e-19  # C
+from .dx import DxGrid
 
 
 def _require_interior(shape: tuple[int, int, int]) -> None:
@@ -58,7 +60,7 @@ def charge_density_e_per_a3(
     spacing_angstrom: float,
 ) -> np.ndarray:
     """Charge density (e / Å³) from APBS φ (kT/e) and dielectric maps."""
-    h_m = spacing_angstrom * 1e-10
+    h_m = spacing_angstrom * ANGSTROM_TO_METER
     phi_v = potential_kte * KT_E_TO_V
     div = div_eps_grad(phi_v, dielx, diely, dielz, h_m)
     rho_si = -EPSILON_0 * div  # C / m³

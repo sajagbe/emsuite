@@ -47,7 +47,7 @@ def main() -> int:
     print(f"Working directory: {workdir}")
     print(f"GPUs detected: {check_gpu_info() or 0}")
 
-    surf = SurfaceInput.from_config(
+    surf = SurfaceInput(
         input_type="SMILES",
         input_data="O",
         output_surf="Water.surf",
@@ -66,7 +66,7 @@ def main() -> int:
         print(f"Error: expected optimized geometry at {xyz}", file=sys.stderr)
         return 1
 
-    tuning = TuningInput.from_config(
+    tuning = TuningInput(
         molecule=str(xyz),
         surface_file=surf.path,
         properties=properties,

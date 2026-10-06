@@ -1,12 +1,11 @@
-"""Immutable channel inputs. ``.in`` files and kwargs build these; runners consume them."""
+"""Immutable channel inputs. ``.in`` files and constructors build these; ``.run()`` executes."""
 
 from __future__ import annotations
 
-from dataclasses import asdict, dataclass, fields
+from dataclasses import MISSING, asdict, dataclass, fields
 from pathlib import Path
-from typing import Any, Self
+from typing import Any, Callable, Self
 
-from emsuite.config import resolve_config
 from emsuite.config.schemas import (
     validate_coupled_params,
     validate_potential_params,
@@ -15,22 +14,18 @@ from emsuite.config.schemas import (
 )
 from emsuite.results import CoupledResult, PotentialResult, SurfaceResult, TuningResult
 
-_TUNING_DEFAULTS = {
-    "molecule": None,
-    "surface_file": None,
-    "properties": ("all",),
-    "basis_set": "6-31G*",
-    "method": "dft",
-    "functional": "b3lyp",
-    "charge": 0,
-    "spin": 0,
-    "solvent": None,
-    "calc_type": "separate",
-    "parallel": True,
-    "num_procs": None,
-    "state_of_interest": 2,
-    "triplet": False,
-}
+
+def _channel_defaults(cls: type) -> dict[str, Any]:
+    """Defaults for ``.in`` parsing: dataclass field defaults, else ``None`` for required fields."""
+    defaults: dict[str, Any] = {}
+    for item in fields(cls):
+        if item.default is not MISSING:
+            defaults[item.name] = item.default
+        elif item.default_factory is not MISSING:  # type: ignore[unreachable]
+            defaults[item.name] = item.default_factory()
+        else:
+            defaults[item.name] = None
+    return defaults
 
 
 def _take(cls: type, params: dict[str, Any]) -> dict[str, Any]:
@@ -53,6 +48,17 @@ def _to_dict(obj: Any) -> dict[str, Any]:
     return data
 
 
+def _finalize(
+    instance: Any,
+    *,
+    validate: Callable[[dict[str, Any]], dict[str, Any]],
+) -> None:
+    """Validate and write normalized fields onto a frozen input (defaults live on the dataclass)."""
+    validated = validate({**_channel_defaults(type(instance)), **_to_dict(instance)})
+    for name, value in _take(type(instance), validated).items():
+        object.__setattr__(instance, name, value)
+
+
 @dataclass(frozen=True)
 class SurfaceInput:
     input_type: str
@@ -72,40 +78,22 @@ class SurfaceInput:
     charge: int = 0
     spin: int = 0
 
-    @classmethod
-    def from_mapping(cls, params: dict[str, Any]) -> Self:
-        from emsuite.surface.runner import SURFACE_DEFAULTS
-
-        validated = validate_surface_params({**SURFACE_DEFAULTS, **params})
-        return cls(**_take(cls, validated))
+    def __post_init__(self) -> None:
+        _finalize(self, validate=validate_surface_params)
 
     @classmethod
     def from_file(cls, path: str | Path) -> Self:
         from emsuite.surface.runner import parse_surface_input
 
-        return cls.from_mapping(parse_surface_input(str(path)))
-
-    @classmethod
-    def from_config(cls, config: str | Path | dict | None = None, **overrides: Any) -> Self:
-        from emsuite.surface.runner import SURFACE_DEFAULTS
-
-        return cls.from_mapping(resolve_config(config, overrides, defaults=SURFACE_DEFAULTS))
-
-    @classmethod
-    def from_any(cls, config: SurfaceInput | str | Path | dict) -> Self:
-        if isinstance(config, cls):
-            return config
-        if isinstance(config, dict):
-            return cls.from_mapping(config)
-        return cls.from_file(config)
+        return cls(**_take(cls, parse_surface_input(str(path))))
 
     def to_dict(self) -> dict[str, Any]:
         return _to_dict(self)
 
     def run(self) -> SurfaceResult:
-        from emsuite.surface.runner import run_surface_calculation
+        from emsuite.surface.runner import _run_surface
 
-        path = run_surface_calculation(self)
+        path = _run_surface(self)
         return SurfaceResult.from_surf(path)
 
 
@@ -133,40 +121,22 @@ class PotentialInput:
     forcefield: str = "AMBER"
     ph: float | None = 7.0
 
-    @classmethod
-    def from_mapping(cls, params: dict[str, Any]) -> Self:
-        from emsuite.potential.config_io import POTENTIAL_DEFAULTS
-
-        validated = validate_potential_params({**POTENTIAL_DEFAULTS, **params})
-        return cls(**_take(cls, validated))
+    def __post_init__(self) -> None:
+        _finalize(self, validate=validate_potential_params)
 
     @classmethod
     def from_file(cls, path: str | Path) -> Self:
         from emsuite.potential.config_io import parse_potential_input
 
-        return cls.from_mapping(parse_potential_input(str(path)))
-
-    @classmethod
-    def from_config(cls, config: str | Path | dict | None = None, **overrides: Any) -> Self:
-        from emsuite.potential.config_io import POTENTIAL_DEFAULTS
-
-        return cls.from_mapping(resolve_config(config, overrides, defaults=POTENTIAL_DEFAULTS))
-
-    @classmethod
-    def from_any(cls, config: PotentialInput | str | Path | dict) -> Self:
-        if isinstance(config, cls):
-            return config
-        if isinstance(config, dict):
-            return cls.from_mapping(config)
-        return cls.from_file(config)
+        return cls(**_take(cls, parse_potential_input(str(path))))
 
     def to_dict(self) -> dict[str, Any]:
         return _to_dict(self)
 
     def run(self) -> PotentialResult:
-        from emsuite.potential.runner import run_potential_calculation
+        from emsuite.potential.runner import _run_potential
 
-        path = run_potential_calculation(self)
+        path = _run_potential(self)
         return PotentialResult.from_surf(path, quantity=self.quantity)
 
 
@@ -187,36 +157,22 @@ class TuningInput:
     state_of_interest: int = 2
     triplet: bool = False
 
-    @classmethod
-    def from_mapping(cls, params: dict[str, Any]) -> Self:
-        validated = validate_tuning_params({**_TUNING_DEFAULTS, **params})
-        return cls(**_take(cls, validated))
+    def __post_init__(self) -> None:
+        _finalize(self, validate=validate_tuning_params)
 
     @classmethod
     def from_file(cls, path: str | Path) -> Self:
-        from emsuite.tuning.config_io import get_tuning_parameters
+        from emsuite.tuning.config_io import parse_tuning_input
 
-        return cls.from_mapping(get_tuning_parameters(str(path)))
-
-    @classmethod
-    def from_config(cls, config: str | Path | dict | None = None, **overrides: Any) -> Self:
-        return cls.from_mapping(resolve_config(config, overrides, defaults=_TUNING_DEFAULTS))
-
-    @classmethod
-    def from_any(cls, config: TuningInput | str | Path | dict) -> Self:
-        if isinstance(config, cls):
-            return config
-        if isinstance(config, dict):
-            return cls.from_mapping(config)
-        return cls.from_file(config)
+        return cls(**_take(cls, parse_tuning_input(str(path))))
 
     def to_dict(self) -> dict[str, Any]:
         return _to_dict(self)
 
     def run(self) -> TuningResult:
-        from emsuite.tuning.runner import run_tuning_calculation
+        from emsuite.tuning.runner import _run_tuning
 
-        results_dir = run_tuning_calculation(self)
+        results_dir = _run_tuning(self)
         return TuningResult(results_dir=str(results_dir) if results_dir else None)
 
 
@@ -255,67 +211,47 @@ class CoupledInput:
     forcefield: str = "AMBER"
     ph: float | None = 7.0
 
-    @classmethod
-    def from_mapping(cls, params: dict[str, Any]) -> Self:
-        from emsuite.coupled.runner import COUPLED_DEFAULTS
-
-        validated = validate_coupled_params({**COUPLED_DEFAULTS, **params})
-        return cls(**_take(cls, validated))
+    def __post_init__(self) -> None:
+        _finalize(self, validate=validate_coupled_params)
 
     @classmethod
     def from_file(cls, path: str | Path) -> Self:
         from emsuite.coupled.runner import parse_coupled_input
 
-        return cls.from_mapping(parse_coupled_input(str(path)))
-
-    @classmethod
-    def from_config(cls, config: str | Path | dict | None = None, **overrides: Any) -> Self:
-        from emsuite.coupled.runner import COUPLED_DEFAULTS
-
-        return cls.from_mapping(resolve_config(config, overrides, defaults=COUPLED_DEFAULTS))
-
-    @classmethod
-    def from_any(cls, config: CoupledInput | str | Path | dict) -> Self:
-        if isinstance(config, cls):
-            return config
-        if isinstance(config, dict):
-            return cls.from_mapping(config)
-        return cls.from_file(config)
+        return cls(**_take(cls, parse_coupled_input(str(path))))
 
     def to_dict(self) -> dict[str, Any]:
         return _to_dict(self)
 
-    def run(self) -> CoupledResult:
-        if self.potential_surf:
-            potential = PotentialResult.from_surf(
-                self.potential_surf, quantity=self.potential_quantity
-            )
-        else:
-            potential = PotentialInput(
-                molecule=self.molecule,
-                surface_file=self.surface_file,
-                output_surf=self.output_surf,
-                surface_density=self.surface_density,
-                surface_scale=self.surface_scale,
-                method=self.potential_method,
-                quantity=self.potential_quantity,
-                pdie=self.pdie,
-                sdie=self.sdie,
-                charge=self.charge,
-                spin=self.spin,
-                ligand=self.ligand or self.molecule,
-                protein=self.protein,
-                ligand_atoms=self.ligand_atoms,
-                protein_format=self.protein_format,
-                ligand_resname=self.ligand_resname,
-                ligand_chain=self.ligand_chain,
-                ligand_resseq=self.ligand_resseq,
-                ligand_mol2=self.ligand_mol2,
-                forcefield=self.forcefield,
-                ph=self.ph,
-            ).run()
-        surface_file = potential.path or potential.to_surf(self.output_surf)
-        tuning = TuningInput(
+    def to_potential_input(self) -> PotentialInput:
+        """Map coupled fields onto a PotentialInput (skips when ``potential_surf`` is set)."""
+        return PotentialInput(
+            molecule=self.molecule,
+            surface_file=self.surface_file,
+            output_surf=self.output_surf,
+            surface_density=self.surface_density,
+            surface_scale=self.surface_scale,
+            method=self.potential_method,
+            quantity=self.potential_quantity,
+            pdie=self.pdie,
+            sdie=self.sdie,
+            charge=self.charge,
+            spin=self.spin,
+            ligand=self.ligand or self.molecule,
+            protein=self.protein,
+            ligand_atoms=self.ligand_atoms,
+            protein_format=self.protein_format,
+            ligand_resname=self.ligand_resname,
+            ligand_chain=self.ligand_chain,
+            ligand_resseq=self.ligand_resseq,
+            ligand_mol2=self.ligand_mol2,
+            forcefield=self.forcefield,
+            ph=self.ph,
+        )
+
+    def to_tuning_input(self, surface_file: str) -> TuningInput:
+        """Map coupled fields onto a TuningInput for the given surface path."""
+        return TuningInput(
             molecule=self.molecule,
             surface_file=surface_file,
             properties=self.properties,
@@ -330,5 +266,22 @@ class CoupledInput:
             num_procs=self.num_procs,
             state_of_interest=self.state_of_interest,
             triplet=self.triplet,
-        ).run()
+        )
+
+    def run(self) -> CoupledResult:
+        print("\n" + "=" * 60)
+        print("           Coupled Potential → Tuning Pipeline")
+        print("=" * 60 + "\n")
+
+        if self.potential_surf:
+            potential = PotentialResult.from_surf(
+                self.potential_surf, quantity=self.potential_quantity
+            )
+        else:
+            potential = self.to_potential_input().run()
+        surface_file = potential.path or potential.to_surf(self.output_surf)
+        tuning = self.to_tuning_input(surface_file).run()
+
+        print("\nCoupled calculation complete.")
+        print("=" * 60 + "\n")
         return CoupledResult(potential=potential, tuning=tuning)

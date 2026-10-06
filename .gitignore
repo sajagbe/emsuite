@@ -49,6 +49,12 @@ dev/*
 # APBS run artifact (created when testing potential channel)
 io.mc
 
+# Integration audit / consistency archives (keep README + committed fingerprints)
+tests/integration_runs/consistency-*/
+tests/integration_runs/baseline/
+tests/integration_runs/gpu-*/
+tests/integration_runs/LATEST/
+
 /*.in
 /*.xyz
 /*.surf

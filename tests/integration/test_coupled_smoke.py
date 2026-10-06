@@ -6,9 +6,9 @@ from pathlib import Path
 
 import pytest
 
-from emsuite.coupled import run_coupled_calculation
+from emsuite import CoupledInput
 
-from .helpers import METHANE_SURFACE_IN, record_assertions
+from .helpers import install_methane_surf, record_assertions, write_methane_xyz
 
 COUPLED_IN = """\
 molecule = 'methane.xyz'
@@ -25,18 +25,14 @@ calc_type = 'separate'
 parallel = False
 """
 
-SURFACE_IN = METHANE_SURFACE_IN
-
 
 @pytest.mark.slow
 def test_coupled_pipeline(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.chdir(tmp_path)
-    from emsuite.surface import run_surface_calculation
-
-    (tmp_path / "surface.in").write_text(SURFACE_IN)
-    run_surface_calculation("surface.in")
+    write_methane_xyz(tmp_path)
+    install_methane_surf(tmp_path)
     (tmp_path / "coupled.in").write_text(COUPLED_IN)
-    run_coupled_calculation("coupled.in")
+    CoupledInput.from_file("coupled.in").run()
     results = list(tmp_path.glob("results_methane_*"))
     assert results
     assert not list(tmp_path.glob("coupled_*.in"))

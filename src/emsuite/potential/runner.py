@@ -5,6 +5,7 @@ from __future__ import annotations
 import os
 import shutil
 from pathlib import Path
+from typing import TYPE_CHECKING
 
 import numpy as np
 
@@ -14,6 +15,9 @@ from emsuite.surface.generate import generate_surface
 from .apbs import run_apbs_grids
 from .gauss import charges_at_points, potential_at_points
 from .occupancy import occupancy_atoms_and_charges
+
+if TYPE_CHECKING:
+    from emsuite.inputs import PotentialInput
 
 # Planned PySCF backends (ESP/MEP) — not implemented yet.
 _FUTURE_METHODS = frozenset({"esp", "mep"})
@@ -68,23 +72,17 @@ def _apbs_values(
     return values
 
 
-def run_potential_calculation(config) -> str:
-    """
-    Map APBS electrostatics onto a surface and write a heterogeneous ``.surf``.
+def _run_potential(inp: PotentialInput) -> str:
+    """Map APBS electrostatics onto a surface; return heterogeneous ``.surf`` path.
 
     ``quantity='potential'`` writes interpolated APBS φ at each surface point.
     ``quantity='charge'`` writes Gauss-law charges from φ and the dielectric maps.
-
-    Args:
-        config (str | Path | dict): Path to a potential.in file, or a parameter dict.
     """
     print("\n" + "=" * 60)
     print("              Electrostatic Potential Module")
     print("=" * 60 + "\n")
 
-    from emsuite.inputs import PotentialInput
-
-    params = PotentialInput.from_any(config).to_dict()
+    params = inp.to_dict()
     molecule = params["molecule"]
     if not os.path.exists(molecule):
         raise FileNotFoundError(f"Molecule XYZ not found: {molecule}")

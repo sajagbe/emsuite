@@ -1,13 +1,17 @@
 """CLI entry point for EMSuite."""
 
+from __future__ import annotations
+
 import argparse
 import sys
 from pathlib import Path
+from typing import Any
 
 from emsuite.core import print_startup_message
+from emsuite.inputs import CoupledInput, PotentialInput, SurfaceInput, TuningInput
 
 
-def main():
+def main(argv: list[str] | None = None) -> None:
     print_startup_message()
 
     parser = argparse.ArgumentParser(
@@ -34,16 +38,18 @@ def main():
         help="Run potential-derived surface charges through tuning",
     )
 
-    args = parser.parse_args()
+    args = parser.parse_args(argv)
 
-    if args.tuning:
-        run_tuning(args.tuning)
-    elif args.surface:
-        run_surface(args.surface)
-    elif args.potential:
-        run_potential(args.potential)
-    elif args.coupled:
-        run_coupled(args.coupled)
+    channels: list[tuple[Any, str | None]] = [
+        (SurfaceInput, args.surface),
+        (TuningInput, args.tuning),
+        (PotentialInput, args.potential),
+        (CoupledInput, args.coupled),
+    ]
+    for input_cls, path in channels:
+        if path is not None:
+            _run(input_cls, path)
+            return
 
 
 def _require_file(input_file: str) -> Path:
@@ -54,28 +60,9 @@ def _require_file(input_file: str) -> Path:
     return input_path
 
 
-def run_surface(input_file: str):
-    from emsuite.inputs import SurfaceInput
-
-    SurfaceInput.from_file(_require_file(input_file)).run()
-
-
-def run_tuning(input_file: str):
-    from emsuite.inputs import TuningInput
-
-    TuningInput.from_file(_require_file(input_file)).run()
-
-
-def run_potential(input_file: str):
-    from emsuite.inputs import PotentialInput
-
-    PotentialInput.from_file(_require_file(input_file)).run()
-
-
-def run_coupled(input_file: str):
-    from emsuite.inputs import CoupledInput
-
-    CoupledInput.from_file(_require_file(input_file)).run()
+def _run(input_cls: type, input_file: str) -> None:
+    """Build a channel Input from ``input_file`` and execute it."""
+    input_cls.from_file(_require_file(input_file)).run()
 
 
 if __name__ == "__main__":

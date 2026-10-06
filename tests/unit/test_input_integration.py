@@ -17,13 +17,13 @@ def test_parse_surface_input_from_example():
     assert params["output_surf"] == "CCO2.surf"
 
 
-def test_get_tuning_parameters_from_example():
-    from emsuite.tuning import get_tuning_parameters
+def test_parse_tuning_input_from_example():
+    from emsuite.tuning import parse_tuning_input
 
     example = Path("examples/tuning/CCO2-exe/tuning.in")
     if not example.exists():
         pytest.skip("example tuning.in not present")
-    params = get_tuning_parameters(str(example))
+    params = parse_tuning_input(str(example))
     assert params["molecule"] == "CCO_opt2.xyz"
     assert params["surface_file"] == "CCO2.surf"
     assert "exe" in params["properties"]
