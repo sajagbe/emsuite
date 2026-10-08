@@ -61,4 +61,19 @@ sbatch tests/manual/probe_gpu4pyscf_pyscf214.slurm
 2. **Keep `oscillator_strength_cpu`** as the production fix on the current 2.10 + 1.4.3 stack.
 3. Future paired upgrade path: PySCF **2.14** + gpu4pyscf **≥1.8.1** restores stock GPU osc; still keep the CPU helper as cheap defense-in-depth.
 
+## Full integrated smoke (this worktree)
+
+Branch / worktree: `fix/osc-strength-cpu-extract` (forked from `2026-10-06-q8iw`),
+separate from live `~/packages/emsuite` on `q8iw` and from `~/.local` packages.
+
+```bash
+sbatch tests/manual/integrated_pyscf214_stack.slurm
+# or on a GPU node:
+PYTHONPATH=src .venv/bin/python tests/manual/integrated_pyscf214_stack.py
+```
+
+Covers: version pin to `.venv` 2.14+1.8.1, `lib.einsum` fix, stock↔CPU osc
+identity (+ backtest vs probe 4572332), combined methane exe/osc with
+`_pin_combined_to_single_gpu` under a fake multi-GPU `CUDA_VISIBLE_DEVICES`.
+
 `.venv/` is gitignored; do not commit wheels.

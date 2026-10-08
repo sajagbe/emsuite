@@ -206,6 +206,27 @@ def calculate_surface_effect_at_point(
 ##########################################################
 
 
+def _pin_combined_to_single_gpu():
+    """Force combined (MM+TDDFT) onto one visible GPU.
+
+    LF/cc-pVTZ charged TDDFT with all surface charges succeeds on 1 GPU, but
+    fails with cudaErrorLaunchFailure on multi-GPU nodes where vacuum TD uses a
+    subprocess then charged TD runs in-process (MM charges cannot be pickled).
+    Pinning avoids that path.
+    """
+    raw = os.environ.get("CUDA_VISIBLE_DEVICES", "0")
+    devices = [d.strip() for d in raw.split(",") if d.strip() != ""]
+    if len(devices) <= 1:
+        return raw
+    pinned = devices[0]
+    os.environ["CUDA_VISIBLE_DEVICES"] = pinned
+    print(
+        f"Combined calc: pinning CUDA_VISIBLE_DEVICES={pinned!r} "
+        f"(was {raw!r}) for MM+TDDFT stability"
+    )
+    return pinned
+
+
 def calculate_combined_surface_effect(
     base_chkfiles,
     coords,
@@ -234,6 +255,10 @@ def calculate_combined_surface_effect(
     Returns:
         dict: Dictionary of combined property effects
     """
+    # Must run before any TD: multi-GPU vacuum-TD subprocess + in-process MM TD
+    # triggers cudaErrorLaunchFailure for large-basis LF (cc-pVTZ).
+    _pin_combined_to_single_gpu()
+
     # Resurrect base molecules
     molecule_alone = (
         core.resurrect_mol(base_chkfiles["neutral"]) if base_chkfiles.get("neutral") else None
