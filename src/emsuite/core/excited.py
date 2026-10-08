@@ -6,6 +6,7 @@ import numpy as np
 from pyscf import tdscf
 
 from ._gpu import CUPY_AVAILABLE
+from .oscillator_strength import oscillator_strength_cpu
 
 
 def _mf_has_mm_charges(mf):
@@ -154,14 +155,13 @@ e_np = to_numpy(td.e)
 if e_np is None or len(e_np) == 0 or not np.isfinite(e_np).all():
     raise RuntimeError(f'TDDFT returned non-finite energies: {{e_np}}')
 
-# Energies + xy are required for exe. Oscillator strengths are optional:
-# gpu4pyscf can raise in td.oscillator_strength() (einsum unpack error)
-# even after a successful TDDFT kernel; parent reconstructs from e/xy only.
+# Energies + xy are required for exe. Prefer GPU osc when it works; on
+# gpu4pyscf einsum failure the parent fills osc via CPU NumPy extract.
 osc = None
 try:
     osc = to_numpy(td.oscillator_strength()).tolist()
 except Exception as osc_err:
-    print(f"WARNING: td.oscillator_strength() failed ({{osc_err}}); continuing with energies only")
+    print(f"WARNING: td.oscillator_strength() failed ({{osc_err}}); parent will CPU-extract osc")
 
 results = {{
     'e': e_np.tolist(),
@@ -203,6 +203,16 @@ with open('td_results.pkl', 'wb') as f:
             td.converged = True
             if td.e.size == 0 or not np.isfinite(td.e).all():
                 raise RuntimeError(f"TDDFT subprocess returned non-finite energies: {td.e}")
+
+            # If GPU osc failed in the subprocess, fill via CPU NumPy extract now
+            # that e/xy sit on a CPU SCF (property calculators also use this helper).
+            if results.get("oscillator_strength") is None:
+                try:
+                    osc_cpu = oscillator_strength_cpu(td)
+                    results["oscillator_strength"] = osc_cpu.tolist()
+                    print(f"CPU-extracted oscillator strengths after GPU failure: {osc_cpu}")
+                except Exception as osc_err:
+                    print(f"WARNING: CPU osc extract also failed ({osc_err})")
 
             print(f"TDDFT completed in subprocess on GPU {visible_devices[0]}, states: {len(td.e)}")
             sys.stdout.flush()
