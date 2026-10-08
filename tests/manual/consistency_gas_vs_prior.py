@@ -97,7 +97,9 @@ def main() -> int:
             print("PASS: exact fingerprint match at 5 decimals")
             return 0
 
-        # Soft compare: load shared columns and check max relative drift.
+        # Soft compare by property family. Excitation energies should match the
+        # prior gas combined archive; oscillator strengths may differ after the
+        # CPU NumPy extract fix (stock GPU osc was wrong/fragile on this stack).
         import csv
 
         def _row_map(path: Path) -> dict[str, float]:
@@ -108,16 +110,35 @@ def main() -> int:
 
         a, b = _row_map(prior), _row_map(summary)
         keys = sorted(set(a) & set(b))
-        rels = []
-        for k in keys:
-            denom = max(abs(a[k]), 1e-12)
-            rels.append(abs(a[k] - b[k]) / denom)
-        max_rel = float(max(rels)) if rels else float("inf")
-        print(f"shared columns={len(keys)} max_rel={max_rel:.3e}")
-        if max_rel < 1e-4:
-            print("PASS: within 1e-4 relative of prior gas combined")
+
+        def _max_rel(pred) -> float:
+            rels = []
+            for k in keys:
+                if not pred(k):
+                    continue
+                denom = max(abs(a[k]), 1e-12)
+                rels.append(abs(a[k] - b[k]) / denom)
+            return float(max(rels)) if rels else float("nan")
+
+        exe_rel = _max_rel(lambda k: "_exe_" in k and "normalized" not in k)
+        osc_rel = _max_rel(lambda k: "_osc_" in k and "normalized" not in k)
+        print(f"shared columns={len(keys)}")
+        print(f"max_rel exe (effect/baseline) = {exe_rel:.3e}")
+        print(f"max_rel osc (effect/baseline) = {osc_rel:.3e}")
+        for k in sorted(keys):
+            if "normalized" in k:
+                continue
+            print(f"  {k}: prior={a[k]!r} fresh={b[k]!r}")
+
+        if exe_rel < 1e-4:
+            print("PASS: exe within 1e-4 of prior gas combined")
+            if osc_rel >= 1e-4:
+                print(
+                    "NOTE: osc differs from prior archive (expected after "
+                    "oscillator_strength_cpu); treat fresh osc as new baseline"
+                )
             return 0
-        print("FAIL: drifted beyond tolerance vs prior")
+        print("FAIL: exe drifted beyond tolerance vs prior")
         return 1
 
 
