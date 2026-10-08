@@ -110,6 +110,17 @@ INTEGRATION_FEATURE_TRACE: dict[str, dict[str, object]] = {
         "summary": "Parallel Ray + gpu4pyscf tuning",
         "code_paths": ["src/emsuite/tuning/runner.py", "src/emsuite/tuning/parallel.py"],
     },
+    "tests/integration/test_gpu_channels.py::test_gpu_tuning_combined_exe_osc_pinned": {
+        "feature_id": "gpu-tuning-combined-exe-osc-pin",
+        "version": "1.6.1",
+        "channel": "tuning",
+        "summary": "Combined MM+TDDFT exe/osc with single-GPU pin (fake multi-GPU env)",
+        "code_paths": [
+            "src/emsuite/tuning/runner.py",
+            "src/emsuite/core/oscillator_strength.py",
+            "src/emsuite/core/excited.py",
+        ],
+    },
     "tests/integration/test_gpu_channels.py::test_gpu_coupled_parallel": {
         "feature_id": "gpu-coupled-parallel",
         "version": "1.3.0",

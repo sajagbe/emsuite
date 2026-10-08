@@ -181,6 +181,57 @@ def test_gpu_tuning_parallel(
 
 @pytest.mark.gpu
 @pytest.mark.slow
+def test_gpu_tuning_combined_exe_osc_pinned(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, require_gpu: None
+) -> None:
+    """Combined MM+TDDFT with exe/osc under a fake multi-GPU CUDA_VISIBLE_DEVICES.
+
+    Pins to the first device (avoids vacuum-TD subprocess + in-process MM TD
+    cudaErrorLaunchFailure) and exercises CPU osc extract / stock GPU osc.
+    """
+    import os
+
+    real = os.environ.get("CUDA_VISIBLE_DEVICES", "0").split(",")[0].strip() or "0"
+    # Simulate a multi-GPU allocation so combined pinning must fire.
+    monkeypatch.setenv("CUDA_VISIBLE_DEVICES", f"{real},{real}")
+    monkeypatch.chdir(tmp_path)
+    surf_path, _ = _prepare_methane_surface(tmp_path)
+
+    TuningInput(
+        molecule="methane.xyz",
+        surface_file=str(surf_path),
+        properties=("exe", "osc"),
+        basis_set=_GPU_BASIS,
+        method="dft",
+        functional="b3lyp",
+        calc_type="combined",
+        parallel=False,
+        state_of_interest=2,
+        triplet=False,
+    ).run()
+
+    # Pinning must have collapsed the fake multi-GPU list.
+    assert os.environ["CUDA_VISIBLE_DEVICES"] == real
+
+    results_dir = latest_results_dir(tmp_path)
+    summary = results_dir / "methane_tuning_summary.csv"
+    assert summary.is_file()
+    text = summary.read_text()
+    assert "s1_exe" in text or "s1_osc" in text
+    for name in ("s1_exe", "s1_osc", "s2_exe", "s2_osc"):
+        assert (results_dir / f"methane_{name}.mol2").is_file(), name
+    record_assertions(
+        tmp_path,
+        channel="tuning",
+        calc_type="combined",
+        properties=["exe", "osc"],
+        pinned_cuda=real,
+        results_dir=str(results_dir),
+    )
+
+
+@pytest.mark.gpu
+@pytest.mark.slow
 def test_gpu_coupled_parallel(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch, require_gpu: None
 ) -> None:
