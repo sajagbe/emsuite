@@ -8,14 +8,18 @@ Default emsuite (this package) already ships `oscillator_strength_cpu` so
 oscillator strengths work on the live 2.10 + 1.4.3 stack. The paired upgrade
 restores stock GPU `td.oscillator_strength()` as well.
 
-## Create / use (repo-local `.venv`)
+## Create / use (repo-local optional venv)
+
+Default editable / `.venv` may still be PySCF 2.10. For the paired upgrade smoke,
+use a separate env (already present as `.venv-pyscf214` if preserved from the
+integration worktree):
 
 ```bash
 cd /data/PHO_WORK/sajagbe2/packages/emsuite
-python -m venv --system-site-packages .venv
-.venv/bin/pip install -U pip wheel setuptools
-.venv/bin/pip install 'pyscf==2.14.0'
-.venv/bin/pip install 'gpu4pyscf-cuda12x==1.8.1'
+python -m venv --system-site-packages .venv-pyscf214
+.venv-pyscf214/bin/pip install -U pip wheel setuptools
+.venv-pyscf214/bin/pip install 'pyscf==2.14.0'
+.venv-pyscf214/bin/pip install 'gpu4pyscf-cuda12x==1.8.1'
 ```
 
 `--system-site-packages` keeps NumPy/SciPy/CuPy from the user site visible while the
@@ -23,10 +27,10 @@ venv’s packages shadow older user-site wheels.
 
 ```bash
 export PYTHONPATH=src
-.venv/bin/python tests/manual/bench_osc_cpu_extract.py
-sbatch tests/manual/bench_osc_pyscf214.slurm
-sbatch tests/manual/probe_gpu4pyscf_pyscf214.slurm
-sbatch tests/manual/integrated_pyscf214_stack.slurm
+.venv-pyscf214/bin/python tests/manual/bench_osc_cpu_extract.py
+# or point the manual *.slurm scripts at .venv-pyscf214
+sbatch tests/manual/probe_solvent_tddft.slurm
+sbatch tests/manual/consistency_gas_vs_prior.slurm
 ```
 
 ## Versions
