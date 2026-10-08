@@ -239,6 +239,22 @@ def resurrect_mol(chkfile_name):
 ##############################################
 
 
+def resolve_smd_solvent(name: str) -> str:
+    """Return the canonical PySCF SMD solvent_db key for *name* (case-insensitive)."""
+    if name in smd.solvent_db:
+        return name
+    lower = name.lower()
+    if lower in smd.solvent_db:
+        return lower
+    matches = [k for k in smd.solvent_db if k.lower() == lower]
+    if len(matches) == 1:
+        return matches[0]
+    raise KeyError(
+        f"Unknown SMD solvent {name!r}. "
+        f"Use a key from pyscf.solvent.smd.solvent_db (case-insensitive)."
+    )
+
+
 def solvate_molecule(mf, solvent="water"):
     """
     Apply implicit solvation to a molecule using the Polarizable Continuum Model (PCM).
@@ -258,7 +274,7 @@ def solvate_molecule(mf, solvent="water"):
         - Automatically tries SOSCF if initial SCF doesn't converge
         - Solvent parameters are taken from the PySCF SMD database
     """
-    solvent = solvent.lower()
+    solvent = resolve_smd_solvent(solvent)
     had_mm = getattr(mf, "_emsuite_has_mm", False)
     mf = mf.PCM()
     mf.with_solvent.eps = smd.solvent_db[solvent][5]
