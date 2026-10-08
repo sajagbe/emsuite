@@ -11,6 +11,14 @@
 set -euo pipefail
 cd /data/PHO_WORK/sajagbe2/packages/emsuite-osc-cpu
 export PYTHONPATH=src:${PYTHONPATH:-}
+# Prefer worktree-isolated .venv (PySCF 2.14) when present; else system python.
+if [[ -x .venv/bin/python ]]; then
+  PY=.venv/bin/python
+else
+  PY=python
+fi
 echo "CUDA_VISIBLE_DEVICES=${CUDA_VISIBLE_DEVICES:-unset}"
+echo "Python: $PY"
 nvidia-smi -L || true
-python tests/manual/bench_osc_cpu_extract.py
+"$PY" -c "import numpy, pyscf; print('numpy', numpy.__version__); print('pyscf', pyscf.__version__, pyscf.__file__)"
+"$PY" tests/manual/bench_osc_cpu_extract.py
