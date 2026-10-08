@@ -5,16 +5,16 @@
 #SBATCH --cpus-per-task=4
 #SBATCH --mem=16G
 #SBATCH --time=00:45:00
-#SBATCH --output=/data/PHO_WORK/sajagbe2/packages/emsuite-osc-cpu/tests/manual/integrated_pyscf214_stack_%j.out
-#SBATCH --error=/data/PHO_WORK/sajagbe2/packages/emsuite-osc-cpu/tests/manual/integrated_pyscf214_stack_%j.err
+#SBATCH --output=/data/PHO_WORK/sajagbe2/packages/emsuite/tests/manual/integrated_pyscf214_stack_%j.out
+#SBATCH --error=/data/PHO_WORK/sajagbe2/packages/emsuite/tests/manual/integrated_pyscf214_stack_%j.err
 
 set -euo pipefail
-cd /data/PHO_WORK/sajagbe2/packages/emsuite-osc-cpu
+cd /data/PHO_WORK/sajagbe2/packages/emsuite
 export PYTHONPATH=src:${PYTHONPATH:-}
 export PYTHONUTF8=1
 
 if [[ ! -x .venv/bin/python ]]; then
-  echo "ERROR: worktree .venv missing — create with PYSCF214_ENV_NOTES.md" >&2
+  echo "ERROR: repo .venv missing — create with PYSCF214_ENV_NOTES.md" >&2
   exit 2
 fi
 PY=.venv/bin/python

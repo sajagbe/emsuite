@@ -4,6 +4,22 @@ All notable changes to this project are documented in this file.
 
 ## [Unreleased]
 
+### Fixed
+- GPU TDDFT oscillator strengths on NumPy ≥2.4 / CuPy: evaluate length-gauge `f`
+  via `oscillator_strength_cpu` (pure NumPy) instead of crashing in
+  `td.oscillator_strength()` → `lib.einsum`.
+- Combined MM+TDDFT on multi-GPU nodes: pin `CUDA_VISIBLE_DEVICES` to one GPU
+  before CUDA init / combined TD (avoids `cudaErrorLaunchFailure` when vacuum TD
+  used a subprocess and charged TD ran in-process).
+- SMD/PCM solvent + TDDFT on gpu4pyscf 1.4.3: always call `mf.TDDFT()` so
+  PCM-aware GPU TD is used. The old `pyscf.tdscf.TDDFT(mf)` path called
+  `remove_soscf()` → broken `lib.logger.warn(...)` and failed every solvent point
+  with `warn() missing 1 required positional argument: 'msg'`.
+
+### Added
+- Manual GPU probes for the optional PySCF 2.14 + gpu4pyscf ≥1.8.1 stack and a
+  solvent-TDDFT reproducer under `tests/manual/`.
+
 ## [1.6.0] - 2026-09-05
 
 ### Added

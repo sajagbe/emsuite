@@ -5,13 +5,13 @@
 #SBATCH --cpus-per-task=4
 #SBATCH --mem=16G
 #SBATCH --time=00:20:00
-#SBATCH --output=/data/PHO_WORK/sajagbe2/packages/emsuite-osc-cpu/tests/manual/bench_osc_cpu_extract_%j.out
-#SBATCH --error=/data/PHO_WORK/sajagbe2/packages/emsuite-osc-cpu/tests/manual/bench_osc_cpu_extract_%j.err
+#SBATCH --output=/data/PHO_WORK/sajagbe2/packages/emsuite/tests/manual/bench_osc_cpu_extract_%j.out
+#SBATCH --error=/data/PHO_WORK/sajagbe2/packages/emsuite/tests/manual/bench_osc_cpu_extract_%j.err
 
 set -euo pipefail
-cd /data/PHO_WORK/sajagbe2/packages/emsuite-osc-cpu
+cd /data/PHO_WORK/sajagbe2/packages/emsuite
 export PYTHONPATH=src:${PYTHONPATH:-}
-# Prefer worktree-isolated .venv (PySCF 2.14) when present; else system python.
+# Prefer repo-local .venv (PySCF 2.14) when present; else system python.
 if [[ -x .venv/bin/python ]]; then
   PY=.venv/bin/python
 else

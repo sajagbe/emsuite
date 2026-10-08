@@ -253,10 +253,11 @@ with open('td_results.pkl', 'wb') as f:
         print(f"Running TDDFT in current process (force_single_gpu={force_single_gpu})")
         sys.stdout.flush()
 
-        if hasattr(mf, "with_solvent"):
-            td = tdscf.TDDFT(mf) if hasattr(mf, "xc") else tdscf.TDHF(mf)
-        else:
-            td = mf.TDDFT() if hasattr(mf, "TDDFT") else mf.TDHF()
+        # Always use mf.TDDFT()/TDHF() (including PCM-wrapped GPU objects).
+        # pyscf.tdscf.TDDFT(mf) calls mf.remove_soscf(); gpu4pyscf 1.4.3's
+        # remove_soscf does lib.logger.warn('...') without a rec → TypeError
+        # ("warn() missing ... 'msg'"), which wiped every solvent TDDFT point.
+        td = mf.TDDFT() if hasattr(mf, "TDDFT") else mf.TDHF()
 
         td.singlet = not triplet
         td.nstates = nstates

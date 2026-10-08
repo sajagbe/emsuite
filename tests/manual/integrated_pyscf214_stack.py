@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
-"""Full isolated-stack smoke: PySCF 2.14 + gpu4pyscf ≥1.8.1 + osc CPU + combined pin.
+"""Full optional-stack smoke: PySCF 2.14 + gpu4pyscf ≥1.8.1 + osc CPU + combined pin.
 
-Runs only under the worktree ``.venv`` (does not touch ``~/.local``).
+Runs under repo-local ``.venv`` (see PYSCF214_ENV_NOTES.md); does not touch ``~/.local``.
 
 Checks:
   1. Package versions (numpy / pyscf / gpu4pyscf)
@@ -42,7 +42,7 @@ def _banner(title: str) -> None:
 
 
 def check_versions() -> dict:
-    _banner("1) Versions (isolated stack)")
+    _banner("1) Versions (optional .venv stack)")
     import pyscf
 
     import gpu4pyscf
@@ -58,9 +58,9 @@ def check_versions() -> dict:
     for k, v in info.items():
         print(f"  {k}: {v}")
     assert "2.14" in str(info["pyscf"]), f"expected pyscf 2.14.x, got {info['pyscf']}"
-    # Require paired GPU package from venv (≥1.8.1), not live ~/.local 1.4.3
+    # Require paired GPU package from repo .venv (≥1.8.1), not live ~/.local 1.4.3
     assert ".venv" in str(info["gpu4pyscf_file"]), (
-        f"gpu4pyscf must come from worktree .venv, got {info['gpu4pyscf_file']}"
+        f"gpu4pyscf must come from repo .venv, got {info['gpu4pyscf_file']}"
     )
     ver = str(info["gpu4pyscf"])
     parts = [int(x) for x in ver.split(".")[:3] if x.isdigit()]

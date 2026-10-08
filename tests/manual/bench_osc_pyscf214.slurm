@@ -5,14 +5,14 @@
 #SBATCH --cpus-per-task=4
 #SBATCH --mem=16G
 #SBATCH --time=00:20:00
-#SBATCH --output=/data/PHO_WORK/sajagbe2/packages/emsuite-osc-cpu/tests/manual/bench_osc_pyscf214_%j.out
-#SBATCH --error=/data/PHO_WORK/sajagbe2/packages/emsuite-osc-cpu/tests/manual/bench_osc_pyscf214_%j.err
+#SBATCH --output=/data/PHO_WORK/sajagbe2/packages/emsuite/tests/manual/bench_osc_pyscf214_%j.out
+#SBATCH --error=/data/PHO_WORK/sajagbe2/packages/emsuite/tests/manual/bench_osc_pyscf214_%j.err
 
-# GPU smoke against the worktree-isolated PySCF 2.14 venv (.venv).
+# GPU smoke against the optional PySCF 2.14 venv (.venv).
 # Does NOT touch ~/.local pyscf 2.10 used by live opsins jobs.
 
 set -euo pipefail
-cd /data/PHO_WORK/sajagbe2/packages/emsuite-osc-cpu
+cd /data/PHO_WORK/sajagbe2/packages/emsuite
 export PYTHONPATH=src:${PYTHONPATH:-}
 PY="${PWD}/.venv/bin/python"
 echo "CUDA_VISIBLE_DEVICES=${CUDA_VISIBLE_DEVICES:-unset}"

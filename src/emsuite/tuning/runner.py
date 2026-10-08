@@ -632,6 +632,12 @@ def _run_tuning(inp: TuningInput):
     parallel = tuning_params["parallel"]
     num_procs = tuning_params["num_procs"]
 
+    # Combined MM+TDDFT must see a single GPU for the whole process. Pinning
+    # later (after multi-GPU SCF / vacuum-TD subprocess) is too late and still
+    # hits cudaErrorLaunchFailure (prod 4572434). Pin before any CUDA init.
+    if calc_type == "combined":
+        _pin_combined_to_single_gpu()
+
     # Check available hardware
     No_of_GPUs: int = core.check_gpu_info() or 0
     No_of_CPUs: int = core.check_cpu_info() or 1
