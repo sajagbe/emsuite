@@ -276,6 +276,11 @@ def solvate_molecule(mf, solvent="water"):
     """
     solvent = resolve_smd_solvent(solvent)
     had_mm = getattr(mf, "_emsuite_has_mm", False)
+    # Do not write PCM SCF back into the shared gas-phase chkfile.
+    # PySCF's chk dump of the "scf" group overwrites extras like scf/xc that
+    # save_chkfile wrote separately; Ray workers then resurrect as HF.
+    original_chk = getattr(mf, "chkfile", None)
+    mf.chkfile = None
     mf = mf.PCM()
     mf.with_solvent.eps = smd.solvent_db[solvent][5]
     mf.with_solvent.method = "C-PCM"
@@ -289,6 +294,8 @@ def solvate_molecule(mf, solvent="water"):
             print("SOSCF also did not converge.")
         else:
             print("SOSCF converged.")
+    # Restore path for reference only; PCM kernel does not write here.
+    mf.chkfile = original_chk
     if had_mm:
         mf._emsuite_has_mm = True
     return mf

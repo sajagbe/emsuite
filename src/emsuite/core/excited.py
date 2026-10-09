@@ -257,7 +257,20 @@ with open('td_results.pkl', 'wb') as f:
         # pyscf.tdscf.TDDFT(mf) calls mf.remove_soscf(); gpu4pyscf 1.4.3's
         # remove_soscf does lib.logger.warn('...') without a rec → TypeError
         # ("warn() missing ... 'msg'"), which wiped every solvent TDDFT point.
-        td = mf.TDDFT() if hasattr(mf, "TDDFT") else mf.TDHF()
+        #
+        # PCM defines TDDFT() for both HF and DFT via super().TDDFT(), so
+        # hasattr(mf, "TDDFT") is True even for RHF and then crashes with
+        # AttributeError: 'super' object has no attribute 'TDDFT'. Choose by
+        # whether this is a DFT object (xc set), matching the multi-GPU path.
+        is_dft = bool(getattr(mf, "xc", None))
+        if is_dft:
+            try:
+                td = mf.TDDFT()
+            except AttributeError:
+                # Lost-XC / HF-as-DFT edge case under PCM
+                td = mf.TDHF()
+        else:
+            td = mf.TDHF() if hasattr(mf, "TDHF") else mf.TDDFT()
 
         td.singlet = not triplet
         td.nstates = nstates
