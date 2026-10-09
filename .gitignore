@@ -10,6 +10,7 @@ build/
 .ruff_cache/
 .coverage
 htmlcov/
+site/
 
 # IDE
 .vscode/
