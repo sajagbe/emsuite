@@ -1,0 +1,20 @@
+{
+  "MAX": {
+    "abs_effect_d1": 0.05441106882736646,
+    "abs_effect_d3": 0.017693966349328516,
+    "qm_only_shrinks": true,
+    "incl_d1": 1.2225141488483968,
+    "incl_d3": 1.4291177870233325,
+    "incl_grows": true,
+    "interpretation": "TUNING (QM-only |\u0394\u03bc| shrinks with distance)"
+  },
+  "MIN": {
+    "abs_effect_d1": 0.05631210644018658,
+    "abs_effect_d3": 0.018602738117853512,
+    "qm_only_shrinks": true,
+    "incl_d1": 0.9413938298724269,
+    "incl_d3": 1.9327498262093887,
+    "incl_grows": true,
+    "interpretation": "TUNING (QM-only |\u0394\u03bc| shrinks with distance)"
+  }
+}
