@@ -29,7 +29,6 @@ if str(_SRC) not in sys.path:
 import numpy as np
 from pyscf import dft, gto, lib
 
-
 _ORIG_LIB_EINSUM = lib.einsum
 
 
@@ -144,7 +143,8 @@ def main() -> int:
         # Direct failed (expected on GPU / unpatched lib.einsum). Cross-check by
         # reconstructing a CPU TD with NumPy MOs and patched einsum.
         from pyscf import tdscf
-        from emsuite.core.oscillator_strength import as_numpy, _xy_to_numpy
+
+        from emsuite.core.oscillator_strength import _xy_to_numpy, as_numpy
 
         mf_cpu = mf.to_cpu() if hasattr(mf, "to_cpu") else mf
         td_ref = tdscf.TDDFT(mf_cpu) if hasattr(mf_cpu, "xc") else tdscf.TDHF(mf_cpu)

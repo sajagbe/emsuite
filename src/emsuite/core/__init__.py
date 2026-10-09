@@ -2,7 +2,6 @@
 
 from ._gpu import CUPY_AVAILABLE, cp
 from .excited import create_td_molecule_object
-from .oscillator_strength import as_numpy, oscillator_strength_cpu
 from .hardware import check_cpu_info, check_gpu_info, print_office_quote, print_startup_message
 from .io import extract_xyz_name, optimize_molecule
 from .molecule import (
@@ -12,6 +11,7 @@ from .molecule import (
     save_chkfile,
     solvate_molecule,
 )
+from .oscillator_strength import as_numpy, oscillator_strength_cpu
 from .qmmm import create_qmmm_molecule_object
 
 __all__ = [

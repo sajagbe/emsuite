@@ -58,5 +58,9 @@ src = ["src", "tests"]
 select = ["E", "F", "I", "UP", "B"]
 ignore = ["E501"]
 
+[tool.ruff.lint.per-file-ignores]
+# Manual scripts mutate sys.path before importing the package / third-party stack.
+"tests/manual/**" = ["E402"]
+
 [tool.ruff.lint.isort]
 known-first-party = ["emsuite"]

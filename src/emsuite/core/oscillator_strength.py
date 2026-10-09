@@ -62,7 +62,9 @@ def _frozen_mask_r(td, nmo: int) -> np.ndarray:
     return np.ones(nmo, dtype=bool)
 
 
-def _transition_dipole_rks(mol, mo_coeff, mo_occ, xy, singlet: bool, mask: np.ndarray) -> np.ndarray:
+def _transition_dipole_rks(
+    mol, mo_coeff, mo_occ, xy, singlet: bool, mask: np.ndarray
+) -> np.ndarray:
     """Length-gauge transition dipoles for closed-shell RKS/RHF TD (nstates, 3)."""
     nstates = len(xy)
     if not singlet:

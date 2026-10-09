@@ -214,7 +214,7 @@ def _pin_combined_to_single_gpu():
     subprocess then charged TD runs in-process (MM charges cannot be pickled).
     Pinning avoids that path.
     """
-    raw = os.environ.get("CUDA_VISIBLE_DEVICES", "0")
+    raw = os.environ.setdefault("CUDA_VISIBLE_DEVICES", "0")
     devices = [d.strip() for d in raw.split(",") if d.strip() != ""]
     if len(devices) <= 1:
         return raw

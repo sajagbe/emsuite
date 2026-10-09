@@ -13,11 +13,10 @@ from emsuite.surface.io import load_surf, save_mol2, save_surf
 
 @dataclass(frozen=True)
 class _SurfGrid:
-    """Shared coords/values/path + I/O for surf-backed channel results."""
+    """Shared coords/values + I/O for surf-backed channel results."""
 
     coords: np.ndarray
     values: np.ndarray
-    path: str | None = None
 
     def __post_init__(self) -> None:
         object.__setattr__(self, "coords", np.asarray(self.coords, dtype=float))
@@ -46,6 +45,8 @@ class _SurfGrid:
 
 @dataclass(frozen=True)
 class SurfaceResult(_SurfGrid):
+    path: str | None = None
+
     @classmethod
     def from_surf(cls, path: str | Path) -> SurfaceResult:
         return cls._from_surf_file(path)
@@ -69,6 +70,7 @@ class SurfaceResult(_SurfGrid):
 @dataclass(frozen=True)
 class PotentialResult(_SurfGrid):
     quantity: str = "potential"
+    path: str | None = None
 
     @classmethod
     def from_surf(cls, path: str | Path, quantity: str = "potential") -> PotentialResult:

@@ -20,3 +20,4 @@ def test_pin_combined_keeps_first_when_multi_gpu(monkeypatch):
 def test_pin_combined_default_when_unset(monkeypatch):
     monkeypatch.delenv("CUDA_VISIBLE_DEVICES", raising=False)
     assert _pin_combined_to_single_gpu() == "0"
+    assert __import__("os").environ["CUDA_VISIBLE_DEVICES"] == "0"

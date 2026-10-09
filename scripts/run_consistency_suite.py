@@ -80,7 +80,9 @@ def _compare_fingerprints(base: dict[str, object], cand: dict[str, object]) -> i
                 drifts.append(f"{key}: baseline={b!r} candidate={c!r}")
             continue
         for field in ("surf", "summary", "quantity", "calc_type", "surface_type", "properties"):
-            if field in b and field in c and b[field] != c[field]:
+            if (field in b) != (field in c):
+                drifts.append(f"{key}.{field}: missing from one run")
+            elif field in b and b[field] != c[field]:
                 drifts.append(f"{key}.{field}: baseline={b[field]!r} candidate={c[field]!r}")
 
     if missing:

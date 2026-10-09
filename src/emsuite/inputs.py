@@ -2,9 +2,10 @@
 
 from __future__ import annotations
 
+from collections.abc import Callable
 from dataclasses import MISSING, asdict, dataclass, fields
 from pathlib import Path
-from typing import Any, Callable, Self
+from typing import Any, Self
 
 from emsuite.config.schemas import (
     validate_coupled_params,

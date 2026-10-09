@@ -43,9 +43,8 @@ def _banner(title: str) -> None:
 
 def check_versions() -> dict:
     _banner("1) Versions (optional .venv stack)")
-    import pyscf
-
     import gpu4pyscf
+    import pyscf
 
     info = {
         "python": sys.executable,
@@ -98,9 +97,10 @@ def check_osc_identity() -> dict:
     td.kernel()
 
     e = np.asarray(td.e.get() if hasattr(td.e, "get") else td.e, dtype=float)
-    osc_direct = np.asarray(td.oscillator_strength(), dtype=float)
+    osc_direct = td.oscillator_strength()
     if hasattr(osc_direct, "get"):
-        osc_direct = np.asarray(osc_direct.get(), dtype=float)
+        osc_direct = osc_direct.get()
+    osc_direct = np.asarray(osc_direct, dtype=float)
     osc_cpu = oscillator_strength_cpu(td)
 
     rel = float(np.max(np.abs(osc_cpu - osc_direct) / np.maximum(np.abs(osc_direct), 1e-16)))

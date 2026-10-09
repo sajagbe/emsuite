@@ -73,12 +73,6 @@ def print_office_quote() -> None:
     should not fail because of the Easter egg.
     """
     print("\nFetching inspirational quote...\n")
-    for name in os.listdir():
-        if name.startswith("quote") and name.endswith(".svg"):
-            try:
-                os.remove(name)
-            except OSError as exc:
-                print(f"Warning: could not remove {name}: {exc}")
 
     url = f"{OFFICE_API}/quote/random"
     try:

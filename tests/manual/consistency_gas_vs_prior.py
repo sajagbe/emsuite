@@ -13,8 +13,6 @@ import sys
 import tempfile
 from pathlib import Path
 
-import numpy as np
-
 _ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(_ROOT / "src"))
 
@@ -31,10 +29,7 @@ fingerprint_csv = _helpers.fingerprint_csv
 latest_results_dir = _helpers.latest_results_dir
 
 
-_PRIOR = (
-    _ROOT
-    / "tests/integration_runs/recreate-maps-2026-10-07T035624Z/water/combined/singlet"
-)
+_PRIOR = _ROOT / "tests/integration_runs/recreate-maps-2026-10-07T035624Z/water/combined/singlet"
 _WATER_XYZ = _ROOT / "tests/integration_runs/recreate-maps-2026-10-07T035624Z/water/Water.xyz"
 _WATER_SURF = _ROOT / "tests/integration_runs/recreate-maps-2026-10-07T035624Z/water/Water.surf"
 
