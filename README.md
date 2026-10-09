@@ -406,10 +406,11 @@ molecule.xyz            # optimized geometry (when optimize=True)
 ## Python API
 
 The CLI is a thin wrapper around frozen input dataclasses. Every `.in` file maps
-to `from_file()`; every key maps to `from_config(**kwargs)`.
+to `from_file()`; inline kwargs use the constructor (or `dataclasses.replace`).
 
 ```python
 from emsuite import SurfaceInput, TuningInput, PotentialInput, CoupledInput
+from dataclasses import replace
 
 # Equivalent to: emsuite -s surface.in
 SurfaceInput.from_file("surface.in").run()
@@ -418,13 +419,13 @@ SurfaceInput.from_file("surface.in").run()
 TuningInput.from_file("tuning.in").run()
 
 # Build inline (no .in file):
-surf = SurfaceInput.from_config(
+surf = SurfaceInput(
     input_type="SMILES", input_data="O",
     output_surf="Water.surf", optimized_xyz="Water.xyz",
     surface_charge=0.10,
 ).run()
 
-TuningInput.from_config(
+TuningInput(
     molecule="Water.xyz",
     surface_file=surf.path,
     properties=["homo", "lumo", "gap"],
@@ -433,21 +434,10 @@ TuningInput.from_config(
 ).run()
 ```
 
-`from_config` accepts `config=` (path or dict) with keyword overrides:
+Override from a file with `replace`:
 
 ```python
-TuningInput.from_config(config="tuning.in", parallel=False).run()
-```
-
-Lower-level runners (same calculations, no result objects):
-
-```python
-import emsuite
-
-emsuite.run_surface_calculation("surface.in")
-emsuite.run_tuning_calculation("tuning.in")
-emsuite.run_potential_calculation("potential.in")
-emsuite.run_coupled_calculation("coupled.in")
+replace(TuningInput.from_file("tuning.in"), parallel=False).run()
 ```
 
 See `examples/water-gpu/run_api.py` for a full SMILES→tuning script.

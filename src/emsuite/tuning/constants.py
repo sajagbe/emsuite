@@ -1,4 +1,5 @@
-"""Physical unit conversions."""
+"""Physical unit conversions (re-exported from :mod:`emsuite.physconst`)."""
 
-HARTREE_TO_KCAL = 627.509
-HARTREE_TO_EV = 27.2114
+from emsuite.physconst import HARTREE_TO_EV, HARTREE_TO_KCAL
+
+__all__ = ["HARTREE_TO_EV", "HARTREE_TO_KCAL"]

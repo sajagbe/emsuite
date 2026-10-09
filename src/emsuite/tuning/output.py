@@ -359,7 +359,9 @@ def check_all_files_created(
     if missing:
         print(f"Missing: {', '.join(missing)}")
     else:
-        print("All expected output files were created.")
+        from emsuite.core import print_office_quote
+
+        print_office_quote()
 
 
 #################

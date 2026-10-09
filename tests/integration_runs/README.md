@@ -2,13 +2,36 @@
 
 Slow integration tests can archive a full, traceable record of every run here.
 
+## Consistency suite (cleanup / refactor gates)
+
+Use this when changing shared plumbing (dead-code removal, CLI/input factories,
+result types). It runs the core slow channel matrix, archives workspaces, and
+records numeric fingerprints for before/after compare.
+
+Numeric fingerprints for potential/tuning use the committed fixture
+`tests/integration/fixtures/methane.surf` because the external `vsg` tool does
+not emit bit-identical VDW point sets across runs. Surface-*generation* tests
+still call `vsg` but only record structural assertions.
+
+```bash
+# Phase 0 / new oracle on current main
+python scripts/run_consistency_suite.py --baseline
+
+# After each cleanup step
+python scripts/run_consistency_suite.py
+# → auto-compares fingerprints to tests/integration_runs/baseline_fingerprints.json
+```
+
 ## Run a full audited suite
 
 ```bash
-python scripts/run_slow_integration_audit.py
+python scripts/run_consistency_suite.py
 ```
 
-Each run creates a timestamped folder, for example `2026-06-21T153045Z/`, containing:
+(Older docs referred to `run_slow_integration_audit.py`; the consistency runner
+supersedes it for cleanup gates and also archives via `EMSUITE_INTEGRATION_RUN_DIR`.)
+
+Each run creates a timestamped folder, for example `consistency-2026-06-21T153045Z/`, containing:
 
 | Artifact | Purpose |
 |----------|---------|

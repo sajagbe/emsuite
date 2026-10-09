@@ -1,8 +1,8 @@
 """Shared quantum chemistry primitives."""
 
-from ._gpu import GPU_AVAILABLE, cp
+from ._gpu import CUPY_AVAILABLE, cp
 from .excited import create_td_molecule_object
-from .hardware import check_cpu_info, check_gpu_info, print_startup_message
+from .hardware import check_cpu_info, check_gpu_info, print_office_quote, print_startup_message
 from .io import extract_xyz_name, optimize_molecule
 from .molecule import (
     create_molecule_object,
@@ -11,14 +11,16 @@ from .molecule import (
     save_chkfile,
     solvate_molecule,
 )
+from .oscillator_strength import as_numpy, oscillator_strength_cpu
 from .qmmm import create_qmmm_molecule_object
 
 __all__ = [
-    "GPU_AVAILABLE",
+    "CUPY_AVAILABLE",
     "cp",
     "check_cpu_info",
     "check_gpu_info",
     "print_startup_message",
+    "print_office_quote",
     "create_molecule_object",
     "save_chkfile",
     "resurrect_mol",
@@ -26,6 +28,8 @@ __all__ = [
     "find_homo_lumo_and_gap",
     "create_qmmm_molecule_object",
     "create_td_molecule_object",
+    "as_numpy",
+    "oscillator_strength_cpu",
     "extract_xyz_name",
     "optimize_molecule",
 ]

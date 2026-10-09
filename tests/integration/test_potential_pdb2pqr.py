@@ -17,7 +17,7 @@ from emsuite.inputs import PotentialInput
 
 @pytest.mark.slow
 def test_pdb_absent_mode(pdb2pqr_fixture: Path) -> None:
-    result = PotentialInput.from_config(
+    result = PotentialInput(
         molecule="ligand.xyz",
         protein="complex.pdb",
         protein_format="pdb",
@@ -32,7 +32,7 @@ def test_pdb_absent_mode(pdb2pqr_fixture: Path) -> None:
 
 @pytest.mark.slow
 def test_pdb_present_mode_zeroes_ligand_charge_keeps_radius(pdb2pqr_fixture: Path) -> None:
-    result = PotentialInput.from_config(
+    result = PotentialInput(
         molecule="ligand.xyz",
         protein="complex.pdb",
         protein_format="pdb",
@@ -48,7 +48,7 @@ def test_pdb_present_mode_zeroes_ligand_charge_keeps_radius(pdb2pqr_fixture: Pat
 
 @pytest.mark.slow
 def test_pdb_charged_mode_keeps_real_ligand_charge(pdb2pqr_fixture: Path) -> None:
-    result = PotentialInput.from_config(
+    result = PotentialInput(
         molecule="ligand.xyz",
         protein="complex.pdb",
         protein_format="pdb",
@@ -100,7 +100,7 @@ def _pdb2pqr_temp_dirs() -> set[str]:
 def test_pdb_mode_does_not_leak_temp_dir(pdb2pqr_fixture: Path) -> None:
     """occupancy.py's tempfile.mkdtemp() for the isolated PDB/PQR must be cleaned up."""
     before = _pdb2pqr_temp_dirs()
-    PotentialInput.from_config(
+    PotentialInput(
         molecule="ligand.xyz",
         protein="complex.pdb",
         protein_format="pdb",

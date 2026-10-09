@@ -7,13 +7,10 @@ from pathlib import Path
 import numpy as np
 import pytest
 
-from emsuite.potential import run_potential_calculation
+from emsuite import PotentialInput
 from emsuite.potential.apbs import run_apbs_grids
-from emsuite.surface import run_surface_calculation
 
-from .helpers import METHANE_SURFACE_IN, record_assertions
-
-SURFACE_IN = METHANE_SURFACE_IN
+from .helpers import fingerprint_surf, install_methane_surf, record_assertions, write_methane_xyz
 
 POTENTIAL_IN = """\
 molecule = 'methane.xyz'
@@ -27,10 +24,11 @@ quantity = 'potential'
 @pytest.mark.slow
 def test_potential_apbs_map(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.chdir(tmp_path)
-    (tmp_path / "surface.in").write_text(SURFACE_IN)
-    run_surface_calculation("surface.in")
+    write_methane_xyz(tmp_path)
+    install_methane_surf(tmp_path)
     (tmp_path / "potential.in").write_text(POTENTIAL_IN)
-    surf_path = run_potential_calculation("potential.in")
+    result = PotentialInput.from_file("potential.in").run()
+    surf_path = result.path
     assert Path(surf_path).is_file()
     data = np.loadtxt(surf_path, skiprows=1)
     if data.ndim == 1:
@@ -46,6 +44,7 @@ def test_potential_apbs_map(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> 
         surface_points=int(potentials.shape[0]),
         potentials_finite=True,
         output_surf=surf_path,
+        surf=fingerprint_surf(surf_path),
     )
 
 

@@ -8,8 +8,6 @@ from emsuite.core import find_homo_lumo_and_gap
 
 from ..constants import HARTREE_TO_EV, HARTREE_TO_KCAL
 
-GROUND_STATE_PROPS = ("gse", "homo", "lumo", "gap", "dm", "spin")
-
 
 def calculate_ground_state_properties(mf, props_to_calc: list[str]) -> dict:
     results: dict = {}

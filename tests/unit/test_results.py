@@ -8,6 +8,16 @@ from emsuite.results import PotentialResult, SurfaceResult
 from emsuite.surface.io import load_surf
 
 
+def test_potential_result_positional_quantity_before_path(tmp_path: Path):
+    coords = np.array([[0.0, 0.0, 0.0]])
+    values = np.array([0.1])
+    result = PotentialResult(coords, values, "charge", str(tmp_path / "out.surf"))
+    assert result.quantity == "charge"
+    assert result.path == str(tmp_path / "out.surf")
+    written = result.to_surf()
+    assert written == str(tmp_path / "out.surf")
+
+
 def test_potential_result_to_surf_roundtrip(tmp_path: Path):
     coords = np.array([[0.0, 0.0, 0.0], [1.0, 0.0, 0.0]])
     values = np.array([0.1, -0.2])

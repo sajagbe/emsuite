@@ -17,17 +17,17 @@ from pathlib import Path
 import numpy as np
 import pytest
 
-from emsuite.core import GPU_AVAILABLE, check_gpu_info
+from emsuite.core import CUPY_AVAILABLE, check_gpu_info
 from emsuite.inputs import CoupledInput, PotentialInput, SurfaceInput, TuningInput
 
-from .helpers import METHANE_SURFACE_IN, latest_results_dir, record_assertions, write_methane_xyz
+from .helpers import install_methane_surf, latest_results_dir, record_assertions, write_methane_xyz
 
 _GPU_PROPS = ("homo", "lumo", "gap")
 _GPU_BASIS = "sto-3g"
 
 
 def _gpu_available() -> bool:
-    return bool(GPU_AVAILABLE and (check_gpu_info() or 0) >= 1)
+    return bool(CUPY_AVAILABLE and (check_gpu_info() or 0) >= 1)
 
 
 @pytest.fixture(scope="module")
@@ -37,10 +37,10 @@ def require_gpu() -> None:
 
 
 def _prepare_methane_surface(tmp_path: Path) -> tuple[Path, Path]:
-    """UFF VDW surface + methane.xyz in *tmp_path*."""
-    (tmp_path / "surface.in").write_text(METHANE_SURFACE_IN)
-    surf = SurfaceInput.from_file(tmp_path / "surface.in").run()
-    return Path(surf.path), tmp_path / "methane.xyz"
+    """Fixed fixture VDW surface + methane.xyz in *tmp_path*."""
+    write_methane_xyz(tmp_path)
+    surf = install_methane_surf(tmp_path)
+    return surf, tmp_path / "methane.xyz"
 
 
 @pytest.mark.gpu
@@ -76,7 +76,7 @@ def test_gpu_surface_pyscf_optimize(
     """Surface channel with PySCF geometry optimization (gpu4pyscf when available)."""
     monkeypatch.chdir(tmp_path)
     write_methane_xyz(tmp_path)
-    result = SurfaceInput.from_config(
+    result = SurfaceInput(
         input_type="XYZ",
         input_data="methane.xyz",
         output_surf="methane_pyscf.surf",
@@ -104,7 +104,7 @@ def test_gpu_potential_apbs_potential(
     """Potential channel: APBS electrostatic potential map (CPU math on GPU node)."""
     monkeypatch.chdir(tmp_path)
     surf_path, _ = _prepare_methane_surface(tmp_path)
-    result = PotentialInput.from_config(
+    result = PotentialInput(
         molecule="methane.xyz",
         surface_file=str(surf_path),
         output_surf="methane_potential.surf",
@@ -130,7 +130,7 @@ def test_gpu_potential_apbs_gauss_charge(
     """Potential channel: Gauss-law surface charges from APBS φ and dielectric maps."""
     monkeypatch.chdir(tmp_path)
     surf_path, _ = _prepare_methane_surface(tmp_path)
-    result = PotentialInput.from_config(
+    result = PotentialInput(
         molecule="methane.xyz",
         surface_file=str(surf_path),
         output_surf="methane_charge.surf",
@@ -156,7 +156,7 @@ def test_gpu_tuning_parallel(
     """Tuning channel with Ray + gpu4pyscf (parallel=True)."""
     monkeypatch.chdir(tmp_path)
     surf_path, _ = _prepare_methane_surface(tmp_path)
-    TuningInput.from_config(
+    TuningInput(
         molecule="methane.xyz",
         surface_file=str(surf_path),
         properties=_GPU_PROPS,
@@ -181,13 +181,64 @@ def test_gpu_tuning_parallel(
 
 @pytest.mark.gpu
 @pytest.mark.slow
+def test_gpu_tuning_combined_exe_osc_pinned(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, require_gpu: None
+) -> None:
+    """Combined MM+TDDFT with exe/osc under a fake multi-GPU CUDA_VISIBLE_DEVICES.
+
+    Pins to the first device (avoids vacuum-TD subprocess + in-process MM TD
+    cudaErrorLaunchFailure) and exercises CPU osc extract / stock GPU osc.
+    """
+    import os
+
+    real = os.environ.get("CUDA_VISIBLE_DEVICES", "0").split(",")[0].strip() or "0"
+    # Simulate a multi-GPU allocation so combined pinning must fire.
+    monkeypatch.setenv("CUDA_VISIBLE_DEVICES", f"{real},{real}")
+    monkeypatch.chdir(tmp_path)
+    surf_path, _ = _prepare_methane_surface(tmp_path)
+
+    TuningInput(
+        molecule="methane.xyz",
+        surface_file=str(surf_path),
+        properties=("exe", "osc"),
+        basis_set=_GPU_BASIS,
+        method="dft",
+        functional="b3lyp",
+        calc_type="combined",
+        parallel=False,
+        state_of_interest=2,
+        triplet=False,
+    ).run()
+
+    # Pinning must have collapsed the fake multi-GPU list.
+    assert os.environ["CUDA_VISIBLE_DEVICES"] == real
+
+    results_dir = latest_results_dir(tmp_path)
+    summary = results_dir / "methane_tuning_summary.csv"
+    assert summary.is_file()
+    text = summary.read_text()
+    assert "s1_exe" in text or "s1_osc" in text
+    for name in ("s1_exe", "s1_osc", "s2_exe", "s2_osc"):
+        assert (results_dir / f"methane_{name}.mol2").is_file(), name
+    record_assertions(
+        tmp_path,
+        channel="tuning",
+        calc_type="combined",
+        properties=["exe", "osc"],
+        pinned_cuda=real,
+        results_dir=str(results_dir),
+    )
+
+
+@pytest.mark.gpu
+@pytest.mark.slow
 def test_gpu_coupled_parallel(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch, require_gpu: None
 ) -> None:
     """Coupled channel: APBS Gauss charges → parallel GPU tuning."""
     monkeypatch.chdir(tmp_path)
     surf_path, _ = _prepare_methane_surface(tmp_path)
-    result = CoupledInput.from_config(
+    result = CoupledInput(
         molecule="methane.xyz",
         surface_file=str(surf_path),
         output_surf="coupled_gpu.surf",

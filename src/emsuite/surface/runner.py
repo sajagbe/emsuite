@@ -1,30 +1,17 @@
-"""Surface input parsing and CLI runner."""
+"""Surface input parsing and private runner."""
+
+from __future__ import annotations
 
 from pathlib import Path
+from typing import TYPE_CHECKING
 
 from emsuite.config import parse_assignments, parse_config_file
 from emsuite.config.schemas import validate_surface_params
 
 from .generate import generate_surface
 
-SURFACE_DEFAULTS = {
-    "input_type": None,  # Required
-    "input_data": None,  # Required
-    "output_surf": "surface.surf",
-    "optimized_xyz": None,  # Optional: custom name for optimized XYZ
-    "surface_density": 1.0,
-    "surface_scale": 1.0,
-    "surface_type": "homogenous",
-    "surface_charge": 0.10,
-    "optimize": None,  # Auto-determined based on input_type
-    "optimize_method": "mmff",
-    "method": "dft",
-    "basis_set": "6-31G*",
-    "functional": "b3lyp",
-    "solvent": None,
-    "charge": 0,
-    "spin": 0,
-}
+if TYPE_CHECKING:
+    from emsuite.inputs import SurfaceInput
 
 
 def parse_surface_input(input_file):
@@ -37,7 +24,9 @@ def parse_surface_input(input_file):
     Returns:
         dict: Dictionary of parameters with defaults applied
     """
-    params = parse_config_file(input_file, defaults=SURFACE_DEFAULTS)
+    from emsuite.inputs import SurfaceInput, _channel_defaults
+
+    params = parse_config_file(input_file, defaults=_channel_defaults(SurfaceInput))
     parsed = parse_assignments(Path(input_file).read_text())
 
     if params["surface_type"].lower() == "homogenous" and "surface_charge" not in parsed:
@@ -46,25 +35,13 @@ def parse_surface_input(input_file):
     return validate_surface_params(params)
 
 
-def run_surface_calculation(config):
-    """
-    Main entry point for surface generation.
-
-    Args:
-        config (str | Path | dict): Path to a surface.in file, or a parameter dict.
-
-    Returns:
-        str: Path to the generated surf file
-    """
+def _run_surface(inp: SurfaceInput) -> str:
+    """Execute surface generation for a validated SurfaceInput. Returns .surf path."""
     print("\n" + "=" * 60)
     print("                  Surface Generation Module")
     print("=" * 60 + "\n")
 
-    from emsuite.inputs import SurfaceInput
-
-    if not isinstance(config, (dict, SurfaceInput)):
-        print(f"Reading input file: {config}")
-    params = SurfaceInput.from_any(config).to_dict()
+    params = inp.to_dict()
 
     print(f"\nInput type: {params['input_type']}")
     print(f"Input data: {params['input_data']}")

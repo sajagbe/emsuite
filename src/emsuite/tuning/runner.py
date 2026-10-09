@@ -1,5 +1,7 @@
 """Tuning calculation orchestration."""
 
+from __future__ import annotations
+
 import json
 import logging
 import os
@@ -7,12 +9,16 @@ import shutil
 import sys
 import tempfile
 from datetime import datetime
+from typing import TYPE_CHECKING
 
 import numpy as np
 import ray
 
 from emsuite import core
 from emsuite.surface import load_surf
+
+if TYPE_CHECKING:
+    from emsuite.inputs import TuningInput
 
 from .logging import (
     append_point_to_summary,
@@ -200,6 +206,27 @@ def calculate_surface_effect_at_point(
 ##########################################################
 
 
+def _pin_combined_to_single_gpu():
+    """Force combined (MM+TDDFT) onto one visible GPU.
+
+    LF/cc-pVTZ charged TDDFT with all surface charges succeeds on 1 GPU, but
+    fails with cudaErrorLaunchFailure on multi-GPU nodes where vacuum TD uses a
+    subprocess then charged TD runs in-process (MM charges cannot be pickled).
+    Pinning avoids that path.
+    """
+    raw = os.environ.setdefault("CUDA_VISIBLE_DEVICES", "0")
+    devices = [d.strip() for d in raw.split(",") if d.strip() != ""]
+    if len(devices) <= 1:
+        return raw
+    pinned = devices[0]
+    os.environ["CUDA_VISIBLE_DEVICES"] = pinned
+    print(
+        f"Combined calc: pinning CUDA_VISIBLE_DEVICES={pinned!r} "
+        f"(was {raw!r}) for MM+TDDFT stability"
+    )
+    return pinned
+
+
 def calculate_combined_surface_effect(
     base_chkfiles,
     coords,
@@ -228,6 +255,10 @@ def calculate_combined_surface_effect(
     Returns:
         dict: Dictionary of combined property effects
     """
+    # Must run before any TD: multi-GPU vacuum-TD subprocess + in-process MM TD
+    # triggers cudaErrorLaunchFailure for large-basis LF (cc-pVTZ).
+    _pin_combined_to_single_gpu()
+
     # Resurrect base molecules
     molecule_alone = (
         core.resurrect_mol(base_chkfiles["neutral"]) if base_chkfiles.get("neutral") else None
@@ -565,48 +596,47 @@ def startup_message():
 
 
 ##########################################################
-def run_tuning_calculation(config):
+def _run_tuning(inp: TuningInput):
     #######################################
     #           Preliminary Setup         #
     #######################################
-    """Main entry point for tuning calculations.
-
-    Args:
-        config (str | Path | dict | TuningInput): Path to a tuning.in file, or a
-            parameter dict/TuningInput (defaults are supplied per-key below).
-    """
+    """Execute tuning for a validated TuningInput. Returns results_dir path."""
     # Print startup message
     startup_message()
 
-    from emsuite.inputs import TuningInput
+    tuning_params = inp.to_dict()
 
-    tuning_params = TuningInput.from_any(config).to_dict()
-
-    # Extract all parameters
-    molecule = tuning_params.get("molecule") or tuning_params.get("xyz_file")
+    # Extract all parameters (Input already validated + defaulted)
+    molecule = tuning_params["molecule"]
     if not molecule or not os.path.exists(molecule):
         raise FileNotFoundError(f"XYZ file required: {molecule}")
-    basis_set = tuning_params.get("basis_set", "6-31G*")
-    method = tuning_params.get("method", "dft")
-    functional = tuning_params.get("functional", "b3lyp")
-    charge = tuning_params.get("charge", 0)
-    spin = tuning_params.get("spin", 0)
-    solvent = tuning_params.get("solvent", None)
+    basis_set = tuning_params["basis_set"]
+    method = tuning_params["method"]
+    functional = tuning_params["functional"]
+    charge = tuning_params["charge"]
+    spin = tuning_params["spin"]
+    solvent = tuning_params["solvent"]
 
     # Surface calculation parameters
-    surface_file = tuning_params.get("surface_file")
+    surface_file = tuning_params["surface_file"]
     if not surface_file or not os.path.exists(surface_file):
         raise FileNotFoundError(f"Surface file required: {surface_file}")
-    calc_type = tuning_params.get("calc_type", "separate")
+    calc_type = tuning_params["calc_type"]
 
     # Calculation specifics
-    properties = tuning_params.get("properties", ["all"])
-    state_of_interest = tuning_params.get("state_of_interest", 2)
-    triplet = tuning_params.get("triplet", False)
+    properties = tuning_params["properties"]
+    state_of_interest = tuning_params["state_of_interest"]
+    triplet = tuning_params["triplet"]
 
-    # Parallel processing parameter (default: True)
-    parallel = tuning_params.get("parallel", True)
-    num_procs = tuning_params.get("num_procs", None)
+    # Parallel processing
+    parallel = tuning_params["parallel"]
+    num_procs = tuning_params["num_procs"]
+
+    # Combined MM+TDDFT must see a single GPU for the whole process. Pinning
+    # later (after multi-GPU SCF / vacuum-TD subprocess) is too late and still
+    # hits cudaErrorLaunchFailure (prod 4572434). Pin before any CUDA init.
+    if calc_type == "combined":
+        _pin_combined_to_single_gpu()
 
     # Check available hardware
     No_of_GPUs: int = core.check_gpu_info() or 0
@@ -1133,5 +1163,7 @@ def run_tuning_calculation(config):
 
 
 if __name__ == "__main__":
+    from emsuite.inputs import TuningInput
+
     tuning_file = sys.argv[1] if len(sys.argv) > 1 else "tuning.in"
-    run_tuning_calculation(tuning_file)
+    TuningInput.from_file(tuning_file).run()

@@ -48,7 +48,7 @@ Equivalent inline API:
 ```python
 from emsuite import SurfaceInput, TuningInput
 
-surf = SurfaceInput.from_config(
+surf = SurfaceInput(
     input_type="SMILES",
     input_data="O",
     output_surf="Water.surf",
@@ -58,7 +58,7 @@ surf = SurfaceInput.from_config(
     optimize_method="uff",
 ).run()
 
-TuningInput.from_config(
+TuningInput(
     molecule="Water.xyz",
     surface_file=surf.path,
     properties=["homo", "lumo", "gap"],

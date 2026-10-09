@@ -15,7 +15,7 @@ from emsuite.inputs import CoupledInput
 
 @pytest.mark.slow
 def test_coupled_absent_mode_via_pdb2pqr(pdb2pqr_fixture: Path) -> None:
-    result = CoupledInput.from_config(
+    result = CoupledInput(
         molecule="ligand.xyz",
         protein="complex.pdb",
         protein_format="pdb",
@@ -35,7 +35,7 @@ def test_coupled_absent_mode_via_pdb2pqr(pdb2pqr_fixture: Path) -> None:
 
 @pytest.mark.slow
 def test_coupled_charged_mode_via_pdb2pqr(pdb2pqr_fixture: Path) -> None:
-    result = CoupledInput.from_config(
+    result = CoupledInput(
         molecule="ligand.xyz",
         protein="complex.pdb",
         protein_format="pdb",

@@ -5,7 +5,8 @@ import sys
 import numpy as np
 from pyscf import tdscf
 
-from ._gpu import GPU_AVAILABLE
+from ._gpu import CUPY_AVAILABLE
+from .oscillator_strength import oscillator_strength_cpu
 
 
 def _mf_has_mm_charges(mf):
@@ -49,7 +50,7 @@ def create_td_molecule_object(mf, nstates=5, triplet=False, force_single_gpu=Fal
         len(visible_devices) > 1
         and hasattr(mf, "to_cpu")
         and callable(mf.to_cpu)
-        and GPU_AVAILABLE
+        and CUPY_AVAILABLE
         and not force_single_gpu
     )
 
@@ -154,14 +155,13 @@ e_np = to_numpy(td.e)
 if e_np is None or len(e_np) == 0 or not np.isfinite(e_np).all():
     raise RuntimeError(f'TDDFT returned non-finite energies: {{e_np}}')
 
-# Energies + xy are required for exe. Oscillator strengths are optional:
-# gpu4pyscf can raise in td.oscillator_strength() (einsum unpack error)
-# even after a successful TDDFT kernel; parent reconstructs from e/xy only.
+# Energies + xy are required for exe. Prefer GPU osc when it works; on
+# gpu4pyscf einsum failure the parent fills osc via CPU NumPy extract.
 osc = None
 try:
     osc = to_numpy(td.oscillator_strength()).tolist()
 except Exception as osc_err:
-    print(f"WARNING: td.oscillator_strength() failed ({{osc_err}}); continuing with energies only")
+    print(f"WARNING: td.oscillator_strength() failed ({{osc_err}}); parent will CPU-extract osc")
 
 results = {{
     'e': e_np.tolist(),
@@ -204,6 +204,16 @@ with open('td_results.pkl', 'wb') as f:
             if td.e.size == 0 or not np.isfinite(td.e).all():
                 raise RuntimeError(f"TDDFT subprocess returned non-finite energies: {td.e}")
 
+            # If GPU osc failed in the subprocess, fill via CPU NumPy extract now
+            # that e/xy sit on a CPU SCF (property calculators also use this helper).
+            if results.get("oscillator_strength") is None:
+                try:
+                    osc_cpu = oscillator_strength_cpu(td)
+                    results["oscillator_strength"] = osc_cpu.tolist()
+                    print(f"CPU-extracted oscillator strengths after GPU failure: {osc_cpu}")
+                except Exception as osc_err:
+                    print(f"WARNING: CPU osc extract also failed ({osc_err})")
+
             print(f"TDDFT completed in subprocess on GPU {visible_devices[0]}, states: {len(td.e)}")
             sys.stdout.flush()
 
@@ -243,10 +253,24 @@ with open('td_results.pkl', 'wb') as f:
         print(f"Running TDDFT in current process (force_single_gpu={force_single_gpu})")
         sys.stdout.flush()
 
-        if hasattr(mf, "with_solvent"):
-            td = tdscf.TDDFT(mf) if hasattr(mf, "xc") else tdscf.TDHF(mf)
+        # Always use mf.TDDFT()/TDHF() (including PCM-wrapped GPU objects).
+        # pyscf.tdscf.TDDFT(mf) calls mf.remove_soscf(); gpu4pyscf 1.4.3's
+        # remove_soscf does lib.logger.warn('...') without a rec → TypeError
+        # ("warn() missing ... 'msg'"), which wiped every solvent TDDFT point.
+        #
+        # PCM defines TDDFT() for both HF and DFT via super().TDDFT(), so
+        # hasattr(mf, "TDDFT") is True even for RHF and then crashes with
+        # AttributeError: 'super' object has no attribute 'TDDFT'. Choose by
+        # whether this is a DFT object (xc set), matching the multi-GPU path.
+        is_dft = bool(getattr(mf, "xc", None))
+        if is_dft:
+            try:
+                td = mf.TDDFT()
+            except AttributeError:
+                # Lost-XC / HF-as-DFT edge case under PCM
+                td = mf.TDHF()
         else:
-            td = mf.TDDFT() if hasattr(mf, "TDDFT") else mf.TDHF()
+            td = mf.TDHF() if hasattr(mf, "TDHF") else mf.TDDFT()
 
         td.singlet = not triplet
         td.nstates = nstates

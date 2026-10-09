@@ -6,7 +6,7 @@ import numpy as np
 from pyscf import dft, gto, lib, scf
 from pyscf.solvent import smd
 
-from ._gpu import GPU_AVAILABLE, cp
+from ._gpu import CUPY_AVAILABLE, cp
 
 
 def create_molecule_object(
@@ -77,9 +77,9 @@ def create_molecule_object(
                 raise ValueError("Method must be 'dft' or 'hf'")
 
             # Move to GPU if available and requested
-            if gpu and GPU_AVAILABLE:
+            if gpu and CUPY_AVAILABLE:
                 mf = mf.to_gpu()
-            elif gpu and not GPU_AVAILABLE:
+            elif gpu and not CUPY_AVAILABLE:
                 print("GPU requested but not available - using CPU.")
             else:
                 print("Using CPU as requested.")
@@ -122,7 +122,7 @@ def save_chkfile(mf, chkfile_name, functional=None):
     lib.chkfile.save_mol(mf.mol, chkfile_name)
 
     # Handle CuPy arrays for GPU objects
-    if is_gpu and GPU_AVAILABLE:
+    if is_gpu and CUPY_AVAILABLE:
         mo_energy = (
             cp.asnumpy(mf.mo_energy) if isinstance(mf.mo_energy, cp.ndarray) else mf.mo_energy
         )
@@ -195,7 +195,7 @@ def resurrect_mol(chkfile_name):
         mf = scf.UHF(mol) if is_unrestricted else scf.RHF(mol)
 
     # Convert to GPU if available
-    if GPU_AVAILABLE:
+    if CUPY_AVAILABLE:
         try:
             print(f"Converting {type(mf)} to GPU...")
             mf = mf.to_gpu()
@@ -239,6 +239,22 @@ def resurrect_mol(chkfile_name):
 ##############################################
 
 
+def resolve_smd_solvent(name: str) -> str:
+    """Return the canonical PySCF SMD solvent_db key for *name* (case-insensitive)."""
+    if name in smd.solvent_db:
+        return name
+    lower = name.lower()
+    if lower in smd.solvent_db:
+        return lower
+    matches = [k for k in smd.solvent_db if k.lower() == lower]
+    if len(matches) == 1:
+        return matches[0]
+    raise KeyError(
+        f"Unknown SMD solvent {name!r}. "
+        f"Use a key from pyscf.solvent.smd.solvent_db (case-insensitive)."
+    )
+
+
 def solvate_molecule(mf, solvent="water"):
     """
     Apply implicit solvation to a molecule using the Polarizable Continuum Model (PCM).
@@ -258,8 +274,13 @@ def solvate_molecule(mf, solvent="water"):
         - Automatically tries SOSCF if initial SCF doesn't converge
         - Solvent parameters are taken from the PySCF SMD database
     """
-    solvent = solvent.lower()
+    solvent = resolve_smd_solvent(solvent)
     had_mm = getattr(mf, "_emsuite_has_mm", False)
+    # Do not write PCM SCF back into the shared gas-phase chkfile.
+    # PySCF's chk dump of the "scf" group overwrites extras like scf/xc that
+    # save_chkfile wrote separately; Ray workers then resurrect as HF.
+    original_chk = getattr(mf, "chkfile", None)
+    mf.chkfile = None
     mf = mf.PCM()
     mf.with_solvent.eps = smd.solvent_db[solvent][5]
     mf.with_solvent.method = "C-PCM"
@@ -273,6 +294,8 @@ def solvate_molecule(mf, solvent="water"):
             print("SOSCF also did not converge.")
         else:
             print("SOSCF converged.")
+    # Restore path for reference only; PCM kernel does not write here.
+    mf.chkfile = original_chk
     if had_mm:
         mf._emsuite_has_mm = True
     return mf

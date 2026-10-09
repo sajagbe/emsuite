@@ -13,6 +13,8 @@ dependencies = [
     "ray>=2.50.1",
     "apbs-binary>=3.4.1.1",
     "pdb2pqr>=3.7.1",
+    "qcelemental>=0.51.2",
+    "pint>=0.25.3",
 ]
 
 [project.optional-dependencies]
@@ -55,6 +57,10 @@ src = ["src", "tests"]
 [tool.ruff.lint]
 select = ["E", "F", "I", "UP", "B"]
 ignore = ["E501"]
+
+[tool.ruff.lint.per-file-ignores]
+# Manual scripts mutate sys.path before importing the package / third-party stack.
+"tests/manual/**" = ["E402"]
 
 [tool.ruff.lint.isort]
 known-first-party = ["emsuite"]
