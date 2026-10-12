@@ -339,11 +339,18 @@ def check_all_files_created(
     effect_keys = set()
     if all_effects and len(all_effects) > 0:
         for effect in all_effects:
+            # Failed surface / combined points are stored as None (see runner.py).
+            # Match create_output_files: skip them instead of calling .keys().
+            if not effect:
+                continue
             effect_keys.update(effect.keys())
         # Only check for keys ending with '_effect'
         effect_props = [
             key.replace("_effect", "") for key in effect_keys if key.endswith("_effect")
         ]
+        # If every entry failed, fall back so we still report expected mol2 names.
+        if not effect_props:
+            effect_props = properties_to_calculate
     else:
         effect_props = properties_to_calculate
 

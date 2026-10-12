@@ -67,3 +67,4 @@ tests/integration_runs/LATEST/
 **/*id_sajagbe*
 **/id_sajagbe*
 .venv-pyscf214/
+.worktrees/
