@@ -7,7 +7,12 @@ from pathlib import Path
 import numpy as np
 import pytest
 
-from emsuite.potential.pdb_select import isolate_residue, select_residue_lines, strip_residue
+from emsuite.potential.pdb_select import (
+    drop_atoms,
+    isolate_residue,
+    select_residue_lines,
+    strip_residue,
+)
 from emsuite.potential.pqr import read_pqr_coords, zero_ligand_charges
 
 
@@ -85,6 +90,48 @@ def test_isolate_residue_drops_other_hetatms(tmp_path: Path):
     assert "HOH" not in text
     assert "LIG" in text
     assert "ALA" in text
+
+
+LYS_SB_TEXT = (
+    _pdb_line("ATOM", 1, "LYS", "A", 108, 1.0, 1.0, 1.0, name="N")
+    + _pdb_line("ATOM", 2, "LYS", "A", 108, 2.0, 1.0, 1.0, name="CA")
+    + _pdb_line("ATOM", 3, "LYS", "A", 108, 3.0, 1.0, 1.0, name="CE")
+    + _pdb_line("ATOM", 4, "LYS", "A", 108, 4.0, 1.0, 1.0, name="NZ")
+    + _pdb_line("ATOM", 5, "LYS", "A", 108, 4.5, 1.0, 1.0, name="HZ")
+    + _pdb_line("HETATM", 6, "RET", "A", 202, 5.0, 1.0, 1.0, name="C15")
+)
+
+
+def test_drop_atoms_removes_named_atoms_keeps_others(tmp_path: Path):
+    pdb = tmp_path / "sb.pdb"
+    pdb.write_text(LYS_SB_TEXT)
+    out = drop_atoms(
+        pdb,
+        resname="LYS",
+        chain="A",
+        resseq=108,
+        atom_names=("CE", "NZ", "HZ"),
+        output_path=tmp_path / "dropped.pdb",
+    )
+    atom_lines = [ln for ln in out.read_text().splitlines() if ln.startswith(("ATOM", "HETATM"))]
+    names = {ln[12:16].strip() for ln in atom_lines}
+    assert names == {"N", "CA", "C15"}
+    assert any("LYS" in ln for ln in atom_lines)
+    assert any("RET" in ln for ln in atom_lines)
+
+
+def test_drop_atoms_requires_match(tmp_path: Path):
+    pdb = tmp_path / "sb.pdb"
+    pdb.write_text(LYS_SB_TEXT)
+    with pytest.raises(ValueError, match="No atoms named"):
+        drop_atoms(
+            pdb,
+            resname="LYS",
+            chain="A",
+            resseq=108,
+            atom_names=("ZZZ",),
+            output_path=tmp_path / "x.pdb",
+        )
 
 
 WHITESPACE_PQR = (

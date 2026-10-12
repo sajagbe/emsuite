@@ -824,6 +824,7 @@ def _run_tuning(inp: TuningInput):
     print("=" * 60)
     print("\n")
 
+    combined_failure: BaseException | None = None
     if calc_type == "combined":
         print(f"Running combined calculation with all {len(surface_coords)} surface points...")
 
@@ -912,6 +913,7 @@ def _run_tuning(inp: TuningInput):
 
             all_effects = [None]
             output_coords = np.mean(surface_coords, axis=0).reshape(1, 3)
+            combined_failure = e
 
         # Finalize summary with statistics
         finalize_summary_log(summary_file, all_effects)
@@ -1159,6 +1161,10 @@ def _run_tuning(inp: TuningInput):
     os.chdir(results_dir)
     check_all_files_created(molecule_name, output_coords, properties_to_calculate, all_effects)
     os.chdir(original_dir)
+    # Combined total failure: keep diagnostic outputs, but fail with the real error
+    # (not AttributeError from check_all_files_created on None effects).
+    if combined_failure is not None:
+        raise RuntimeError(f"Combined calculation failed: {combined_failure}") from combined_failure
     return results_dir
 
 
