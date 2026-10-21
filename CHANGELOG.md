@@ -4,6 +4,9 @@ All notable changes to this project are documented in this file.
 
 ## [Unreleased]
 
+### Removed
+- Tuning properties `fukui_plus` and `fukui_minus` (they were unit-converted copies of EA/IE, not condensed Fukui functions). Requesting them is now an unknown-property error.
+
 ### Fixed
 - GPU TDDFT oscillator strengths on NumPy ≥2.4 / CuPy: evaluate length-gauge `f`
   via `oscillator_strength_cpu` (pure NumPy) instead of crashing in

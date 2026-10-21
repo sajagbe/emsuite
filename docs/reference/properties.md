@@ -19,8 +19,6 @@ icon: lucide/sigma
 | `hard` | chemical hardness | cation + anion |
 | `efl` | electrophilicity | cation + anion |
 | `nfl` | nucleophilicity | derived response |
-| `fukui_plus` | electrophilic Fukui response | anion/neutral |
-| `fukui_minus` | nucleophilic Fukui response | neutral/cation |
 | `exe` | excitation energies | excited-state calculation |
 | `osc` | oscillator strengths | excited-state calculation |
 | `all` | all supported properties | all required states |

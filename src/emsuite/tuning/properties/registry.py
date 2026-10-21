@@ -21,8 +21,6 @@ PROPERTY_CONFIG = {
     "hard": {"deps": ["ie", "ea"], "calc": [], "unit": HARTREE_TO_EV},
     "efl": {"deps": ["cp", "hard"], "calc": [], "unit": HARTREE_TO_EV},
     "nfl": {"deps": ["efl"], "calc": [], "unit": HARTREE_TO_EV},
-    "fukui_plus": {"deps": ["ea"], "calc": ["anion"], "unit": HARTREE_TO_EV},
-    "fukui_minus": {"deps": ["ie"], "calc": ["cation"], "unit": HARTREE_TO_EV},
     "exe": {"deps": [], "calc": ["td"], "unit": 1},
     "osc": {"deps": [], "calc": ["td"], "unit": 1},
 }
@@ -77,10 +75,5 @@ def calculate_all_properties(
     results = calculate_ground_state_properties(mf, props)
     results = calculate_thermo_properties(mf, anion_mf, cation_mf, props, partial=results)
     results.update(calculate_excited_state_properties(td_obj, triplet, props))
-
-    if "fukui_plus" in props and "ea" in results:
-        results["fukui_plus"] = results["ea"] * HARTREE_TO_EV
-    if "fukui_minus" in props and "ie" in results:
-        results["fukui_minus"] = results["ie"] * HARTREE_TO_EV
 
     return results

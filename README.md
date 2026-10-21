@@ -361,8 +361,6 @@ Accepts all **potential** keys (prefixed `potential_` where needed) plus all
 | `hard` | Chemical hardness | eV |
 | `efl` | Electrophilicity | eV |
 | `nfl` | Nucleophilicity | eV |
-| `fukui_plus` | Nucleophilic Fukui index | eV |
-| `fukui_minus` | Electrophilic Fukui index | eV |
 | `exe` | Excitation energies | eV |
 | `osc` | Oscillator strengths | dimensionless |
 

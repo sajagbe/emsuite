@@ -9,6 +9,45 @@ from ._gpu import CUPY_AVAILABLE
 from .oscillator_strength import oscillator_strength_cpu
 
 
+def _clip_overlap_eigs(w, lindep=1e-12):
+    """Keep symmetric-orthogonalization weights non-negative.
+
+    PySCF's TDDFT (X,Y) Gram–Schmidt re-orthogonalizes with ``e**-.5``.
+    A one-root trial space can give a slightly negative overlap eigenvalue
+    from round-off; the power then becomes NaN and Davidson reports
+    ``Eigenvalues did not converge``. Requesting more roots often hides it.
+    """
+    w = np.asarray(w)
+    if w.size and np.any(w < 0.0):
+        w = np.maximum(w, lindep)
+    return w
+
+
+def _stabilize_pyscf_tddft_overlap():
+    """Patch PySCF LR Gram–Schmidt so any ``nstates`` can run."""
+    from pyscf.tdscf import _lr_eig
+
+    if getattr(_lr_eig, "_emsuite_overlap_clip", False):
+        return
+    orig = _lr_eig.VW_Gram_Schmidt_fill_holder
+
+    def _safe_vw(V_holder, W_holder, X_new, Y_new, lindep=1e-12):
+        orig_eigh = np.linalg.eigh
+
+        def eigh_clip(a, *args, **kwargs):
+            vals, vecs = orig_eigh(a, *args, **kwargs)
+            return _clip_overlap_eigs(vals, lindep), vecs
+
+        np.linalg.eigh = eigh_clip
+        try:
+            return orig(V_holder, W_holder, X_new, Y_new, lindep=lindep)
+        finally:
+            np.linalg.eigh = orig_eigh
+
+    _lr_eig.VW_Gram_Schmidt_fill_holder = _safe_vw
+    _lr_eig._emsuite_overlap_clip = True
+
+
 def _mf_has_mm_charges(mf):
     """True if mf carries external MM / surface charges that must not be pickled away."""
     if getattr(mf, "_emsuite_has_mm", False):
@@ -35,6 +74,7 @@ def create_td_molecule_object(mf, nstates=5, triplet=False, force_single_gpu=Fal
     Returns:
         TD object with calculated excited states
     """
+    _stabilize_pyscf_tddft_overlap()
 
     # Check if multiple GPUs are visible
     current_cuda_devices = os.environ.get("CUDA_VISIBLE_DEVICES", "0")
@@ -142,6 +182,8 @@ td = mf.TDDFT() if data['is_dft'] else mf.TDHF()
 td.singlet = not data['triplet']
 td.nstates = data['nstates']
 td.verbose = 4
+from emsuite.core.excited import _stabilize_pyscf_tddft_overlap
+_stabilize_pyscf_tddft_overlap()
 td.kernel()
 
 # Convert results to numpy for pickling

@@ -27,3 +27,23 @@ def test_stark_gap_not_in_registry():
     assert "stark_gap" not in PROPERTY_CONFIG
     with pytest.raises(KeyError, match="stark_gap"):
         setup_calculation(["stark_gap"])
+
+
+def test_fukui_rejected_by_schema():
+    with pytest.raises(ConfigValidationError, match="fukui_plus"):
+        validate_tuning_params(
+            {"molecule": "m.xyz", "surface_file": "s.surf", "properties": ["fukui_plus"]}
+        )
+    with pytest.raises(ConfigValidationError, match="fukui_minus"):
+        validate_tuning_params(
+            {"molecule": "m.xyz", "surface_file": "s.surf", "properties": ["fukui_minus"]}
+        )
+
+
+def test_fukui_not_in_registry():
+    assert "fukui_plus" not in PROPERTY_CONFIG
+    assert "fukui_minus" not in PROPERTY_CONFIG
+    with pytest.raises(KeyError, match="fukui_plus"):
+        setup_calculation(["fukui_plus"])
+    with pytest.raises(KeyError, match="fukui_minus"):
+        setup_calculation(["fukui_minus"])

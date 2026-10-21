@@ -21,7 +21,7 @@ Approved direction for EMSuite. Shipped features are documented in [README.md](.
 
 ## Tuning properties
 
-**Core:** `gse`, `homo`, `lumo`, `gap`, `dm`, `spin`, `ie`, `ea`, `cp`, `eng`, `hard`, `efl`, `nfl`, `fukui_plus`, `fukui_minus`, `exe`, `osc`
+**Core:** `gse`, `homo`, `lumo`, `gap`, `dm`, `spin`, `ie`, `ea`, `cp`, `eng`, `hard`, `efl`, `nfl`, `exe`, `osc`
 
 Use `properties = ['all']` for the full registry.
 

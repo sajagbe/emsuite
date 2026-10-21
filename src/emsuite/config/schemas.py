@@ -37,8 +37,6 @@ _CORE_PROPERTIES = frozenset(
         "hard",
         "efl",
         "nfl",
-        "fukui_plus",
-        "fukui_minus",
         "exe",
         "osc",
         "all",

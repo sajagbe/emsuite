@@ -75,7 +75,7 @@ Four channels, two engines, 27 properties once the working-tree trim is included
 
 ### Tuning properties (working tree)
 
-**Core (17):** `gse`, `homo`, `lumo`, `gap`, `dm`, `spin`, `ie`, `ea`, `cp`, `eng`, `hard`, `efl`, `nfl`, `fukui_plus`, `fukui_minus`, `exe`, `osc`
+**Core (15):** `gse`, `homo`, `lumo`, `gap`, `dm`, `spin`, `ie`, `ea`, `cp`, `eng`, `hard`, `efl`, `nfl`, `exe`, `osc`. Fukui (`fukui_plus`/`fukui_minus`) is out of scope / removed from code.
 
 **Advanced (10):** `freq`, `stark_homo`, `stark_lumo`, `stark_gap`, `eint`, `h2o`, `pa`, `efl_fug`, `nfl_fug`, `eng_fug`
 

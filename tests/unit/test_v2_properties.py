@@ -16,8 +16,6 @@ CORE = {
     "hard",
     "efl",
     "nfl",
-    "fukui_plus",
-    "fukui_minus",
     "exe",
     "osc",
 }
@@ -36,5 +34,7 @@ def test_advanced_properties_removed():
         "h2o",
         "pa",
         "efl_fug",
+        "fukui_plus",
+        "fukui_minus",
     ):
         assert code not in PROPERTY_CONFIG
