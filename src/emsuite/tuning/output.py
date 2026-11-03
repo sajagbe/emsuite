@@ -40,7 +40,12 @@ def append_raw_properties_to_summary(summary_file, raw_properties):
             f.write("Energy Properties:\n")
             f.write("-" * 50 + "\n")
             for prop, value in sorted(energy_props.items()):
-                unit = "eV" if any(x in prop for x in ["eng", "hard", "efl", "nfl"]) else "kcal/mol"
+                if "nfl" in prop:
+                    unit = "1/eV"
+                elif any(x in prop for x in ["eng", "hard", "efl"]):
+                    unit = "eV"
+                else:
+                    unit = "kcal/mol"
                 f.write(f"  {prop:<15s}: {value:>12.6f}  {unit}\n")
             f.write("\n")
 
@@ -276,9 +281,10 @@ def create_output_files(
             for key in effect_keys:
                 prop_base = key.replace("_effect", "") if key.endswith("_effect") else key
 
-                # Get raw effect value
-                raw_val = effect.get(key, 0.0) if effect else 0.0
-                norm_val = norm_effect.get(key, 0.0) if norm_effect else 0.0
+                # Get raw effect value; failed points are left blank, not 0.0,
+                # so they cannot be mistaken for a real zero effect.
+                raw_val = effect.get(key, 0.0) if effect else ""
+                norm_val = norm_effect.get(key, 0.0) if norm_effect else ""
                 base_val = raw_properties.get(prop_base, 0.0)
 
                 row[key] = raw_val
@@ -306,16 +312,22 @@ def normalize_effects(all_effects, effect_keys):
     """
     normalized_effects = []
 
-    # Calculate min and max for each effect key
+    # Calculate min and max for each effect key. Failed points are stored as
+    # None (see runner.py); they must not enter the range or the map is lost.
     normalization_params = {}
     for key in effect_keys:
-        values = [effect.get(key, 0.0) for effect in all_effects]
+        values = [effect.get(key, 0.0) for effect in all_effects if effect]
+        if not values:
+            continue
         min_val = min(values)
         max_val = max(values)
         normalization_params[key] = (min_val, max_val)
 
-    # Normalize each effect dictionary
+    # Normalize each effect dictionary (failed points stay None)
     for effect in all_effects:
+        if not effect:
+            normalized_effects.append(None)
+            continue
         normalized = {}
         for key in effect_keys:
             min_val, max_val = normalization_params[key]

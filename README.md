@@ -360,7 +360,7 @@ Accepts all **potential** keys (prefixed `potential_` where needed) plus all
 | `eng` | Electronegativity | eV |
 | `hard` | Chemical hardness | eV |
 | `efl` | Electrophilicity | eV |
-| `nfl` | Nucleophilicity | eV |
+| `nfl` | Nucleophilicity | 1/eV |
 | `exe` | Excitation energies | eV |
 | `osc` | Oscillator strengths | dimensionless |
 

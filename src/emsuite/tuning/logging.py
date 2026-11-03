@@ -201,11 +201,12 @@ def log_point_result(logs_dir, point_index, coord, charge, effects, success=True
             if energy_effects:
                 f.write("\n  Energy Properties:\n")
                 for key, value in sorted(energy_effects.items()):
-                    unit = (
-                        "eV"
-                        if "eng" in key or "hard" in key or "efl" in key or "nfl" in key
-                        else "kcal/mol"
-                    )
+                    if "nfl" in key:
+                        unit = "1/eV"
+                    elif "eng" in key or "hard" in key or "efl" in key:
+                        unit = "eV"
+                    else:
+                        unit = "kcal/mol"
                     f.write(f"    {key:<36} {value:>20.14f} {unit:>17}\n")
 
             # Write orbital effects

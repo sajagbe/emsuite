@@ -14,7 +14,13 @@
 set -euo pipefail
 ROOT="/data/PHO_WORK/sajagbe2/packages/emsuite"
 BIN="$ROOT/.venv/bin"
-HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# Under sbatch, BASH_SOURCE points at a copy in /var/spool/slurmd/job<ID>/,
+# so use the submit directory (submit from this folder: `sbatch run.slurm`).
+HERE="${SLURM_SUBMIT_DIR:-$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)}"
+if [[ ! -f "$HERE/prepare.py" ]]; then
+    echo "ERROR: $HERE has no prepare.py; cd to tests/probes/water_electrostatics and sbatch run.slurm there" >&2
+    exit 1
+fi
 cd "$HERE"
 
 export PYTHONUTF8=1
