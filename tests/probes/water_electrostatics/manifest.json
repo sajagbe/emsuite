@@ -1,0 +1,34 @@
+{
+  "source_map": "/data/PHO_WORK/sajagbe2/packages/emsuite/tests/integration_runs/recreate-maps-2026-10-07T035624Z/water/separate/singlet/results_Water_2026-10-07_04-18-19/Water_tuning_summary.csv",
+  "source_xyz": "/data/PHO_WORK/sajagbe2/packages/emsuite/tests/integration_runs/recreate-maps-2026-10-07T035624Z/water/Water.xyz",
+  "source_surf": "/data/PHO_WORK/sajagbe2/packages/emsuite/tests/integration_runs/recreate-maps-2026-10-07T035624Z/water/Water.surf",
+  "sentinels": {
+    "RED": {
+      "point_index": 24,
+      "xyz": [
+        -1.687838,
+        -0.940835,
+        0.239403
+      ],
+      "s1_exe_effect_q0.10": -0.22395602038116902
+    },
+    "BLUE": {
+      "point_index": 0,
+      "xyz": [
+        -0.215474,
+        0.844948,
+        -1.437228
+      ],
+      "s1_exe_effect_q0.10": 0.2731520598828592
+    },
+    "ZERO": {
+      "point_index": 16,
+      "xyz": [
+        -0.071125,
+        -0.959829,
+        -0.66626
+      ],
+      "s1_exe_effect_q0.10": -0.030571519317444285
+    }
+  }
+}

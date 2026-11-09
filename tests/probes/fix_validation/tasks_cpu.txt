@@ -1,0 +1,14 @@
+tune cases/water_full/cpu
+tune cases/lf_gas/cpu
+tune cases/rPSB_gas/cpu
+tune cases/SB_gas/cpu
+tune cases/rPSB_nhexane/cpu
+tune cases/rPSB_dmso/cpu
+tune cases/SB_water/cpu
+baseline cases/baseline/rPSB_gas/cpu 2
+baseline cases/baseline/SB_gas/cpu 2
+baseline cases/baseline/rPSB_nhexane/cpu 2
+baseline cases/baseline/rPSB_chloroform/cpu 2
+baseline cases/baseline/rPSB_acetonitrile/cpu 2
+baseline cases/baseline/SB_dmso/cpu 2
+pytest tests/integration/test_failed_point_recovery.py

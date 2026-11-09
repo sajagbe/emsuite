@@ -1,0 +1,14 @@
+molecule = 'SB.xyz'
+surface_file = 'SB.surf'
+charge = 0
+spin = 0
+basis_set = '6-31G*'
+method = 'dft'
+functional = 'b3lyp'
+solvent = None
+calc_type = 'separate'
+properties = ['all']
+state_of_interest = 3
+triplet = False
+parallel = True
+num_procs = 4

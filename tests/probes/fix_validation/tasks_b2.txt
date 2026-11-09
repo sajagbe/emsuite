@@ -1,0 +1,6 @@
+baseline cases/baseline/rPSB_gas/gpu2 5
+baseline cases/baseline/SB_gas/gpu2 5
+baseline cases/baseline/rPSB_nhexane/gpu2 5
+baseline cases/baseline/rPSB_chloroform/gpu2 5
+baseline cases/baseline/rPSB_acetonitrile/gpu2 5
+baseline cases/baseline/SB_dmso/gpu2 5

@@ -1,0 +1,5 @@
+tune cases/rPSB_gas/gpu
+tune cases/SB_gas/gpu
+tune cases/rPSB_nhexane/gpu
+tune cases/rPSB_dmso/gpu
+tune cases/SB_water/gpu

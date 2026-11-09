@@ -1,0 +1,57 @@
+water  charge 0  host photonmgt  2026-11-09 22:02
+HF/6-31G* SCF E = -76.00583451 Ha  converged=True  (0 s)
+surface points: 14 (vsg, density 0.5, scale 1.0)
+
+POTENTIAL (kT/e) at pdie 2; differences are vs hf_mantina_pdie2
+setting               mean       min       max  rms diff  max|diff|  rel rms    corr
+current            -0.5231   -2.5902    1.4650    1.3657     2.3736    47.8%  1.0000
+b3lyp_mantina      -0.9335   -4.6131    2.6023    0.2019     0.3506     7.1%  1.0000
+hf_mantina         -1.0044   -4.9637    2.8005    0.0000     0.0000     0.0%  1.0000
+hf_bondi           -0.2329   -4.9375    5.0046    1.1364     2.2041    39.8%  0.9952
+hf_zap9_2008       -1.0044   -4.9637    2.8005    0.0000     0.0000     0.0%  1.0000
+hf_zap9_2010       -1.0044   -4.9637    2.8005    0.0000     0.0000     0.0%  1.0000
+
+POTENTIAL (kT/e) at pdie 1; differences are vs hf_mantina_pdie1
+setting               mean       min       max  rms diff  max|diff|  rel rms    corr
+current            -1.0193   -4.3970    2.2994    2.2880     4.0290    47.8%  1.0000
+b3lyp_mantina      -1.8180   -7.8308    4.0837    0.3383     0.5952     7.1%  1.0000
+hf_mantina         -1.9561   -8.4260    4.3948    0.0000     0.0000     0.0%  1.0000
+hf_bondi           -0.3847   -8.3801    8.9197    2.3142     4.5248    48.3%  0.9931
+hf_zap9_2008       -1.9561   -8.4260    4.3948    0.0000     0.0000     0.0%  1.0000
+hf_zap9_2010       -1.9561   -8.4260    4.3948    0.0000     0.0000     0.0%  1.0000
+
+POTENTIAL: pdie 1 vs pdie 2 for the same setting (rel rms diff)
+current             68.1%
+b3lyp_mantina       68.1%
+hf_mantina          68.1%
+hf_bondi            72.5%
+hf_zap9_2008        68.1%
+hf_zap9_2010        68.1%
+
+GAUSS-LAW SURFACE CHARGE (e) at pdie 2; differences are vs hf_mantina_pdie2
+setting               mean       min       max  rms diff  max|diff|  rel rms    corr
+current           7.98e-11 -1.20e-10  3.50e-10  3.40e-10   8.07e-10    78.5%  0.7273
+b3lyp_mantina     6.65e-11 -7.96e-10  6.90e-10  3.34e-10   9.42e-10    77.1%  0.6372
+hf_mantina        9.86e-11 -8.29e-10  1.01e-09  0.00e+00   0.00e+00     0.0%  1.0000
+hf_bondi          1.13e-10 -1.71e-10  5.50e-10  3.87e-10   9.34e-10    89.3%  0.4015
+hf_zap9_2008      9.86e-11 -8.29e-10  1.01e-09  0.00e+00   0.00e+00     0.0%  1.0000
+hf_zap9_2010      9.86e-11 -8.29e-10  1.01e-09  0.00e+00   0.00e+00     0.0%  1.0000
+
+GAUSS-LAW SURFACE CHARGE (e) at pdie 1; differences are vs hf_mantina_pdie1
+setting               mean       min       max  rms diff  max|diff|  rel rms    corr
+current           4.51e-11 -9.05e-11  1.78e-10  3.02e-10   6.47e-10    95.8%  0.3391
+b3lyp_mantina     9.75e-11 -1.11e-10  6.72e-10  3.03e-10   6.23e-10    96.3%  0.4637
+hf_mantina       -8.74e-12 -4.36e-10  8.15e-10  0.00e+00   0.00e+00     0.0%  1.0000
+hf_bondi          1.11e-12 -4.08e-10  3.47e-10  4.06e-10   1.09e-09   129.1% -0.1208
+hf_zap9_2008     -8.74e-12 -4.36e-10  8.15e-10  0.00e+00   0.00e+00     0.0%  1.0000
+hf_zap9_2010     -8.74e-12 -4.36e-10  8.15e-10  0.00e+00   0.00e+00     0.0%  1.0000
+
+GAUSS-LAW SURFACE CHARGE: pdie 1 vs pdie 2 for the same setting (rel rms diff)
+current             75.6%
+b3lyp_mantina       97.0%
+hf_mantina          70.0%
+hf_bondi           138.5%
+hf_zap9_2008        70.0%
+hf_zap9_2010        70.0%
+
+1 kT/e = 25.69 mV at 298.15 K. rel rms = rms(diff) / rms(reference).
