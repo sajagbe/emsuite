@@ -344,7 +344,15 @@ def calculate_combined_surface_effect(
 # Create Molecular Objects for Any Requested Calculation #
 ##########################################################
 def create_alone_molecule_objects(
-    input_data, basis_set, method, functional, charge, charge_change, gpu_available, spin_guesses
+    input_data,
+    basis_set,
+    method,
+    functional,
+    charge,
+    charge_change,
+    gpu_available,
+    spin_guesses,
+    reference_energy=None,
 ):
     """
     Create individual molecule objects with specified charge modifications.
@@ -374,6 +382,7 @@ def create_alone_molecule_objects(
         charge_change=charge_change,
         gpu=gpu_available,
         spin_guesses=spin_guesses,
+        reference_energy=reference_energy,
     )
 
 
@@ -425,6 +434,9 @@ def create_molecule_objects(
     calc_configs = [("neutral", 0, spin_guesses), ("anion", -1, None), ("cation", +1, None)]
     for name, charge_change, spin_guesses in calc_configs:
         if required_calculations.get(name, False):
+            # Ions are checked against the neutral energy (computed first) so a
+            # collapsed SCF solution cannot become the IE/EA baseline.
+            neutral = molecules.get("neutral")
             molecules[name] = create_alone_molecule_objects(
                 input_data,
                 basis_set,
@@ -434,6 +446,7 @@ def create_molecule_objects(
                 charge_change,
                 gpu_available,
                 spin_guesses,
+                reference_energy=float(neutral.e_tot) if charge_change and neutral else None,
             )
 
     chkfile_map = {

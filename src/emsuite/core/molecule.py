@@ -18,6 +18,8 @@ def create_molecule_object(
     charge_change=0,
     gpu=True,
     spin_guesses=None,  # Note PySCF uses 2S = number of unpaired electrons not multiplicity (2S+1), so spin=0 is singlet, spin=1 is doublet, etc.
+    reference_energy=None,
+    max_energy_delta=1.0,
 ):
     """
     Create a PySCF molecule object with optimal spin configuration.
@@ -38,6 +40,11 @@ def create_molecule_object(
         spin_guesses (list, optional): List of spin multiplicities to test.
                                      Defaults to [0, 1, 2, 3, 4]. Uses 2S notation not multiplicity (2S+1).
                                      Important for open-shell systems.
+        reference_energy (float, optional): Energy (Ha) of a related species, normally the
+                                     neutral when building an ion. Solutions further than
+                                     ``max_energy_delta`` from it are rejected as unphysical.
+        max_energy_delta (float, optional): Allowed |E - reference_energy| in Ha. Default 1.0
+                                     (27 eV, far above any one-electron IE/EA).
 
     Returns:
         pyscf.scf object gpu4pyscf.scf object or None: The converged SCF object with lowest energy,
@@ -45,7 +52,14 @@ def create_molecule_object(
 
     Note:
         - Uses 2S notation (0=singlet, 1=doublet, etc.)
-        - Automatically tries SOSCF if initial SCF doesn't converge
+        - If the SCF does not converge, SOSCF is restarted from a fresh initial guess
+          rather than from the unconverged orbitals.
+        - Solutions more than ``max_energy_delta`` from ``reference_energy`` and
+          open-shell solutions with <S^2> more than 1.0 above S(S+1) are rejected.
+          These guards catch collapsed SCF solutions (hundreds of Ha too low); they do
+          not prevent them. In validation (tests/probes/fix_validation) the collapses
+          occurred only when gpu4pyscf ran with more than one visible GPU (none on CPU
+          or a single GPU), so run baseline SCF on one GPU.
         - Prints convergence information for each spin state
     """
     charge = original_charge + charge_change
@@ -84,18 +98,25 @@ def create_molecule_object(
             else:
                 print("Using CPU as requested.")
 
+            fresh_mf = mf.copy()  # untouched copy: default initial guess for SOSCF
             energy = mf.kernel()
 
-            # Try SOSCF if not converged
+            # Try SOSCF if not converged, from a fresh guess (see Note)
             if not mf.converged:
-                mf = mf.newton()
+                mf = fresh_mf.newton()
                 energy = mf.kernel()
 
-            if mf.converged:
-                print(f"Spin {spin} (2S+1={spin + 1}) converged: E = {energy:.6f} Ha")
-                results.append((spin, energy, mf))
-            else:
+            if not mf.converged:
                 print(f"Spin {spin} (2S+1={spin + 1}) did NOT converge")
+                continue
+
+            reason = _unphysical_reason(mf, spin, energy, reference_energy, max_energy_delta)
+            if reason:
+                print(f"Spin {spin} (2S+1={spin + 1}) REJECTED: E = {energy:.6f} Ha; {reason}")
+                continue
+
+            print(f"Spin {spin} (2S+1={spin + 1}) converged: E = {energy:.6f} Ha")
+            results.append((spin, energy, mf))
 
         except Exception as e:
             print(f"Spin {spin} failed: {e}")
@@ -108,6 +129,24 @@ def create_molecule_object(
     else:
         print("No spin converged for this species.")
         return None
+
+
+def _unphysical_reason(mf, spin, energy, reference_energy=None, max_energy_delta=1.0):
+    """Return why a converged SCF solution is unphysical, or None if it looks sane."""
+    if reference_energy is not None and abs(energy - reference_energy) > max_energy_delta:
+        return (
+            f"|E - E_ref| = {abs(energy - reference_energy):.3f} Ha > {max_energy_delta} Ha "
+            f"(E_ref = {reference_energy:.6f})"
+        )
+    if spin > 0:
+        try:
+            s2 = float(mf.spin_square()[0])
+        except Exception:
+            return None
+        expected = (spin / 2) * (spin / 2 + 1)
+        if s2 - expected > 1.0:
+            return f"<S^2> = {s2:.3f}, expected {expected:.3f}"
+    return None
 
 
 def save_chkfile(mf, chkfile_name, functional=None):
