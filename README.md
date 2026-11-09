@@ -245,6 +245,7 @@ output_surf = 'potential.surf'
 method = 'apbs'
 quantity = 'potential'         # 'potential' = interpolated φ; 'charge' = Gauss-law q
 
+# Ligand alone: HF/6-31G* RESP charges; radii from the vdw-surfgen table.
 # Optional protein field (XYZ Gasteiger or PDB via pdb2pqr):
 # protein = 'protein.xyz'
 # ligand_atoms = 'absent'

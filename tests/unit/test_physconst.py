@@ -22,12 +22,16 @@ def test_kte_to_volts_near_room_temperature():
     assert abs(KT_E_TO_V - 0.02568) < 5e-5
 
 
-def test_vdw_radius_mantina_matches_common_bondi():
-    assert abs(vdw_radius_angstrom("C") - 1.70) < 1e-6
-    assert abs(vdw_radius_angstrom("O") - 1.52) < 1e-6
-    # Mantina H is 1.10 Å (Bondi was 1.20)
-    assert abs(vdw_radius_angstrom("H") - 1.10) < 1e-6
+def test_vdw_radius_uses_vdw_surfgen_table():
+    from vdw_surfgen.cli import VDW_RADII
+
+    for symbol, radius in VDW_RADII.items():
+        assert vdw_radius_angstrom(symbol) == float(radius)
+    assert vdw_radius_angstrom("H") == 1.20
+    assert vdw_radius_angstrom("C") == 1.70
 
 
-def test_vdw_radius_missing_uses_fallback():
+def test_vdw_radius_falls_back_to_mantina_then_missing():
+    # Se is not in the vdw-surfgen table; Mantina has 1.90 Å.
+    assert abs(vdw_radius_angstrom("Se") - 1.90) < 1e-6
     assert vdw_radius_angstrom("Sg", missing=1.50) == 1.50

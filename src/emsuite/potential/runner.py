@@ -100,6 +100,7 @@ def _run_potential(inp: PotentialInput) -> str:
         protein_xyz=protein,
         ligand_atoms=str(params.get("ligand_atoms") or "present"),
         ligand_charge=int(params.get("charge") or 0),
+        ligand_spin=int(params.get("spin") or 0),
         protein_format=protein_format,
         ligand_resname=params.get("ligand_resname"),
         ligand_chain=params.get("ligand_chain"),

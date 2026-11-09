@@ -13,6 +13,7 @@ from .charges import partial_charges_from_xyz
 from .pdb2pqr_runner import run_pdb2pqr
 from .pdb_select import isolate_residue, strip_residue
 from .pqr import read_pqr_coords, zero_ligand_charges
+from .resp import resp_charges_from_xyz
 
 
 def assemble_pqr(
@@ -106,6 +107,7 @@ def occupancy_atoms_and_charges(
     protein_xyz: str | None,
     ligand_atoms: str = "present",
     ligand_charge: int = 0,
+    ligand_spin: int = 0,
     protein_format: str = "xyz",
     ligand_resname: str | None = None,
     ligand_chain: str | None = None,
@@ -116,8 +118,9 @@ def occupancy_atoms_and_charges(
 ) -> tuple[list[tuple[str, float, float, float]] | None, np.ndarray | None, np.ndarray, str | None]:
     """Return (pqr_atoms, pqr_charges, box_coords, pqr_path) for an APBS run.
 
-    ``pqr_atoms``/``pqr_charges`` are populated for the XYZ+Gasteiger path
-    (``protein_format='xyz'``, the existing behavior); ``pqr_path`` is
+    ``pqr_atoms``/``pqr_charges`` are populated for the XYZ path
+    (``protein_format='xyz'``): a lone ligand gets HF/6-31G* RESP charges, a
+    protein XYZ gets Gasteiger charges (ligand charge 0 there); ``pqr_path`` is
     populated instead for the pdb2pqr path (``protein_format='pdb'``), and the
     caller (potential/runner.py) passes whichever is set into run_apbs_grids.
     """
@@ -141,7 +144,7 @@ def occupancy_atoms_and_charges(
         )
 
     if not protein_xyz:
-        atoms, charges = partial_charges_from_xyz(ligand_xyz, charge=ligand_charge)
+        atoms, charges = resp_charges_from_xyz(ligand_xyz, charge=ligand_charge, spin=ligand_spin)
         return atoms, charges, ligand.coords, None
 
     protein = Geometry.from_xyz(protein_xyz)

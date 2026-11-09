@@ -1,10 +1,14 @@
 """Physical constants and unit conversions via qcelemental + pint.
 
-- **qcelemental**: QC unit conversions (hartree↔eV/kcal) and Mantina VDW radii
+- **qcelemental**: QC unit conversions (hartree↔eV/kcal)
+- **vdw-surfgen**: VDW radii (the same table vsg uses to build surfaces); Mantina
+  (qcelemental) only for elements that table lacks
 - **pint**: SI electromagnetic / thermal constants and length/volume scaling
 """
 
 from __future__ import annotations
+
+from functools import cache
 
 import qcelemental as qcel
 from pint import UnitRegistry
@@ -36,10 +40,26 @@ def kT_over_e_volts(temperature_K: float = 298.0) -> float:
 # Historical APBS convention in this package: room temperature ≈ 298 K.
 KT_E_TO_V: float = kT_over_e_volts(298.0)
 
-# Fallback VDW radius (Å) when Mantina table has no entry for an element.
+# Fallback VDW radius (Å) when neither table has an entry for an element.
 _DEFAULT_VDW_RADIUS_A: float = 1.50
 
 
+@cache
+def _vsg_radii() -> dict[str, float]:
+    # Imported lazily: vdw_surfgen.cli pulls in matplotlib/tqdm at import time.
+    from vdw_surfgen.cli import VDW_RADII
+
+    return {str(k): float(v) for k, v in VDW_RADII.items()}
+
+
 def vdw_radius_angstrom(symbol: str, *, missing: float = _DEFAULT_VDW_RADIUS_A) -> float:
-    """Mantina (2009) van der Waals radius in Å via qcelemental."""
+    """Van der Waals radius in Å.
+
+    Uses the vdw-surfgen ``VDW_RADII`` table, so the APBS/PQR radii match the
+    radii vsg uses to place surface points. Elements not in that table (it has
+    38) fall back to Mantina (2009) via qcelemental, then to ``missing``.
+    """
+    table = _vsg_radii()
+    if symbol in table:
+        return table[symbol]
     return float(qcel.vdwradii.get(symbol, units="angstrom", missing=missing))
