@@ -56,10 +56,11 @@ def create_molecule_object(
           rather than from the unconverged orbitals.
         - Solutions more than ``max_energy_delta`` from ``reference_energy`` and
           open-shell solutions with <S^2> more than 1.0 above S(S+1) are rejected.
-          These guards catch collapsed SCF solutions (hundreds of Ha too low); they do
-          not prevent them. In validation (tests/probes/fix_validation) the collapses
-          occurred only when gpu4pyscf ran with more than one visible GPU (none on CPU
-          or a single GPU), so run baseline SCF on one GPU.
+        - A GPU solution is accepted only if CPU PySCF gives the same energy for its
+          density (within 1e-5 Ha); this also covers the neutral, which has no
+          reference energy. Wrong GPU solutions (hundreds of Ha too low) occurred only
+          with more than one visible GPU (tests/probes/fix_validation,
+          tests/probes/multigpu_scf); these checks reject them, they do not prevent them.
         - Prints convergence information for each spin state
     """
     charge = original_charge + charge_change
@@ -121,14 +122,39 @@ def create_molecule_object(
         except Exception as e:
             print(f"Spin {spin} failed: {e}")
 
-    if results:
-        # pick lowest energy among converged spins
-        best_spin, best_energy, best_mf = min(results, key=lambda x: x[1])
+    # Lowest energy wins, but a GPU result is only accepted if CPU PySCF gets the
+    # same energy for the same density (see _cpu_energy_mismatch).
+    for best_spin, best_energy, best_mf in sorted(results, key=lambda x: x[1]):
+        mismatch = _cpu_energy_mismatch(best_mf, best_energy)
+        if mismatch:
+            print(f"Spin {best_spin} (2S+1={best_spin + 1}) REJECTED: {mismatch}")
+            continue
         print(f"\nLowest energy: spin={best_spin} (2S+1={best_spin + 1}), E={best_energy:.6f} Ha")
         return best_mf
-    else:
-        print("No spin converged for this species.")
+    print("No spin state converged to a trustworthy solution for this species.")
+    return None
+
+
+def _cpu_energy_mismatch(mf, energy, tol=1e-5):
+    """Recompute the energy of mf's converged density with CPU PySCF.
+
+    Returns a message if it differs from the GPU energy by more than ``tol`` Ha,
+    else None. CPU objects are not rechecked. With gpu4pyscf on more than one GPU,
+    the solver can report energies hundreds of Ha below the true energy of its own
+    density (tests/probes/multigpu_scf); correct GPU results agree to ~1e-9 Ha.
+    """
+    if not (CUPY_AVAILABLE and isinstance(getattr(mf, "mo_coeff", None), cp.ndarray)):
         return None
+    dm = mf.make_rdm1()
+    dm = dm.get() if hasattr(dm, "get") else dm
+    cpu_mf = getattr(mf, "_scf", mf).to_cpu()  # plain SCF object, also after newton()
+    e_cpu = float(cpu_mf.energy_tot(dm))
+    if abs(e_cpu - energy) > tol:
+        return (
+            f"GPU energy {energy:.6f} Ha, but CPU PySCF gives {e_cpu:.6f} Ha "
+            f"for the same density (difference {abs(e_cpu - energy):.3f} Ha)"
+        )
+    return None
 
 
 def _unphysical_reason(mf, spin, energy, reference_energy=None, max_energy_delta=1.0):

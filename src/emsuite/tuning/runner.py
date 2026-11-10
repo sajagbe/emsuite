@@ -449,6 +449,18 @@ def create_molecule_objects(
                 reference_energy=float(neutral.e_tot) if charge_change and neutral else None,
             )
 
+    failed = [
+        name
+        for name, _, _ in calc_configs
+        if required_calculations.get(name) and not molecules.get(name)
+    ]
+    if failed:
+        raise RuntimeError(
+            f"No trustworthy SCF solution for the {', '.join(failed)} state(s) of {input_data}: "
+            "every spin state either did not converge or was rejected (see the 'REJECTED' "
+            "lines above). The properties that need these states cannot be computed."
+        )
+
     chkfile_map = {
         "neutral": "molecule_alone.chk",
         "anion": "anion_alone.chk",
