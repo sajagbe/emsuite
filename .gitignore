@@ -68,3 +68,7 @@ tests/integration_runs/LATEST/
 **/id_sajagbe*
 .venv-pyscf214/
 .worktrees/
+
+# Large APBS grids and third-party PDFs in probe folders (never commit)
+*.dx
+tests/probes/**/*.pdf
