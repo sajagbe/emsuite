@@ -71,9 +71,7 @@ def load_extreme_points(csv_path: Path) -> list[dict]:
                 "label": label,
                 "point_index": int(float(r["point_index"])),
                 "dm_effect_map": float(r["dm_effect"]),
-                "xyz": np.array(
-                    [float(r["x"]), float(r["y"]), float(r["z"])], dtype=float
-                ),
+                "xyz": np.array([float(r["x"]), float(r["y"]), float(r["z"])], dtype=float),
             }
         )
     return out
