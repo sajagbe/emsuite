@@ -1,6 +1,6 @@
 # Water electrostatics: q-scan, sign, superposition
 
-Paper R2. Same water, same 32-point surface, B3LYP/6-31G* vacuum as
+Same water, same 32-point surface, B3LYP/6-31G* vacuum as
 `tests/integration_runs/recreate-maps-2026-10-07T035624Z/water`.
 
 | Test | Jobs | Result |
