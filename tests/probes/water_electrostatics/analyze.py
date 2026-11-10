@@ -148,7 +148,6 @@ def qscan_and_sign(manifest: dict) -> None:
 
 
 def superpose(manifest: dict) -> None:
-    sent = manifest["sentinels"]
 
     def one_pt(label: str, q: float) -> dict | None:
         summary = latest_summary(HERE / f"jobs/qscan/{label}_q{q:+.2f}")
@@ -187,7 +186,7 @@ def superpose(manifest: dict) -> None:
     xs = [r["s1_combined"] for r in rows]
     ys = [r["s1_sum"] for r in rows]
     ax.plot(xs, ys, "o")
-    for r, x, y in zip(rows, xs, ys):
+    for r, x, y in zip(rows, xs, ys, strict=True):
         ax.annotate(r["case"], (x, y), textcoords="offset points", xytext=(4, 4), fontsize=8)
     lo, hi = min(xs + ys), max(xs + ys)
     pad = 0.05 * (hi - lo if hi != lo else 1.0)

@@ -75,7 +75,9 @@ def write_tuning(path: Path, calc_type: str) -> None:
     )
 
 
-def make_job(rel: str, points: list[tuple[tuple[float, float, float], float]], calc_type: str) -> Path:
+def make_job(
+    rel: str, points: list[tuple[tuple[float, float, float], float]], calc_type: str
+) -> Path:
     job = HERE / rel
     job.mkdir(parents=True, exist_ok=True)
     shutil.copy2(SRC / "Water.xyz", job / "Water.xyz")
@@ -109,15 +111,11 @@ def main() -> None:
 
     red, blue, zero = sentinels["RED"], sentinels["BLUE"], sentinels["ZERO"]
     combined = {
-        "jobs/superpose/AB_q+0.10_combined": (
-            [(red["xyz"], 0.10), (blue["xyz"], 0.10)],
-        ),
+        "jobs/superpose/AB_q+0.10_combined": ([(red["xyz"], 0.10), (blue["xyz"], 0.10)],),
         "jobs/superpose/ABC_q+0.10_combined": (
             [(red["xyz"], 0.10), (blue["xyz"], 0.10), (zero["xyz"], 0.10)],
         ),
-        "jobs/superpose/AB_q+0.50_combined": (
-            [(red["xyz"], 0.50), (blue["xyz"], 0.50)],
-        ),
+        "jobs/superpose/AB_q+0.50_combined": ([(red["xyz"], 0.50), (blue["xyz"], 0.50)],),
     }
     for rel, (pts,) in combined.items():
         make_job(rel, pts, "combined")

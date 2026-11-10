@@ -4,7 +4,7 @@ A Python package for electrostatic tuning maps, APBS potential surfaces, and cou
 potential→tuning workflows on molecular systems.
 
 
-![Water molecule tuning example](docs/_static/water-test.gif)
+![Water molecule tuning example](examples/water-gpu/water-test.gif)
 
 
 **Figure 1:** Tuning effects of a +1 *e* charge on the S<sub>1</sub> excitation energy of water, calculated at the B3LYP/cc-pVTZ level in vacuum.

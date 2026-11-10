@@ -30,9 +30,6 @@ gpu = [
     "cupy-cuda12x==13.6.0",
     "cutensor-cu12==2.0.2",
 ]
-docs = [
-    "zensical==0.0.57",
-]
 
 [project.scripts]
 emsuite = "emsuite.cli.main:main"

@@ -49,7 +49,9 @@ def main(name: str = "water") -> None:
     }
     for kind, (g, cs, cc) in rows.items():
         print(f"{kind} charges (e)")
-        print(f"{'atom':<6}{'GPU':>14}{'CPU same':>14}{'CPU chain':>14}{'same-GPU':>12}{'chain-GPU':>12}")
+        print(
+            f"{'atom':<6}{'GPU':>14}{'CPU same':>14}{'CPU chain':>14}{'same-GPU':>12}{'chain-GPU':>12}"
+        )
         for i, sym in enumerate(mol.elements):
             print(
                 f"{sym}{i + 1:<5}{g[i]:>14.8f}{cs[i]:>14.8f}{cc[i]:>14.8f}"
