@@ -1,4 +1,0 @@
-sphinx
-shibuya
-sphinx-autobuild
-sphinx-copybutton
