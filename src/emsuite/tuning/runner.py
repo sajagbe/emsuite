@@ -21,6 +21,7 @@ if TYPE_CHECKING:
     from emsuite.inputs import TuningInput
 
 from . import baseline
+from .geometry import check_surface_frame
 from .logging import (
     append_point_to_summary,
     finalize_summary_log,
@@ -37,12 +38,11 @@ from .output import (
 from .parallel import calculate_point_effect_cpu_remote, calculate_point_effect_gpu
 from .properties import calculate_all_properties, setup_calculation
 from .resume import (
+    capture_resume_inputs,
     create_resume_metadata,
-    find_incomplete_logs,
     load_completed_results_from_logs,
-    prompt_user_resume,
+    select_resume_run,
     update_resume_metadata,
-    validate_resume_compatibility,
 )
 
 os.environ["HDF5_USE_FILE_LOCKING"] = "FALSE"
@@ -689,7 +689,8 @@ def _run_tuning(inp: TuningInput):
         _pin_main_process_to_one_gpu(all_gpus)
 
     # Check available hardware
-    core.check_gpu_info()  # this process: one GPU (or none)
+    if not core.check_gpu_info():  # configured IDs do not guarantee usable CUDA
+        all_gpus = []
     No_of_GPUs: int = len(all_gpus)
     No_of_CPUs: int = core.check_cpu_info() or 1
 
@@ -706,6 +707,7 @@ def _run_tuning(inp: TuningInput):
 
     # Load surface data
     surface_coords, surface_charges = load_surf(surface_file)
+    check_surface_frame(input_data, surface_coords)
 
     print("\n")
     print("=" * 60)
@@ -727,60 +729,45 @@ def _run_tuning(inp: TuningInput):
     existing_results = {}
     points_to_calculate = None
 
-    incomplete_runs = find_incomplete_logs()
+    current_inputs = capture_resume_inputs(
+        tuning_params, properties_to_calculate, len(surface_coords)
+    )
+    selected_run = select_resume_run(tuning_params["resume"], current_inputs)
+    if selected_run:
+        latest_logs_dir, latest_metadata = selected_run
+        resume_mode = True
+        logs_dir = latest_logs_dir
 
-    if incomplete_runs:
-        # Get most recent incomplete run
-        latest_logs_dir, latest_metadata = incomplete_runs[0]
+        # Load existing results
+        print(f"\nLoading existing results from {logs_dir}...")
+        existing_results = load_completed_results_from_logs(logs_dir, len(surface_coords))
 
-        # Check compatibility
-        current_params = {
-            "calc_type": calc_type,
-            "total_points": len(surface_coords),
-            "properties": sorted(properties_to_calculate),
-        }
+        # Determine which points still need calculation
+        completed_indices = set(existing_results.keys())
+        all_indices = set(range(len(surface_coords)))
+        points_to_calculate = sorted(all_indices - completed_indices)
 
-        is_compatible, error_msg = validate_resume_compatibility(latest_metadata, current_params)
+        print(f"Loaded {len(existing_results)} existing results")
 
-        if is_compatible:
-            if prompt_user_resume(latest_logs_dir, latest_metadata):
-                resume_mode = True
-                logs_dir = latest_logs_dir
+        # Debug: Show what was actually loaded
+        print("\nExisting results summary:")
+        for idx in sorted(existing_results.keys()):
+            effects = existing_results[idx]["effects"]
+            print(f"  Point {idx}: {len(effects)} properties")
+            for prop, value in list(effects.items())[:3]:  # Show first 3
+                print(f"    {prop}: {value}")
 
-                # Load existing results
-                print(f"\nLoading existing results from {logs_dir}...")
-                existing_results = load_completed_results_from_logs(logs_dir, len(surface_coords))
+        print(
+            f"Will calculate {len(points_to_calculate)} remaining points: {points_to_calculate[:10]}{'...' if len(points_to_calculate) > 10 else ''}"
+        )
 
-                # Determine which points still need calculation
-                completed_indices = set(existing_results.keys())
-                all_indices = set(range(len(surface_coords)))
-                points_to_calculate = sorted(all_indices - completed_indices)
-
-                print(f"Loaded {len(existing_results)} existing results")
-
-                # Debug: Show what was actually loaded
-                print("\nExisting results summary:")
-                for idx in sorted(existing_results.keys()):
-                    effects = existing_results[idx]["effects"]
-                    print(f"  Point {idx}: {len(effects)} properties")
-                    for prop, value in list(effects.items())[:3]:  # Show first 3
-                        print(f"    {prop}: {value}")
-
-                print(
-                    f"Will calculate {len(points_to_calculate)} remaining points: {points_to_calculate[:10]}{'...' if len(points_to_calculate) > 10 else ''}"
-                )
-
-                # Update metadata for resume
-                with open(os.path.join(logs_dir, ".resume_metadata.json")) as f:
-                    metadata = json.load(f)
-                metadata["resume_count"] += 1
-                metadata["last_updated"] = datetime.now().isoformat()
-                with open(os.path.join(logs_dir, ".resume_metadata.json"), "w") as f:
-                    json.dump(metadata, f, indent=2)
-        else:
-            print("\nWarning: Found incomplete run but parameters don't match:")
-            print(error_msg)
-            print("Starting new calculation instead.\n")
+        # Update metadata for resume
+        with open(os.path.join(logs_dir, ".resume_metadata.json")) as f:
+            metadata = json.load(f)
+        metadata["resume_count"] += 1
+        metadata["last_updated"] = datetime.now().isoformat()
+        with open(os.path.join(logs_dir, ".resume_metadata.json"), "w") as f:
+            json.dump(metadata, f, indent=2)
 
     # Create logs directory if not resuming
     if not resume_mode:
@@ -788,7 +775,9 @@ def _run_tuning(inp: TuningInput):
         print(f"Logging results to: {logs_dir}")
 
         # Create resume metadata
-        create_resume_metadata(logs_dir, calc_type, len(surface_coords), properties_to_calculate)
+        create_resume_metadata(
+            logs_dir, calc_type, len(surface_coords), properties_to_calculate, current_inputs
+        )
 
         # Calculate all points
         points_to_calculate = list(range(len(surface_coords)))

@@ -1,12 +1,13 @@
 """Resume interrupted tuning runs."""
 
+import hashlib
 import json
 import os
 from datetime import datetime
 from pathlib import Path
 
 
-def create_resume_metadata(logs_dir, calc_type, total_points, properties_to_calculate):
+def create_resume_metadata(logs_dir, calc_type, total_points, properties_to_calculate, inputs):
     """
     Create metadata file for resume capability.
 
@@ -22,6 +23,7 @@ def create_resume_metadata(logs_dir, calc_type, total_points, properties_to_calc
         "calc_type": calc_type,
         "total_points": total_points,
         "properties": sorted(properties_to_calculate),
+        "inputs": inputs,
         "completed_points": [],
         "failed_points": [],
         "resume_count": 0,
@@ -98,41 +100,62 @@ def find_incomplete_logs():
     return incomplete_runs
 
 
+def capture_resume_inputs(params, properties, total_points):
+    """Snapshot calculation settings and file contents before any SCF work."""
+    inputs = {
+        key: params[key]
+        for key in (
+            "calc_type",
+            "basis_set",
+            "method",
+            "functional",
+            "charge",
+            "spin",
+            "solvent",
+            "state_of_interest",
+            "triplet",
+        )
+    }
+    inputs.update(properties=sorted(properties), total_points=total_points)
+    for key in ("molecule", "surface_file"):
+        path = Path(params[key]).resolve()
+        inputs[key] = {"path": str(path), "sha256": hashlib.sha256(path.read_bytes()).hexdigest()}
+    return inputs
+
+
 def validate_resume_compatibility(metadata, current_params):
-    """
-    Check if resume is compatible with current run parameters.
+    """Compare all recorded calculation inputs; paths are diagnostic only."""
+    previous = metadata.get("inputs")
+    if not isinstance(previous, dict):
+        return False, "inputs not recorded in the previous run"
+    differences = []
+    for key in sorted(previous.keys() | current_params.keys()):
+        old, new = previous.get(key), current_params.get(key)
+        if key in ("molecule", "surface_file") and isinstance(old, dict) and isinstance(new, dict):
+            matches = old.get("sha256") == new.get("sha256")
+        else:
+            matches = key in previous and key in current_params and old == new
+        if not matches:
+            differences.append(f"{key}: old={old!r}; new={new!r}")
+    return not differences, "\n".join(differences) or None
 
-    Args:
-        metadata (dict): Metadata from previous run
-        current_params (dict): Current run parameters
 
-    Returns:
-        tuple: (is_compatible, error_message)
-    """
-    checks = []
-
-    # Check calc_type
-    if metadata["calc_type"] != current_params["calc_type"]:
-        checks.append(
-            f"calc_type mismatch: {metadata['calc_type']} vs {current_params['calc_type']}"
-        )
-
-    # Check total_points
-    if metadata["total_points"] != current_params["total_points"]:
-        checks.append(
-            f"total_points mismatch: {metadata['total_points']} vs {current_params['total_points']}"
-        )
-
-    # Check properties (must be same or subset)
-    old_props = set(metadata["properties"])
-    new_props = set(current_params["properties"])
-    if old_props != new_props:
-        checks.append(f"properties mismatch: {old_props} vs {new_props}")
-
-    if checks:
-        return False, "\n".join(checks)
-
-    return True, None
+def select_resume_run(enabled, current_inputs):
+    """Select the newest compatible unfinished run without prompting or modifying it."""
+    runs = find_incomplete_logs()
+    if not runs:
+        return None
+    logs_dir, metadata = runs[0]
+    if not enabled:
+        print(f"Unfinished run {logs_dir} left untouched (resume=False). Starting a new run.")
+        return None
+    compatible, differences = validate_resume_compatibility(metadata, current_inputs)
+    if not compatible:
+        print(f"Unfinished run {logs_dir} has different inputs:\n{differences}")
+        print("Starting a new run; the previous folder is left untouched.")
+        return None
+    print(f"Resuming unfinished run: {logs_dir}")
+    return logs_dir, metadata
 
 
 def load_completed_results_from_logs(logs_dir, total_points):
@@ -251,37 +274,3 @@ def parse_point_log_file(log_file):
     except Exception as e:
         print(f"Warning: Could not parse {log_file}: {e}")
         return None
-
-
-def prompt_user_resume(logs_dir, metadata):
-    """
-    Ask user if they want to resume an incomplete run.
-
-    Args:
-        logs_dir (str): Logs directory path
-        metadata (dict): Metadata from incomplete run
-
-    Returns:
-        bool: True if user wants to resume
-    """
-    completed = len(metadata["completed_points"])
-    failed = len(metadata["failed_points"])
-    total = metadata["total_points"]
-    remaining = total - completed
-
-    print("\n" + "=" * 70)
-    print("INCOMPLETE RUN DETECTED")
-    print("=" * 70)
-    print(f"Logs Directory:     {logs_dir}")
-    print(f"Original Start:     {metadata['original_start']}")
-    print(f"Last Updated:       {metadata['last_updated']}")
-    print(f"Calculation Type:   {metadata['calc_type']}")
-    print(f"Total Points:       {total}")
-    print(f"Completed:          {completed} ({completed / total * 100:.1f}%)")
-    print(f"Failed:             {failed}")
-    print(f"Remaining:          {remaining}")
-    print("=" * 70)
-
-    response = input("\nDo you want to resume this calculation? [y/n]: ").strip().lower()
-
-    return response in ["", "y", "yes"]

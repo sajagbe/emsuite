@@ -92,3 +92,6 @@ parallel = True
 
 # Number of parallel processes (None = auto-detect based on available GPUs/CPUs)
 # num_procs = 4
+
+# Resume the latest unfinished run when all calculation inputs match
+resume = True

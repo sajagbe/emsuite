@@ -45,6 +45,8 @@ _CORE_PROPERTIES = frozenset(
 
 
 def validate_tuning_params(params: dict[str, Any]) -> dict[str, Any]:
+    if not isinstance(params.get("resume", True), bool):
+        raise ConfigValidationError("resume must be True or False")
     molecule = params.get("molecule") or params.get("xyz_file")
     if not molecule:
         raise ConfigValidationError("tuning input missing required parameter: molecule")

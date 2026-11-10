@@ -38,7 +38,7 @@ surface_scale = 1.0
 surface_type = 'homogenous'
 
 # Charge for homogenous surface (ignored for heterogenous)
-surface_charge = 1.0
+surface_charge = 0.1
 
 # -----------------------------------------------------------------------------
 # GEOMETRY OPTIMIZATION (optional)

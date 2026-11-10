@@ -10,7 +10,15 @@ def setup_logs_directory():
     """Create logs directory structure with timestamp."""
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
     logs_dir = f"logs_{timestamp}"
-    os.makedirs(logs_dir, exist_ok=True)
+    suffix = 0
+    while True:
+        candidate = logs_dir if suffix == 0 else f"{logs_dir}_{suffix}"
+        try:
+            os.mkdir(candidate)
+            logs_dir = candidate
+            break
+        except FileExistsError:
+            suffix += 1
     return logs_dir
 
 

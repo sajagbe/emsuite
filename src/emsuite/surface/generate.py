@@ -16,7 +16,7 @@ def generate_surface(
     surface_density=1.0,
     surface_scale=1.0,
     surface_type="homogenous",
-    surface_charge=1.0,
+    surface_charge=0.1,
     optimize=None,
     optimize_method="mmff",
     method="dft",

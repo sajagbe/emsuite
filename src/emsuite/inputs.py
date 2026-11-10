@@ -157,6 +157,7 @@ class TuningInput:
     num_procs: int | None = None
     state_of_interest: int = 2
     triplet: bool = False
+    resume: bool = True
 
     def __post_init__(self) -> None:
         _finalize(self, validate=validate_tuning_params)
