@@ -26,13 +26,6 @@ INTEGRATION_FEATURE_TRACE: dict[str, dict[str, object]] = {
         "summary": "End-to-end surface → serial homo/lumo/gap tuning on methane",
         "code_paths": ["src/emsuite/surface/", "src/emsuite/tuning/runner.py"],
     },
-    "tests/integration/test_tuning_separate.py::test_methane_surface_to_tuning_smoke": {
-        "feature_id": "v1.1-tuning-separate-alias",
-        "version": "1.1.0",
-        "channel": "tuning",
-        "summary": "Alias entry point for separate-mode tuning smoke test",
-        "code_paths": ["tests/integration/test_smoke_methane.py"],
-    },
     "tests/integration/test_potential_apbs.py::test_potential_apbs_map": {
         "feature_id": "v1.3-potential-apbs",
         "version": "1.3.0",

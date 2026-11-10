@@ -1,0 +1,30 @@
+{
+  "original_start": "2026-11-03T21:26:16.908547",
+  "last_updated": "2026-11-04T20:41:07.884889",
+  "calc_type": "separate",
+  "total_points": 6,
+  "properties": [
+    "cp",
+    "dm",
+    "ea",
+    "efl",
+    "eng",
+    "exe",
+    "gap",
+    "gse",
+    "hard",
+    "homo",
+    "ie",
+    "lumo",
+    "nfl",
+    "osc",
+    "spin"
+  ],
+  "completed_points": [
+    0,
+    1,
+    2
+  ],
+  "failed_points": [],
+  "resume_count": 0
+}

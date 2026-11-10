@@ -1,0 +1,14 @@
+molecule = 'rPSB.xyz'
+surface_file = 'rPSB.surf'
+charge = 1
+spin = 0
+basis_set = '6-31G*'
+method = 'dft'
+functional = 'b3lyp'
+solvent = 'dimethylsulfoxide'
+calc_type = 'separate'
+properties = ['all']
+state_of_interest = 3
+triplet = False
+parallel = False
+num_procs = 1

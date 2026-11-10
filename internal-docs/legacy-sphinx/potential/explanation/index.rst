@@ -1,4 +1,0 @@
-Explanation
-===========
-
-Coming soon.

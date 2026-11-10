@@ -1,0 +1,140 @@
+{
+  "tuning": {
+    "water_full": {
+      "reference_csv": "/data/PHO_WORK/sajagbe2/packages/emsuite/examples/water-gpu/results_Water_2026-09-02_00-39-19/Water_tuning_summary.csv",
+      "reference_points": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20,
+        21,
+        22,
+        23,
+        24,
+        25,
+        26,
+        27,
+        28,
+        29
+      ],
+      "source": "/data/PHO_WORK/sajagbe2/packages/emsuite/examples/water-gpu"
+    },
+    "lf_gas": {
+      "reference_csv": "/data/PHO_WORK/sajagbe2/packages/emsuite/tests/integration_runs/recreate-maps-2026-10-07T035624Z/lf-gas/6-31Gs/separate/singlet/results_LF_2026-10-07_05-33-31/LF_tuning_summary.csv",
+      "reference_points": [
+        7,
+        50,
+        52,
+        56,
+        71,
+        103,
+        154,
+        189
+      ],
+      "source": "/data/PHO_WORK/sajagbe2/packages/emsuite/tests/integration_runs/recreate-maps-2026-10-07T035624Z/lf-gas/6-31Gs/separate/singlet"
+    },
+    "rPSB_gas": {
+      "reference_csv": "/data/PHO_WORK/sajagbe2/packages/emsuite/tests/integration_runs/opsins/campaigns/pose-restrain-2026-10-11/gas/rPSB/separate_singlet/results_rPSB_2026-10-11_06-02-14/rPSB_tuning_summary.csv",
+      "reference_points": [
+        57,
+        60,
+        126,
+        143,
+        163,
+        200
+      ],
+      "source": "/data/PHO_WORK/sajagbe2/packages/emsuite/tests/integration_runs/opsins/campaigns/pose-restrain-2026-10-11/gas/rPSB/separate_singlet"
+    },
+    "SB_gas": {
+      "reference_csv": "/data/PHO_WORK/sajagbe2/packages/emsuite/tests/integration_runs/opsins/campaigns/pose-restrain-2026-10-11/gas/SB/separate_singlet/results_SB_2026-10-11_06-35-42/SB_tuning_summary.csv",
+      "reference_points": [
+        1,
+        30,
+        95,
+        111,
+        223,
+        252
+      ],
+      "source": "/data/PHO_WORK/sajagbe2/packages/emsuite/tests/integration_runs/opsins/campaigns/pose-restrain-2026-10-11/gas/SB/separate_singlet"
+    },
+    "rPSB_nhexane": {
+      "reference_csv": "/data/PHO_WORK/sajagbe2/packages/emsuite/tests/integration_runs/opsins/campaigns/pose-restrain-2026-10-11/solvents/rPSB/n-hexane/singlet/results_rPSB_2026-10-21_14-15-06/rPSB_tuning_summary.csv",
+      "reference_points": [
+        57,
+        60,
+        126,
+        143,
+        163,
+        202
+      ],
+      "source": "/data/PHO_WORK/sajagbe2/packages/emsuite/tests/integration_runs/opsins/campaigns/pose-restrain-2026-10-11/solvents/rPSB/n-hexane/singlet"
+    },
+    "rPSB_dmso": {
+      "reference_csv": "/data/PHO_WORK/sajagbe2/packages/emsuite/tests/integration_runs/opsins/campaigns/pose-restrain-2026-10-11/solvents/rPSB/dimethylsulfoxide/singlet/results_rPSB_2026-10-23_13-31-59/rPSB_tuning_summary.csv",
+      "reference_points": [
+        60,
+        75,
+        126,
+        143,
+        163,
+        202
+      ],
+      "source": "/data/PHO_WORK/sajagbe2/packages/emsuite/tests/integration_runs/opsins/campaigns/pose-restrain-2026-10-11/solvents/rPSB/dimethylsulfoxide/singlet"
+    },
+    "SB_water": {
+      "reference_csv": "/data/PHO_WORK/sajagbe2/packages/emsuite/tests/integration_runs/opsins/campaigns/pose-restrain-2026-10-11/solvents/SB/water/singlet/results_SB_2026-10-26_09-21-49/SB_tuning_summary.csv",
+      "reference_points": [
+        30,
+        54,
+        112,
+        128,
+        223,
+        252
+      ],
+      "source": "/data/PHO_WORK/sajagbe2/packages/emsuite/tests/integration_runs/opsins/campaigns/pose-restrain-2026-10-11/solvents/SB/water/singlet"
+    }
+  },
+  "baseline": {
+    "rPSB_gas": {
+      "reference_csv": "/data/PHO_WORK/sajagbe2/packages/emsuite/tests/integration_runs/opsins/campaigns/pose-restrain-2026-10-11/gas/rPSB/separate_singlet/results_rPSB_2026-10-11_06-02-14/rPSB_tuning_summary.csv",
+      "source": "/data/PHO_WORK/sajagbe2/packages/emsuite/tests/integration_runs/opsins/campaigns/pose-restrain-2026-10-11/gas/rPSB/separate_singlet"
+    },
+    "SB_gas": {
+      "reference_csv": "/data/PHO_WORK/sajagbe2/packages/emsuite/tests/integration_runs/opsins/campaigns/pose-restrain-2026-10-11/gas/SB/separate_singlet/results_SB_2026-10-11_06-35-42/SB_tuning_summary.csv",
+      "source": "/data/PHO_WORK/sajagbe2/packages/emsuite/tests/integration_runs/opsins/campaigns/pose-restrain-2026-10-11/gas/SB/separate_singlet"
+    },
+    "rPSB_nhexane": {
+      "reference_csv": "/data/PHO_WORK/sajagbe2/packages/emsuite/tests/integration_runs/opsins/campaigns/pose-restrain-2026-10-11/solvents/rPSB/n-hexane/singlet/results_rPSB_2026-10-21_14-15-06/rPSB_tuning_summary.csv",
+      "source": "/data/PHO_WORK/sajagbe2/packages/emsuite/tests/integration_runs/opsins/campaigns/pose-restrain-2026-10-11/solvents/rPSB/n-hexane/singlet"
+    },
+    "rPSB_chloroform": {
+      "reference_csv": "/data/PHO_WORK/sajagbe2/packages/emsuite/tests/integration_runs/opsins/campaigns/pose-restrain-2026-10-11/solvents/rPSB/chloroform/singlet/results_rPSB_2026-10-22_13-01-30/rPSB_tuning_summary.csv",
+      "source": "/data/PHO_WORK/sajagbe2/packages/emsuite/tests/integration_runs/opsins/campaigns/pose-restrain-2026-10-11/solvents/rPSB/chloroform/singlet"
+    },
+    "rPSB_acetonitrile": {
+      "reference_csv": "/data/PHO_WORK/sajagbe2/packages/emsuite/tests/integration_runs/opsins/campaigns/pose-restrain-2026-10-11/solvents/rPSB/acetonitrile/singlet/results_rPSB_2026-10-23_03-04-19/rPSB_tuning_summary.csv",
+      "source": "/data/PHO_WORK/sajagbe2/packages/emsuite/tests/integration_runs/opsins/campaigns/pose-restrain-2026-10-11/solvents/rPSB/acetonitrile/singlet"
+    },
+    "SB_dmso": {
+      "reference_csv": "/data/PHO_WORK/sajagbe2/packages/emsuite/tests/integration_runs/opsins/campaigns/pose-restrain-2026-10-11/solvents/SB/dimethylsulfoxide/singlet/results_SB_2026-10-26_09-41-35/SB_tuning_summary.csv",
+      "source": "/data/PHO_WORK/sajagbe2/packages/emsuite/tests/integration_runs/opsins/campaigns/pose-restrain-2026-10-11/solvents/SB/dimethylsulfoxide/singlet"
+    }
+  }
+}

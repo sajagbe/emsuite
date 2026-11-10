@@ -1,0 +1,141 @@
+diff --git a/src/emsuite/core/molecule.py b/src/emsuite/core/molecule.py
+index 500877d..1c29f3c 100644
+--- a/src/emsuite/core/molecule.py
++++ b/src/emsuite/core/molecule.py
+@@ -18,6 +18,8 @@ def create_molecule_object(
+     charge_change=0,
+     gpu=True,
+     spin_guesses=None,  # Note PySCF uses 2S = number of unpaired electrons not multiplicity (2S+1), so spin=0 is singlet, spin=1 is doublet, etc.
++    reference_energy=None,
++    max_energy_delta=1.0,
+ ):
+     """
+     Create a PySCF molecule object with optimal spin configuration.
+@@ -38,6 +40,11 @@ def create_molecule_object(
+         spin_guesses (list, optional): List of spin multiplicities to test.
+                                      Defaults to [0, 1, 2, 3, 4]. Uses 2S notation not multiplicity (2S+1).
+                                      Important for open-shell systems.
++        reference_energy (float, optional): Energy (Ha) of a related species, normally the
++                                     neutral when building an ion. Solutions further than
++                                     ``max_energy_delta`` from it are rejected as unphysical.
++        max_energy_delta (float, optional): Allowed |E - reference_energy| in Ha. Default 1.0
++                                     (27 eV, far above any one-electron IE/EA).
+ 
+     Returns:
+         pyscf.scf object gpu4pyscf.scf object or None: The converged SCF object with lowest energy,
+@@ -45,7 +52,10 @@ def create_molecule_object(
+ 
+     Note:
+         - Uses 2S notation (0=singlet, 1=doublet, etc.)
+-        - Automatically tries SOSCF if initial SCF doesn't converge
++        - If the SCF does not converge, SOSCF is restarted from a fresh initial guess,
++          not from the unconverged orbitals: those can sit hundreds of Ha below the
++          physical solution, and SOSCF then "converges" there (seen for rPSB/SB ions).
++        - Open-shell solutions with <S^2> more than 1.0 above S(S+1) are rejected.
+         - Prints convergence information for each spin state
+     """
+     charge = original_charge + charge_change
+@@ -84,18 +94,25 @@ def create_molecule_object(
+             else:
+                 print("Using CPU as requested.")
+ 
++            fresh_mf = mf.copy()  # untouched copy: default initial guess for SOSCF
+             energy = mf.kernel()
+ 
+-            # Try SOSCF if not converged
++            # Try SOSCF if not converged, from a fresh guess (see Note)
+             if not mf.converged:
+-                mf = mf.newton()
++                mf = fresh_mf.newton()
+                 energy = mf.kernel()
+ 
+-            if mf.converged:
+-                print(f"Spin {spin} (2S+1={spin + 1}) converged: E = {energy:.6f} Ha")
+-                results.append((spin, energy, mf))
+-            else:
++            if not mf.converged:
+                 print(f"Spin {spin} (2S+1={spin + 1}) did NOT converge")
++                continue
++
++            reason = _unphysical_reason(mf, spin, energy, reference_energy, max_energy_delta)
++            if reason:
++                print(f"Spin {spin} (2S+1={spin + 1}) REJECTED: E = {energy:.6f} Ha; {reason}")
++                continue
++
++            print(f"Spin {spin} (2S+1={spin + 1}) converged: E = {energy:.6f} Ha")
++            results.append((spin, energy, mf))
+ 
+         except Exception as e:
+             print(f"Spin {spin} failed: {e}")
+@@ -110,6 +127,24 @@ def create_molecule_object(
+         return None
+ 
+ 
++def _unphysical_reason(mf, spin, energy, reference_energy=None, max_energy_delta=1.0):
++    """Return why a converged SCF solution is unphysical, or None if it looks sane."""
++    if reference_energy is not None and abs(energy - reference_energy) > max_energy_delta:
++        return (
++            f"|E - E_ref| = {abs(energy - reference_energy):.3f} Ha > {max_energy_delta} Ha "
++            f"(E_ref = {reference_energy:.6f})"
++        )
++    if spin > 0:
++        try:
++            s2 = float(mf.spin_square()[0])
++        except Exception:
++            return None
++        expected = (spin / 2) * (spin / 2 + 1)
++        if s2 - expected > 1.0:
++            return f"<S^2> = {s2:.3f}, expected {expected:.3f}"
++    return None
++
++
+ def save_chkfile(mf, chkfile_name, functional=None):
+     """Save a mean-field object to a checkpoint file."""
+     is_gpu = hasattr(mf, "to_cpu") and callable(mf.to_cpu)
+diff --git a/src/emsuite/tuning/runner.py b/src/emsuite/tuning/runner.py
+index 5db4aa7..8a0021f 100644
+--- a/src/emsuite/tuning/runner.py
++++ b/src/emsuite/tuning/runner.py
+@@ -344,7 +344,15 @@ def calculate_combined_surface_effect(
+ # Create Molecular Objects for Any Requested Calculation #
+ ##########################################################
+ def create_alone_molecule_objects(
+-    input_data, basis_set, method, functional, charge, charge_change, gpu_available, spin_guesses
++    input_data,
++    basis_set,
++    method,
++    functional,
++    charge,
++    charge_change,
++    gpu_available,
++    spin_guesses,
++    reference_energy=None,
+ ):
+     """
+     Create individual molecule objects with specified charge modifications.
+@@ -374,6 +382,7 @@ def create_alone_molecule_objects(
+         charge_change=charge_change,
+         gpu=gpu_available,
+         spin_guesses=spin_guesses,
++        reference_energy=reference_energy,
+     )
+ 
+ 
+@@ -425,6 +434,9 @@ def create_molecule_objects(
+     calc_configs = [("neutral", 0, spin_guesses), ("anion", -1, None), ("cation", +1, None)]
+     for name, charge_change, spin_guesses in calc_configs:
+         if required_calculations.get(name, False):
++            # Ions are checked against the neutral energy (computed first) so a
++            # collapsed SCF solution cannot become the IE/EA baseline.
++            neutral = molecules.get("neutral")
+             molecules[name] = create_alone_molecule_objects(
+                 input_data,
+                 basis_set,
+@@ -434,6 +446,7 @@ def create_molecule_objects(
+                 charge_change,
+                 gpu_available,
+                 spin_guesses,
++                reference_energy=float(neutral.e_tot) if charge_change and neutral else None,
+             )
+ 
+     chkfile_map = {

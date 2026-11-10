@@ -1,0 +1,14 @@
+molecule = 'LF.xyz'
+surface_file = 'LF.surf'
+charge = 0
+spin = 0
+basis_set = '6-31G*'
+method = 'dft'
+functional = 'b3lyp'
+solvent = None
+calc_type = 'separate'
+properties = ['gse', 'homo', 'lumo', 'gap', 'dm', 'ie', 'ea', 'cp', 'eng', 'hard', 'efl', 'nfl', 'exe', 'osc']
+state_of_interest = 3
+triplet = False
+parallel = False
+num_procs = 1
