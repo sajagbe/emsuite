@@ -20,6 +20,7 @@ from emsuite.surface import load_surf
 if TYPE_CHECKING:
     from emsuite.inputs import TuningInput
 
+from . import baseline
 from .logging import (
     append_point_to_summary,
     finalize_summary_log,
@@ -204,6 +205,15 @@ def calculate_surface_effect_at_point(
 ##########################################################
 #        Surface Data Loading and Validation             #
 ##########################################################
+
+
+def _pin_main_process_to_one_gpu(all_gpus):
+    """Restrict this process to the first GPU of ``all_gpus`` (call before any CUDA use)."""
+    os.environ["CUDA_VISIBLE_DEVICES"] = all_gpus[0]
+    print(
+        f"Main process: GPU {all_gpus[0]} only; starting SCFs and surface points use "
+        f"one GPU each from {','.join(all_gpus)}"
+    )
 
 
 def _pin_combined_to_single_gpu():
@@ -397,9 +407,15 @@ def create_molecule_objects(
     required_calculations,
     state_of_interest,
     triplet,
+    gpus=None,
 ):
     """
     Create and save all required molecule objects for property calculations.
+
+    With GPUs (``gpus``: list of GPU ids), neutral, anion and cation run at the
+    same time, each in its own process on its own GPU (see tuning/baseline.py),
+    then are reloaded here from their checkpoint files. Without GPUs they run one
+    after another in this process.
 
     This function creates SCF objects for neutral, anionic, and cationic states
     as needed, along with time-dependent objects for excited state calculations.
@@ -432,6 +448,14 @@ def create_molecule_objects(
     """
     molecules = {}
     calc_configs = [("neutral", 0, spin_guesses), ("anion", -1, None), ("cation", +1, None)]
+    states = [name for name, _, _ in calc_configs if required_calculations.get(name, False)]
+    if gpu_available and gpus and states:
+        results = baseline.run_states(
+            input_data, basis_set, method, functional, charge, spin_guesses, states, gpus
+        )
+        for name in states:
+            molecules[name] = core.resurrect_mol(results[name]["chkfile"])
+        calc_configs = []  # done; skip the one-after-another loop and the chkfile save
     for name, charge_change, spin_guesses in calc_configs:
         if required_calculations.get(name, False):
             # Ions are checked against the neutral energy (computed first) so a
@@ -449,11 +473,7 @@ def create_molecule_objects(
                 reference_energy=float(neutral.e_tot) if charge_change and neutral else None,
             )
 
-    failed = [
-        name
-        for name, _, _ in calc_configs
-        if required_calculations.get(name) and not molecules.get(name)
-    ]
+    failed = [name for name in states if not molecules.get(name)]
     if failed:
         raise RuntimeError(
             f"No trustworthy SCF solution for the {', '.join(failed)} state(s) of {input_data}: "
@@ -467,7 +487,7 @@ def create_molecule_objects(
         "cation": "cation_alone.chk",
     }
     for key, filename in chkfile_map.items():
-        if molecules.get(key):
+        if molecules.get(key) and calc_configs:  # parallel path already wrote them
             core.save_chkfile(molecules[key], filename, functional)
 
     # Create TD object if needed
@@ -657,14 +677,20 @@ def _run_tuning(inp: TuningInput):
     parallel = tuning_params["parallel"]
     num_procs = tuning_params["num_procs"]
 
-    # Combined MM+TDDFT must see a single GPU for the whole process. Pinning
-    # later (after multi-GPU SCF / vacuum-TD subprocess) is too late and still
-    # hits cudaErrorLaunchFailure (prod 4572434). Pin before any CUDA init.
-    if calc_type == "combined":
-        _pin_combined_to_single_gpu()
+    # No single calculation may span more than one GPU: gpu4pyscf split across
+    # GPUs gave wrong energies (1.4.3: DFT grid integrals; 1.9.1: still wrong on
+    # GPUs without a direct link; tests/probes/multigpu_scf). So:
+    #   - neutral/anion/cation starting SCFs: one process per GPU (tuning/baseline.py)
+    #   - surface points: one Ray worker per GPU (Ray gets the full GPU list)
+    #   - this process (reloads, solvent SCF, TDDFT, starting properties): pinned
+    #     to the first GPU here, before any CUDA call (pinning later is too late).
+    all_gpus = baseline.visible_gpus() if core.CUPY_AVAILABLE else []
+    if all_gpus:
+        _pin_main_process_to_one_gpu(all_gpus)
 
     # Check available hardware
-    No_of_GPUs: int = core.check_gpu_info() or 0
+    core.check_gpu_info()  # this process: one GPU (or none)
+    No_of_GPUs: int = len(all_gpus)
     No_of_CPUs: int = core.check_cpu_info() or 1
 
     gpu_available = No_of_GPUs > 0
@@ -779,6 +805,7 @@ def _run_tuning(inp: TuningInput):
         required_calculations,
         state_of_interest,
         triplet,
+        gpus=all_gpus,
     )
 
     # Unpack the list returned by create_molecule_objects
@@ -1002,12 +1029,20 @@ def _run_tuning(inp: TuningInput):
                 )
                 calculate_point_effect = calculate_point_effect_cpu_remote
             else:
-                ray.init(
-                    num_gpus=parallel_processes,
-                    include_dashboard=False,
-                    ignore_reinit_error=True,
-                    logging_level=logging.ERROR,
-                )
+                # Ray's workers must see every GPU even though this process is
+                # pinned to one: start Ray with the full list in the environment.
+                pinned = os.environ.get("CUDA_VISIBLE_DEVICES")
+                os.environ["CUDA_VISIBLE_DEVICES"] = ",".join(all_gpus)
+                try:
+                    ray.init(
+                        num_gpus=parallel_processes,
+                        include_dashboard=False,
+                        ignore_reinit_error=True,
+                        logging_level=logging.ERROR,
+                    )
+                finally:
+                    if pinned is not None:
+                        os.environ["CUDA_VISIBLE_DEVICES"] = pinned
                 calculate_point_effect = calculate_point_effect_gpu
 
             print(

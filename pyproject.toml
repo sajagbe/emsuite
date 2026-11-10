@@ -24,11 +24,13 @@ dev = [
     "ruff>=0.11.0",
     "pre-commit>=4.0",
 ]
+# gpu4pyscf 1.4.3 gave wrong DFT grid integrals with more than one GPU
+# (tests/probes/multigpu_scf); 1.9.1 is correct. CuPy 14 needs the [ctk] extra
+# (CUDA headers) to compile its kernels.
 gpu = [
-    "gpu4pyscf-cuda12x==1.4.3",
-    "gpu4pyscf-libxc-cuda12x==0.5",
-    "cupy-cuda12x==13.6.0",
-    "cutensor-cu12==2.0.2",
+    "gpu4pyscf-cuda12x==1.9.1",
+    "gpu4pyscf-libxc-cuda12x==0.9.0",
+    "cupy-cuda12x[ctk]==14.2.0",
 ]
 
 [project.scripts]
