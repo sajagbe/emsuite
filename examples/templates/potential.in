@@ -1,35 +1,33 @@
 # Run with: emsuite -p potential.in
-
-# Ligand (or standalone molecule) XYZ. Alias: ligand = 'ligand.xyz'
-molecule = 'molecule.xyz'
-surface_file = None
-output_surf = 'potential.surf'
-surface_density = 0.5
-surface_scale = 1.0
-method = 'apbs'
-quantity = 'potential'     # 'potential' or 'charge' (Gauss-law)
-
-# Protein field (optional). Surface is always the ligand VDW.
-# protein = 'protein.xyz'
-# ligand_atoms = 'present'   # ligand in PQR at q=0 (cavity)
-# ligand_atoms = 'absent'    # ligand omitted from PQR; box still spans ligand
-
-# Protein as a real PDB, converted via pdb2pqr instead of Gasteiger-on-XYZ
-# (real AMBER/CHARMM/PARSE force-field charges + propka protonation for the
-# protein; requires selecting the ligand residue explicitly by name).
-# protein = 'complex.pdb'
-# protein_format = 'pdb'
-# ligand_resname = 'LIG'         # HETATM residue name to select in the PDB
-# ligand_chain = None            # only needed if ligand_resname is ambiguous
-# ligand_resseq = None           # only needed if ligand_resname is ambiguous
-# forcefield = 'AMBER'           # AMBER, CHARMM, PARSE, TYL06, PEOEPB, SWANSON
-# ph = 7.0                       # propka titration pH; None to disable
 #
-# ligand_atoms also accepts a third value with protein_format='pdb':
-# ligand_atoms = 'present'   # ligand in PQR, charge zeroed, real pdb2pqr radius (needs ligand_mol2)
-# ligand_atoms = 'absent'    # ligand not in PQR at all
-# ligand_atoms = 'charged'   # ligand in PQR with pdb2pqr's own real (PEOE) charge (needs ligand_mol2)
-# ligand_mol2 = 'ligand.mol2'    # required for 'present'/'charged' with protein_format='pdb'
+# Three files go in: this input, a PDB of the whole system, and a .surf of points.
+# The PDB must already be protonated correctly and be in the same frame as the .surf.
+
+pdb          = 'complex.pdb'
+surface_file = 'ligand.surf'       # make it with: emsuite -s surface.in
+output_surf  = 'potential.surf'    # also writes .mol2, .csv, .pqr and _sources.csv
+quantity     = 'potential'         # 'potential' or 'charge' (Gauss-law)
+
+# Known residues: Amber charges and Rmin/2 radii from these OpenMM force-field files.
+# Listed first wins when a residue fits two files. amber19/ has ff19SB, OL21, lipid21.
+forcefield = ['amber14/protein.ff14SB.xml', 'amber14/DNA.OL15.xml', 'amber14/RNA.OL3.xml', 'amber14/lipid17.xml', 'amber14/GLYCAM_06j-1.xml', 'amber14/tip3p.xml']
+
+# Hydrogens are used as given. Set True to let OpenMM add missing ones on known residues.
+add_hydrogens = False
+ph            = 7.0
+
+# Unknown residues (no Amber template): RESP charges from a quantum calculation at the
+# PDB geometry, and element radii from the vdw-surfgen table. State the total charge.
+# unknown_charge = {'LIG': 0}
+# unknown_spin   = {'LIG': 0}      # unpaired electrons; 0 unless stated
+unknown_method = 'hf'              # 'hf' or a DFT functional such as 'b3lyp'
+unknown_basis  = '6-31g*'
+resp_copies    = 'each'            # 'each': RESP on every copy; 'one': first copy, reused
+
+# Switches. Entries: 'RES', 'RES:CHAIN:NUMBER', or one atom 'RES:CHAIN:NUMBER@ATOM'.
+# off     = ['LIG']                # charge 0, radius kept: the solvent stays out
+# removed = ['HOH']                # charge 0 and radius 0: the solvent fills the place
 
 pdie = 2.0
 sdie = 78.54
+# grid_spacing = 0.3               # APBS fine-grid spacing in Å; unset = 65 points per side

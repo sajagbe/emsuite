@@ -176,16 +176,16 @@ def test_selection_matching_and_off_switch():
     assert not spec.is_off("ALA", "A", 1, "CA")
 
 
-def test_uncharged_and_grid_spacing():
+def test_removed_and_grid_spacing():
     spec = PotentialSpec(
-        pdb="complex.pdb", surface_file="ligand.surf", uncharged="FMN", grid_spacing=0.3
+        pdb="complex.pdb", surface_file="ligand.surf", removed="FMN", grid_spacing=0.3
     )
-    assert spec.uncharged == (Selection("FMN"),)
-    assert spec.is_uncharged("FMN", "A", 1, "P") and not spec.is_off("FMN", "A", 1, "P")
+    assert spec.removed == (Selection("FMN"),)
+    assert spec.is_removed("FMN", "A", 1, "P") and not spec.is_off("FMN", "A", 1, "P")
     assert spec.grid_spacing == 0.3
     assert PotentialSpec(pdb="complex.pdb", surface_file="ligand.surf").grid_spacing is None
-    with pytest.raises(ConfigValidationError, match="uncharged entry"):
-        PotentialSpec(pdb="complex.pdb", surface_file="ligand.surf", uncharged=["FMN@"])
+    with pytest.raises(ConfigValidationError, match="removed entry"):
+        PotentialSpec(pdb="complex.pdb", surface_file="ligand.surf", removed=["FMN@"])
     with pytest.raises(ConfigValidationError, match="grid_spacing"):
         PotentialSpec(pdb="complex.pdb", surface_file="ligand.surf", grid_spacing=0.01)
 
@@ -196,3 +196,14 @@ def test_grid_size_for_spacing():
     assert dime_for_spacing(46.7, 0.73) == 65
     assert dime_for_spacing(46.7, 0.3) == 161
     assert 46.7 / (dime_for_spacing(46.7, 0.25) - 1) <= 0.25
+
+
+def test_unknown_level_of_theory_keys():
+    spec = PotentialSpec(pdb="complex.pdb", surface_file="ligand.surf")
+    assert (spec.unknown_method, spec.unknown_basis) == ("hf", "6-31g*")
+    spec = PotentialSpec(
+        pdb="complex.pdb", surface_file="ligand.surf", unknown_method="B3LYP", unknown_basis="3-21G"
+    )
+    assert (spec.unknown_method, spec.unknown_basis) == ("b3lyp", "3-21g")
+    with pytest.raises(ConfigValidationError, match="unknown_basis"):
+        PotentialSpec(pdb="complex.pdb", surface_file="ligand.surf", unknown_basis="")

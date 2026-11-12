@@ -64,18 +64,14 @@ def test_surface_heterogenous_generates_edit_header(
 
 
 @pytest.mark.slow
-def test_potential_apbs_gauss_charge(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+def test_potential_apbs_gauss_charge(pdb_complex: Path) -> None:
     """CPU APBS → Gauss-law surface charges (quantity=charge)."""
-    monkeypatch.chdir(tmp_path)
-    write_methane_xyz(tmp_path)
-    surf = install_methane_surf(tmp_path)
-
     result = PotentialInput(
-        molecule="methane.xyz",
-        surface_file=str(surf),
-        output_surf="methane_charge.surf",
-        method="apbs",
+        pdb="complex.pdb",
+        surface_file="acetate.surf",
+        output_surf="acetate_charge.surf",
         quantity="charge",
+        off=["ACT"],
     ).run()
     assert Path(result.path).is_file()
     assert result.quantity == "charge"
@@ -83,7 +79,7 @@ def test_potential_apbs_gauss_charge(tmp_path: Path, monkeypatch: pytest.MonkeyP
     assert len(result.values) >= 10
 
     record_assertions(
-        tmp_path,
+        pdb_complex,
         channel="potential",
         quantity="charge",
         surf=fingerprint_surf(result.path),

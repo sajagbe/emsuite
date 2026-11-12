@@ -4,7 +4,29 @@ All notable changes to this project are documented in this file.
 
 ## [Unreleased]
 
+### Changed
+- Potential channel rebuilt around three files: the input, a PDB and a `.surf`.
+  Known residues (protein, DNA, RNA, lipids, sugars, water, ions) get Amber charges
+  and Rmin/2 radii through the OpenMM force-field XML files. Unknown residues get
+  two-stage RESP charges from a quantum calculation at the PDB geometry and
+  vdw-surfgen element radii; the input states their charge. The PDB is used as
+  given: hydrogens are not rebuilt.
+- New potential keys: `pdb`, `forcefield`, `add_hydrogens`, `unknown_charge`,
+  `unknown_spin`, `unknown_method`, `unknown_basis`, `resp_copies`, `off` (charge 0,
+  radius kept), `removed` (charge 0 and radius 0), `grid_spacing`. Unknown keys stop
+  the run. The coupled channel takes the same keys.
+- The potential channel writes `.surf`, `.mol2`, `.csv`, `.pqr` and `_sources.csv`.
+- Potential-only runs omit dielectric-map output and parsing; charge runs retain
+  all three dielectric maps. DX numeric data uses a compiled reader, and stage
+  timings distinguish APBS execution/writing, grid reading and surface mapping.
+- `surface_file` is now required for the potential and coupled channels; make it
+  with `emsuite -s`.
+
 ### Removed
+- pdb2pqr and its dependency; Gasteiger charges for a protein XYZ; the `molecule`,
+  `protein`, `protein_format`, `ligand_atoms`, `ligand_resname`, `ligand_chain`,
+  `ligand_resseq`, `ligand_mol2`, `surface_density` and `surface_scale` potential keys.
+  Each old key stops the run with a message that names its replacement.
 - Tuning properties `fukui_plus` and `fukui_minus` (they were unit-converted copies of EA/IE, not condensed Fukui functions). Requesting them is now an unknown-property error.
 
 ### Fixed

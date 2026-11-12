@@ -4,8 +4,9 @@ from __future__ import annotations
 
 import subprocess
 import tempfile
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from pathlib import Path
+from time import perf_counter
 
 import apbs_binary
 import numpy as np
@@ -19,9 +20,10 @@ from .pqr import write_pqr
 @dataclass(frozen=True)
 class ApbsGrids:
     potential: DxGrid
-    dielx: DxGrid
-    diely: DxGrid
-    dielz: DxGrid
+    dielx: DxGrid | None = None
+    diely: DxGrid | None = None
+    dielz: DxGrid | None = None
+    timings: dict[str, float] = field(default_factory=dict)
 
 
 def _box_lengths(
@@ -43,7 +45,13 @@ def _write_apbs_input(
     fglen: tuple[float, float, float],
     dime: tuple[int, int, int],
     path: Path,
+    include_dielectric: bool = True,
 ) -> Path:
+    dielectric_output = ""
+    if include_dielectric:
+        dielectric_output = "".join(
+            f"  write diel{axis} dx {prefix}_diel{axis}\n" for axis in "xyz"
+        )
     content = f"""read
   mol pqr {pqr_name}
 end
@@ -68,10 +76,7 @@ elec
   calcenergy total
   calcforce no
   write pot dx {prefix}
-  write dielx dx {prefix}_dielx
-  write diely dx {prefix}_diely
-  write dielz dx {prefix}_dielz
-end
+{dielectric_output}end
 quit
 """
     apbs_in = path / "apbs.in"
@@ -111,8 +116,13 @@ def run_apbs_grids(
     box_coords: np.ndarray | None = None,
     pqr_path: str | Path | None = None,
     grid_spacing: float | None = None,
+    include_dielectric: bool = True,
 ) -> ApbsGrids:
-    """Run APBS and return potential plus dielectric grids.
+    """Run APBS; omit dielectric-map I/O when ``include_dielectric=False``.
+
+    Timings separate execution (including APBS's file writing), each grid read,
+    and temporary-file cleanup. The subprocess boundary cannot isolate the
+    solver from its own writing. The low-level default retains all maps.
 
     ``pqr_path``, if given, points APBS at an already-written PQR (e.g. from
     pdb2pqr) directly — ``atoms``/``charges``/``write_pqr`` are skipped
@@ -146,6 +156,7 @@ def run_apbs_grids(
         work_path.mkdir(parents=True, exist_ok=True)
         tmp = None
 
+    timings = {}
     try:
         if pqr_path is not None:
             input_pqr = Path(pqr_path).resolve()
@@ -153,8 +164,17 @@ def run_apbs_grids(
             input_pqr = write_pqr(atoms, charges.tolist(), work_path / "input.pqr")
         prefix = "potential"
         apbs_in = _write_apbs_input(
-            str(input_pqr), prefix, pdie, sdie, cglen, fglen, dime, work_path
+            str(input_pqr),
+            prefix,
+            pdie,
+            sdie,
+            cglen,
+            fglen,
+            dime,
+            work_path,
+            include_dielectric=include_dielectric,
         )
+        start = perf_counter()
         result = subprocess.run(
             [apbs_binary.APBS_BIN_PATH, str(apbs_in)],
             cwd=work_path,
@@ -162,15 +182,25 @@ def run_apbs_grids(
             text=True,
             check=False,
         )
+        timings["apbs_execute_and_write_s"] = perf_counter() - start
         if result.returncode != 0:
             raise RuntimeError(f"APBS failed (exit {result.returncode}): {result.stderr[-500:]}")
 
-        return ApbsGrids(
-            potential=parse_dx(_dx_file(work_path, prefix)),
-            dielx=parse_dx(_dx_file(work_path, f"{prefix}_dielx")),
-            diely=parse_dx(_dx_file(work_path, f"{prefix}_diely")),
-            dielz=parse_dx(_dx_file(work_path, f"{prefix}_dielz")),
-        )
+        def read_grid(stem: str, name: str) -> DxGrid:
+            start = perf_counter()
+            grid = parse_dx(_dx_file(work_path, stem))
+            timings[f"read_{name}_s"] = perf_counter() - start
+            return grid
+
+        potential = read_grid(prefix, "potential")
+        dielectric = {}
+        if include_dielectric:
+            dielectric = {
+                f"diel{axis}": read_grid(f"{prefix}_diel{axis}", f"diel{axis}") for axis in "xyz"
+            }
+        return ApbsGrids(potential=potential, timings=timings, **dielectric)
     finally:
+        start = perf_counter()
         if tmp is not None:
             tmp.cleanup()
+        timings["cleanup_s"] = perf_counter() - start

@@ -394,15 +394,6 @@ wheels = [
 ]
 
 [[package]]
-name = "docutils"
-version = "0.17.1"
-source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/4c/17/559b4d020f4b46e0287a2eddf2d8ebf76318fd3bd495f1625414b052fdc9/docutils-0.17.1.tar.gz", hash = "sha256:686577d2e4c32380bb50cbb22f575ed742d58168cee37e99117a854bcd88f125", size = 2016138, upload-time = "2021-04-17T14:13:28.434Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/4c/5e/6003a0d1f37725ec2ebd4046b657abb9372202655f96e76795dca8c0063c/docutils-0.17.1-py2.py3-none-any.whl", hash = "sha256:cf316c8370a737a022b72b56874f6602acf974a37a9fba42ec2876387549fc61", size = 575533, upload-time = "2021-04-17T14:13:24.796Z" },
-]
-
-[[package]]
 name = "emsuite"
 version = "1.6.0"
 source = { editable = "." }
@@ -412,7 +403,6 @@ dependencies = [
     { name = "numpy", version = "2.3.2", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.14'" },
     { name = "numpy", version = "2.5.3", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.14'" },
     { name = "openmm" },
-    { name = "pdb2pqr" },
     { name = "pint", version = "0.25.3", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.12'" },
     { name = "pint", version = "0.26.1", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.12'" },
     { name = "pyscf" },
@@ -444,7 +434,6 @@ requires-dist = [
     { name = "gpu4pyscf-libxc-cuda12x", marker = "extra == 'gpu'", specifier = "==0.9.0" },
     { name = "numpy" },
     { name = "openmm", specifier = ">=8.1" },
-    { name = "pdb2pqr", specifier = ">=3.7.1" },
     { name = "pint", specifier = ">=0.25.3" },
     { name = "pre-commit", marker = "extra == 'dev'", specifier = ">=4.0" },
     { name = "pyscf", specifier = ">=2.10.0" },
@@ -813,15 +802,6 @@ wheels = [
 ]
 
 [[package]]
-name = "mmcif-pdbx"
-version = "2.1.0"
-source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/0a/01/6bee9fe8eb6ba1f5f8cc26f57cd27de2aadd549d6e8202f1dc9183822438/mmcif_pdbx-2.1.0.tar.gz", hash = "sha256:456b2f548d18306b82db6578cdc4f18c45be16960950db8ca7064d3ee66ebfc8", size = 18864, upload-time = "2026-04-26T15:53:32.744Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/89/26/0bd767ced9e87a189041fe8469d7e9167f04025cbdceda4eb9ba63e1a8e2/mmcif_pdbx-2.1.0-py3-none-any.whl", hash = "sha256:b52cc4063f57fa5f982c693a3dc394aaf7104054d68d7a2b4d26920950ea01a7", size = 19972, upload-time = "2026-04-26T15:53:31.513Z" },
-]
-
-[[package]]
 name = "msgpack"
 version = "1.1.2"
 source = { registry = "https://pypi.org/simple" }
@@ -1184,23 +1164,6 @@ wheels = [
 ]
 
 [[package]]
-name = "pdb2pqr"
-version = "3.7.1"
-source = { registry = "https://pypi.org/simple" }
-dependencies = [
-    { name = "docutils" },
-    { name = "mmcif-pdbx" },
-    { name = "numpy", version = "2.3.2", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.14'" },
-    { name = "numpy", version = "2.5.3", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.14'" },
-    { name = "propka" },
-    { name = "requests" },
-]
-sdist = { url = "https://files.pythonhosted.org/packages/a5/f2/f63603a19b30518d20f7900a5d7597f6dc9447d09b501e864191b370fa38/pdb2pqr-3.7.1.tar.gz", hash = "sha256:05b5c464022a3ad11c9597c6fc7f70c56061c4669b1497a51958da90d959152f", size = 13436854, upload-time = "2024-12-28T03:43:19.74Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/55/fb/6c702588f9c6de3ca17adb35952dfdd662856f913e4844032a7a01e2a7db/pdb2pqr-3.7.1-py3-none-any.whl", hash = "sha256:15f7422a41ea4c789e564e2ef00ac10b8f020b589b650f6225e627a5901305ea", size = 207930, upload-time = "2024-12-28T03:43:17.284Z" },
-]
-
-[[package]]
 name = "pillow"
 version = "11.3.0"
 source = { registry = "https://pypi.org/simple" }
@@ -1353,15 +1316,6 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/8e/22/2de9408ac81acbb8a7d05d4cc064a152ccf33b3d480ebe0cd292153db239/pre_commit-4.6.0.tar.gz", hash = "sha256:718d2208cef53fdc38206e40524a6d4d9576d103eb16f0fec11c875e7716e9d9", size = 198525, upload-time = "2026-04-21T20:31:41.613Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/80/6e/4b28b62ecb6aae56769c34a8ff1d661473ec1e9519e2d5f8b2c150086b26/pre_commit-4.6.0-py2.py3-none-any.whl", hash = "sha256:e2cf246f7299edcabcf15f9b0571fdce06058527f0a06535068a86d38089f29b", size = 226472, upload-time = "2026-04-21T20:31:40.092Z" },
-]
-
-[[package]]
-name = "propka"
-version = "3.5.1"
-source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/76/6e/b409bfd37fbbcbaf41e485d2c6117027394cee12b7d6128b4e01b29c4843/propka-3.5.1.tar.gz", hash = "sha256:d8083b58d8c4c553ff8704c706190fe37ff82253adcd6e53b31d8ad7d6d52257", size = 111363, upload-time = "2024-01-02T02:35:18.012Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/71/0e/5f70ba04fd85495afb0808654a09abfbede4414dd33e3b711c9023e2a993/propka-3.5.1-py3-none-any.whl", hash = "sha256:2df2d81adc9205113a0e6f9d96b06b46e29716bc3a71223075dd396e0eefdfc3", size = 104123, upload-time = "2024-01-02T02:35:16.174Z" },
 ]
 
 [[package]]

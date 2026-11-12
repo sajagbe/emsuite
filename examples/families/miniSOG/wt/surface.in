@@ -1,0 +1,11 @@
+# Ligand VDW surface for the coupled runs in singlet/ and triplet/.
+# Run: emsuite -s surface.in
+
+input_type = 'XYZ'
+input_data = 'ligand.xyz'
+output_surf = 'ligand.surf'
+surface_density = 0.5
+surface_scale = 1.0
+surface_type = 'homogenous'
+surface_charge = 0.0
+optimize = False

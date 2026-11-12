@@ -1,7 +1,7 @@
 """Charges and radii for residues with no Amber template.
 
-Charges: two-stage RESP from an HF/6-31G* calculation on the residue alone, at
-its PDB geometry (no optimization). Radii: the vdw-surfgen element table. The
+Charges: two-stage RESP from a quantum calculation (HF/6-31G* unless the input
+says otherwise) on the residue alone, at its PDB geometry (no optimization). Radii: the vdw-surfgen element table. The
 user states each residue's total charge (and spin) in the input.
 """
 
@@ -31,10 +31,15 @@ class UnknownResult:
     hf_runs: int
 
 
-def _default_resp(atoms, charge, spin, label):
-    from .resp import resp_charges_from_atoms
+def _resp_at(method: str, basis: str) -> RespFunction:
+    def run(atoms, charge, spin, label):
+        from .resp import resp_charges_from_atoms
 
-    return resp_charges_from_atoms(atoms, charge=charge, spin=spin, label=label)
+        return resp_charges_from_atoms(
+            atoms, charge=charge, spin=spin, basis=basis, label=label, method=method
+        )
+
+    return run
 
 
 def _covalent_radius(symbol: str) -> float:
@@ -124,6 +129,8 @@ def assign_unknown(
     resp_copies: str = "each",
     skip: np.ndarray | None = None,
     resp: RespFunction | None = None,
+    method: str = "hf",
+    basis: str = "6-31g*",
 ) -> UnknownResult:
     """RESP charges and element radii for the unmatched residues.
 
@@ -131,9 +138,10 @@ def assign_unknown(
     gets no HF calculation. ``resp_copies='one'`` runs RESP on the first copy of
     each residue name and reuses its charges for the other copies (matched by atom name).
     """
-    resp = resp or _default_resp
+    resp = resp or _resp_at(method, basis)
+    level = f"{method.upper()}/{basis.upper()}"
     skip = np.zeros(structure.n_atoms, dtype=bool) if skip is None else skip
-    # a residue that is fully off needs no charge and no HF calculation
+    # a residue whose charges are all switched to zero needs no charge and no HF calculation
     active = tuple(r for r in unmatched if not skip[structure.residue_atoms(r)].all())
     check_unknown_residues(structure, active, unknown_charge, unknown_spin)
 
@@ -162,7 +170,7 @@ def assign_unknown(
         sizes = ", ".join(
             f"{structure.residue_label(r)} ({len(structure.residue_atoms(r))} atoms)" for r in plan
         )
-        print(f"HF/6-31G* RESP calculations to run: {len(plan)} -> {sizes}")
+        print(f"{level} RESP calculations to run: {len(plan)} -> {sizes}")
 
     for residue in plan:
         atoms = structure.residue_atoms(residue)
@@ -179,7 +187,7 @@ def assign_unknown(
                 f"RESP charges of {label} sum to {q.sum():+.5f}, not {unknown_charge[name]:+d}"
             )
         charges[residue] = q
-        sources[residue] = "RESP HF/6-31G* at PDB geometry; vsg element radii"
+        sources[residue] = f"RESP {level} at PDB geometry; vsg element radii"
 
     for residue in todo:
         if residue in charges:

@@ -2,18 +2,41 @@
 
 import pytest
 
-from emsuite.config import ConfigValidationError, validate_potential_params, validate_tuning_params
+from emsuite.config import ConfigValidationError, validate_tuning_params
+from emsuite.potential.spec import PotentialSpec
 from emsuite.tuning.properties import PROPERTY_CONFIG, setup_calculation
 
 
 def test_coulomb_method_rejected():
     with pytest.raises(ConfigValidationError, match="coulomb"):
-        validate_potential_params({"molecule": "m.xyz", "method": "coulomb"})
+        PotentialSpec(pdb="c.pdb", surface_file="m.surf", method="coulomb")
 
 
-def test_bond_scan_atoms_rejected():
+def test_bond_scan_atoms_rejected(tmp_path):
+    cfg = tmp_path / "potential.in"
+    cfg.write_text("pdb = 'c.pdb'\nsurface_file = 'm.surf'\nbond_scan_atoms = [0, 1]\n")
     with pytest.raises(ConfigValidationError, match="bond_scan_atoms"):
-        validate_potential_params({"molecule": "m.xyz", "bond_scan_atoms": [0, 1]})
+        PotentialSpec.from_file(cfg, check_files=False)
+
+
+@pytest.mark.parametrize(
+    "line",
+    ["molecule = 'm.xyz'", "protein = 'p.xyz'", "protein_format = 'pdb'", "ligand_mol2 = 'l.mol2'"],
+)
+def test_old_potential_keys_rejected(tmp_path, line):
+    cfg = tmp_path / "potential.in"
+    cfg.write_text(f"pdb = 'c.pdb'\nsurface_file = 'm.surf'\n{line}\n")
+    with pytest.raises(ConfigValidationError, match="no longer a potential input key"):
+        PotentialSpec.from_file(cfg, check_files=False)
+
+
+def test_old_coupled_keys_rejected(tmp_path):
+    from emsuite.inputs import CoupledInput
+
+    cfg = tmp_path / "coupled.in"
+    cfg.write_text("molecule = 'm.xyz'\nproperties = ['homo']\nligand_atoms = 'present'\n")
+    with pytest.raises(ConfigValidationError, match="no longer a coupled input key"):
+        CoupledInput.from_file(cfg)
 
 
 def test_stark_gap_rejected_by_schema():

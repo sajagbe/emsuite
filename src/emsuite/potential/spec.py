@@ -33,15 +33,18 @@ _REMOVED_KEYS: dict[str, str] = {
     "ligand": "the ligand is read from the PDB; give pdb= and surface_file=",
     "protein": "use pdb=",
     "protein_format": "only PDB input is supported; use pdb=",
-    "ligand_atoms": "use off= to switch residues or atoms off",
-    "ligand_resname": "use off= to switch residues or atoms off",
-    "ligand_chain": "use off= to switch residues or atoms off",
-    "ligand_resseq": "use off= to switch residues or atoms off",
+    "ligand_atoms": "use off= (charge 0, radius kept) or removed= (charge 0, radius 0)",
+    "ligand_resname": "use off= (charge 0, radius kept) or removed= (charge 0, radius 0)",
+    "ligand_chain": "use off= (charge 0, radius kept) or removed= (charge 0, radius 0)",
+    "ligand_resseq": "use off= (charge 0, radius kept) or removed= (charge 0, radius 0)",
     "ligand_mol2": "unknown residues get RESP charges; use unknown_charge=",
     "charge": "use unknown_charge={'RES': charge}",
     "spin": "use unknown_spin={'RES': spin}",
     "surface_density": "make the surface in the surface channel; give surface_file=",
     "surface_scale": "make the surface in the surface channel; give surface_file=",
+    "bond_scan_atoms": "the bond-axis scan is no longer supported",
+    "bond_scan_steps": "the bond-axis scan is no longer supported",
+    "bond_scan_span": "the bond-axis scan is no longer supported",
 }
 
 
@@ -156,9 +159,11 @@ class PotentialSpec:
     ph: float = 7.0
     unknown_charge: dict[str, int] = field(default_factory=dict)
     unknown_spin: dict[str, int] = field(default_factory=dict)
+    unknown_method: str = "hf"  # 'hf' or a DFT functional name, e.g. 'b3lyp'
+    unknown_basis: str = "6-31g*"
     resp_copies: str = "each"
-    off: tuple[Selection, ...] = ()
-    uncharged: tuple[Selection, ...] = ()
+    off: tuple[Selection, ...] = ()  # charge 0, radius kept
+    removed: tuple[Selection, ...] = ()  # charge 0 and radius 0
     pdie: float = 2.0
     sdie: float = 78.54
     grid_spacing: float | None = None
@@ -216,6 +221,12 @@ class PotentialSpec:
         put("unknown_charge", charges)
         put("unknown_spin", spins)
 
+        for name in ("unknown_method", "unknown_basis"):
+            value = getattr(self, name)
+            if not isinstance(value, str) or not value.strip():
+                raise ConfigValidationError(f"{name} must be a non-empty string")
+            put(name, value.strip().lower())
+
         resp_copies = str(self.resp_copies).lower()
         if resp_copies not in _RESP_COPIES:
             raise ConfigValidationError(
@@ -224,7 +235,7 @@ class PotentialSpec:
             )
         put("resp_copies", resp_copies)
 
-        for name in ("off", "uncharged"):
+        for name in ("off", "removed"):
             entries = getattr(self, name)
             if isinstance(entries, str | Selection):
                 entries = [entries]
@@ -277,13 +288,25 @@ class PotentialSpec:
             if not Path(value).is_file():
                 raise FileNotFoundError(f"{name} file not found: {value}")
 
+    def to_dict(self) -> dict[str, Any]:
+        return {item.name: getattr(self, item.name) for item in fields(self)}
+
+    def run(self):
+        """Run the potential channel; returns a PotentialResult for the written .surf."""
+        from emsuite.results import PotentialResult
+
+        from .runner import run_potential_spec
+
+        paths = run_potential_spec(self)
+        return PotentialResult.from_surf(paths["surf"], quantity=self.quantity)
+
     def is_off(self, resname: str, chain: str, resseq: int, atom: str) -> bool:
-        """Off: charge 0 and radius 0, so the solvent fills the atom's place."""
+        """Off: charge 0, radius kept, so the atom still keeps the solvent out."""
         return any(s.matches(resname, chain, resseq, atom) for s in self.off)
 
-    def is_uncharged(self, resname: str, chain: str, resseq: int, atom: str) -> bool:
-        """Uncharged: charge 0, radius kept, so the atom still keeps the solvent out."""
-        return any(s.matches(resname, chain, resseq, atom) for s in self.uncharged)
+    def is_removed(self, resname: str, chain: str, resseq: int, atom: str) -> bool:
+        """Removed: charge 0 and radius 0, so the solvent fills the atom's place."""
+        return any(s.matches(resname, chain, resseq, atom) for s in self.removed)
 
     def spin_of(self, resname: str) -> int:
         """Unpaired electrons of an unknown residue; singlet unless stated."""

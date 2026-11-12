@@ -10,6 +10,7 @@ Source: pghosh4 SOPP3 Step_5 Selected_100.gro frame 51/100. Combined jobs 431991
 
 ## Run
 ```bash
+emsuite -s surface.in   # once: writes ligand.surf
 cd singlet   # or triplet
 # from a GPU allocation with emsuite on PATH:
 emsuite -c coupled.in

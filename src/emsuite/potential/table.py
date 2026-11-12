@@ -19,10 +19,10 @@ from .unknown import RespFunction, assign_unknown
 @dataclass(frozen=True)
 class ParameterTable:
     structure: Structure
-    charges: np.ndarray  # (N,) e, after the off switches
-    radii: np.ndarray  # (N,) Å, after the off switches
-    off: np.ndarray  # (N,) bool: charge 0 and radius 0
-    uncharged: np.ndarray  # (N,) bool: charge 0, radius kept
+    charges: np.ndarray  # (N,) e, after the off and removed switches
+    radii: np.ndarray  # (N,) Å, after the off and removed switches
+    off: np.ndarray  # (N,) bool: charge 0, radius kept
+    removed: np.ndarray  # (N,) bool: charge 0 and radius 0
     residue_source: dict[int, str]  # residue index -> where its parameters came from
     hf_runs: int = 0
 
@@ -53,7 +53,7 @@ class ParameterTable:
                     "atoms": len(atoms),
                     "source": self.residue_source[residue],
                     "atoms_off": int(self.off[atoms].sum()),
-                    "atoms_uncharged": int(self.uncharged[atoms].sum()),
+                    "atoms_removed": int(self.removed[atoms].sum()),
                     "net_charge_e": round(float(self.charges[atoms].sum()), 4),
                 }
             )
@@ -73,8 +73,8 @@ class ParameterTable:
             kind = str(row["source"]).split(":")[0].split(";")[0]
             counts[kind] = counts.get(kind, 0) + 1
         lines = [f"  {n:5d} residues: {kind}" for kind, n in sorted(counts.items())]
-        lines.append(f"  atoms off (charge 0, radius 0): {int(self.off.sum())}")
-        lines.append(f"  atoms uncharged (charge 0, radius kept): {int(self.uncharged.sum())}")
+        lines.append(f"  atoms off (charge 0, radius kept): {int(self.off.sum())}")
+        lines.append(f"  atoms removed (charge 0, radius 0): {int(self.removed.sum())}")
         lines.append(f"  total charge in PQR: {self.charges.sum():+.4f} e")
         return "\n".join(lines)
 
@@ -106,8 +106,8 @@ def _mask(structure: Structure, selections, key: str, pdb: str) -> np.ndarray:
 def build_parameter_table(spec: PotentialSpec, resp: RespFunction | None = None) -> ParameterTable:
     """PDB -> charge and radius for every atom, following the input file."""
     structure = load_structure(spec.pdb, add_hydrogens=spec.add_hydrogens, ph=spec.ph)
-    off = _mask(structure, spec.off, "off", spec.pdb)
-    uncharged = _mask(structure, spec.uncharged, "uncharged", spec.pdb) & ~off
+    removed = _mask(structure, spec.removed, "removed", spec.pdb)
+    off = _mask(structure, spec.off, "off", spec.pdb) & ~removed
 
     amber = assign_amber(structure, spec.forcefield)
     unknown = assign_unknown(
@@ -116,8 +116,10 @@ def build_parameter_table(spec: PotentialSpec, resp: RespFunction | None = None)
         spec.unknown_charge,
         spec.unknown_spin,
         resp_copies=spec.resp_copies,
-        skip=off | uncharged,  # atoms whose charge ends at zero need no RESP
+        skip=off | removed,  # atoms whose charge ends at zero need no RESP
         resp=resp,
+        method=spec.unknown_method,
+        basis=spec.unknown_basis,
     )
     charges = amber.charges.copy()
     radii = amber.radii.copy()
@@ -129,8 +131,6 @@ def build_parameter_table(spec: PotentialSpec, resp: RespFunction | None = None)
         source[residue] = unknown.sources[residue]
     if np.isnan(charges).any() or np.isnan(radii).any():
         raise RuntimeError("some atoms were left without a charge or radius")
-    charges[off | uncharged] = 0.0
-    radii[off] = 0.0
-    return ParameterTable(
-        structure, charges, radii, off, uncharged, source, hf_runs=unknown.hf_runs
-    )
+    charges[off | removed] = 0.0
+    radii[removed] = 0.0
+    return ParameterTable(structure, charges, radii, off, removed, source, hf_runs=unknown.hf_runs)

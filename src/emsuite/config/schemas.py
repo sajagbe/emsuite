@@ -65,64 +65,26 @@ def validate_tuning_params(params: dict[str, Any]) -> dict[str, Any]:
     return params
 
 
-_POTENTIAL_METHODS = frozenset({"apbs"})
-_FUTURE_POTENTIAL_METHODS = frozenset({"esp", "mep"})
-_POTENTIAL_QUANTITIES = frozenset({"potential", "charge"})
 _REMOVED_BOND_SCAN_KEYS = ("bond_scan_atoms", "bond_scan_steps", "bond_scan_span")
 
 
-def validate_potential_params(params: dict[str, Any]) -> dict[str, Any]:
-    ligand = params.get("ligand") or params.get("molecule")
-    if not ligand:
-        raise ConfigValidationError(
-            "potential input missing required parameter: molecule or ligand"
-        )
-    params["molecule"] = ligand
-    params["ligand"] = ligand
-    method = str(params.get("method") or "apbs").lower()
-    quantity = str(params.get("quantity") or "potential").lower()
-    ligand_atoms = str(params.get("ligand_atoms") or "present").lower()
-    if method == "coulomb":
-        raise ConfigValidationError("method='coulomb' has been removed; use method='apbs'")
-    if method in _FUTURE_POTENTIAL_METHODS:
-        raise ConfigValidationError(
-            f"method={method!r} is not implemented yet (planned PySCF ESP/MEP backend)"
-        )
-    if method not in _POTENTIAL_METHODS:
-        allowed = ", ".join(sorted(_POTENTIAL_METHODS | _FUTURE_POTENTIAL_METHODS))
-        raise ConfigValidationError(f"potential method must be one of: {allowed}")
-    if quantity not in _POTENTIAL_QUANTITIES:
-        raise ConfigValidationError("potential quantity must be 'potential' or 'charge'")
-    if ligand_atoms not in {"present", "absent", "charged"}:
-        raise ConfigValidationError("ligand_atoms must be 'present', 'absent', or 'charged'")
-    if ligand_atoms == "absent" and not params.get("protein"):
-        raise ConfigValidationError("ligand_atoms='absent' requires protein=")
-    for key in _REMOVED_BOND_SCAN_KEYS:
-        if params.get(key) not in (None, "", False):
-            raise ConfigValidationError(
-                f"{key} has been removed (bond-axis scan is no longer supported)"
-            )
+_REMOVED_COUPLED_KEYS: dict[str, str] = {
+    "protein": "use pdb=",
+    "protein_format": "only PDB input is supported; use pdb=",
+    "ligand_atoms": "use off= (charge 0, radius kept) or removed= (charge 0, radius 0)",
+    "ligand_resname": "use off= or removed= with the residue name",
+    "ligand_chain": "use off= or removed= with RES:CHAIN:NUMBER",
+    "ligand_resseq": "use off= or removed= with RES:CHAIN:NUMBER",
+    "ligand_mol2": "unknown residues get RESP charges; use unknown_charge=",
+    "surface_density": "make the surface in the surface channel; give surface_file=",
+    "surface_scale": "make the surface in the surface channel; give surface_file=",
+}
 
-    protein_format = str(params.get("protein_format") or "xyz").lower()
-    if protein_format not in {"xyz", "pdb"}:
-        raise ConfigValidationError("protein_format must be 'xyz' or 'pdb'")
-    if protein_format == "pdb":
-        if not params.get("protein"):
-            raise ConfigValidationError("protein_format='pdb' requires protein=")
-        if not params.get("ligand_resname"):
-            raise ConfigValidationError("protein_format='pdb' requires ligand_resname=")
-        if ligand_atoms in {"present", "charged"} and not params.get("ligand_mol2"):
-            raise ConfigValidationError(
-                f"ligand_atoms={ligand_atoms!r} with protein_format='pdb' requires ligand_mol2="
-            )
-    elif ligand_atoms == "charged":
-        raise ConfigValidationError("ligand_atoms='charged' requires protein_format='pdb'")
-    params["protein_format"] = protein_format
 
-    params["method"] = method
-    params["quantity"] = quantity
-    params["ligand_atoms"] = ligand_atoms
-    return params
+def reject_removed_coupled_keys(params: dict[str, Any]) -> None:
+    for key, hint in _REMOVED_COUPLED_KEYS.items():
+        if key in params:
+            raise ConfigValidationError(f"{key!r} is no longer a coupled input key; {hint}")
 
 
 def validate_coupled_params(params: dict[str, Any]) -> dict[str, Any]:
@@ -134,22 +96,12 @@ def validate_coupled_params(params: dict[str, Any]) -> dict[str, Any]:
     if not params.get("properties"):
         raise ConfigValidationError("coupled input missing required parameter: properties")
     if not params.get("potential_surf"):
-        potential_keys = {
-            "molecule": ligand,
-            "ligand": ligand,
-            "protein": params.get("protein"),
-            "ligand_atoms": params.get("ligand_atoms"),
-            "method": params.get("potential_method"),
-            "quantity": params.get("potential_quantity"),
-            "protein_format": params.get("protein_format"),
-            "ligand_resname": params.get("ligand_resname"),
-            "ligand_chain": params.get("ligand_chain"),
-            "ligand_resseq": params.get("ligand_resseq"),
-            "ligand_mol2": params.get("ligand_mol2"),
-            "forcefield": params.get("forcefield"),
-            "ph": params.get("ph"),
-        }
-        validate_potential_params({k: v for k, v in potential_keys.items() if v is not None})
+        from emsuite.potential.spec import PotentialSpec
+
+        require_keys(params, ["pdb", "surface_file"], "coupled")
+        spec = PotentialSpec(**potential_spec_kwargs(params))
+        for name in ("forcefield", "off", "removed", "unknown_charge", "unknown_spin"):
+            params[name] = getattr(spec, name)
     properties = params.get("properties")
     if properties:
         validate_tuning_params(
@@ -160,3 +112,32 @@ def validate_coupled_params(params: dict[str, Any]) -> dict[str, Any]:
             }
         )
     return params
+
+
+_SHARED_POTENTIAL_KEYS = (
+    "pdb",
+    "surface_file",
+    "output_surf",
+    "forcefield",
+    "add_hydrogens",
+    "ph",
+    "unknown_charge",
+    "unknown_spin",
+    "unknown_method",
+    "unknown_basis",
+    "resp_copies",
+    "off",
+    "removed",
+    "pdie",
+    "sdie",
+    "grid_spacing",
+)
+
+
+def potential_spec_kwargs(params: dict[str, Any]) -> dict[str, Any]:
+    """Coupled-input fields mapped onto the potential channel's input."""
+    kwargs = {key: params[key] for key in _SHARED_POTENTIAL_KEYS if params.get(key) is not None}
+    for coupled_key, key in (("potential_method", "method"), ("potential_quantity", "quantity")):
+        if params.get(coupled_key) is not None:
+            kwargs[key] = params[coupled_key]
+    return kwargs

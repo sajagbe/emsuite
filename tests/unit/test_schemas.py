@@ -3,7 +3,7 @@
 import pytest
 
 from emsuite.config import ConfigValidationError, validate_surface_params, validate_tuning_params
-from emsuite.config.schemas import validate_coupled_params, validate_potential_params
+from emsuite.config.schemas import validate_coupled_params
 
 
 def test_validate_surface_params_requires_input():
@@ -19,8 +19,8 @@ def test_validate_tuning_params_accepts_molecule_alias():
 
 
 def test_validate_coupled_params_skips_potential_validation_with_potential_surf():
-    # No protein/ligand_atoms/method/quantity given — would fail validate_potential_params
-    # if it ran, since potential_surf means potential is never actually computed.
+    # No pdb/surface_file given: fine, because potential_surf means the potential
+    # is never computed.
     params = validate_coupled_params(
         {
             "molecule": "m.xyz",
@@ -31,35 +31,21 @@ def test_validate_coupled_params_skips_potential_validation_with_potential_surf(
     assert params["potential_surf"] == "precomputed.surf"
 
 
-def test_validate_coupled_params_still_validates_potential_without_potential_surf():
-    with pytest.raises(ConfigValidationError, match="requires protein"):
+def test_validate_coupled_params_requires_pdb_and_surface_without_potential_surf():
+    with pytest.raises(ConfigValidationError, match="pdb"):
+        validate_coupled_params({"molecule": "m.xyz", "properties": ["homo"]})
+    with pytest.raises(ConfigValidationError, match="surface_file"):
+        validate_coupled_params({"molecule": "m.xyz", "properties": ["homo"], "pdb": "c.pdb"})
+
+
+def test_validate_coupled_params_checks_potential_settings():
+    with pytest.raises(ConfigValidationError, match="quantity"):
         validate_coupled_params(
             {
                 "molecule": "m.xyz",
                 "properties": ["homo"],
-                "ligand_atoms": "absent",
+                "pdb": "c.pdb",
+                "surface_file": "m.surf",
+                "potential_quantity": "field",
             }
         )
-
-
-def test_ligand_atoms_charged_requires_pdb_protein_format():
-    # 'charged' only means anything on the pdb2pqr path — without it, this used to
-    # pass validation and fail later with a confusing generic ValueError from
-    # assemble_pqr instead of a clear ConfigValidationError here.
-    with pytest.raises(ConfigValidationError, match="protein_format='pdb'"):
-        validate_potential_params({"molecule": "m.xyz", "ligand_atoms": "charged"})
-
-
-def test_ligand_atoms_charged_accepted_with_pdb_protein_format():
-    params = validate_potential_params(
-        {
-            "molecule": "m.xyz",
-            "protein": "complex.pdb",
-            "protein_format": "pdb",
-            "ligand_atoms": "charged",
-            "ligand_resname": "LIG",
-            "ligand_mol2": "lig.mol2",
-        }
-    )
-    assert params["ligand_atoms"] == "charged"
-    assert params["protein_format"] == "pdb"

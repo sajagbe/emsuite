@@ -85,7 +85,7 @@ ligand.xyz + protein.pdb  ──►  emsuite -c coupled.in
 **C. Potential only (inspect φ or charges before tuning)**
 
 ```text
-molecule.xyz  ──►  emsuite -p potential.in  ──►  potential.surf (+ .csv)
+complex.pdb + ligand.surf  ──►  emsuite -p potential.in  ──►  potential.surf (+ .mol2, .csv, .pqr)
 ```
 
 ---
@@ -195,13 +195,10 @@ Gauss-law surface charges feeding tuning.
 **`coupled.in`**
 
 ```python
-molecule = 'ligand.xyz'        # ligand geometry; VDW surface is built on this
-
-protein = 'complex.pdb'
-protein_format = 'pdb'
-ligand_resname = 'LIG'
-ligand_atoms = 'present'       # 'present' | 'absent' | 'charged'
-ligand_mol2 = 'ligand.mol2'    # required for present/charged with PDB protein
+molecule = 'ligand.xyz'        # the molecule the tuning step computes
+pdb = 'complex.pdb'            # whole system, protonated, same frame as the .surf
+surface_file = 'ligand.surf'   # from: emsuite -s surface.in
+off = ['LIG']                  # the tuned molecule: charge 0, radius kept
 
 output_surf = 'coupled.surf'
 potential_method = 'apbs'
@@ -236,19 +233,24 @@ potential_surf = 'precomputed.surf'   # skips potential channel entirely
 
 ### Tutorial 4 — Potential map only
 
+Three files go in: the input, a PDB of the whole system and a `.surf` of points.
+The PDB must be protonated correctly and be in the same frame as the `.surf`.
+
 **`potential.in`**
 
 ```python
-molecule = 'ligand.xyz'
-surface_file = None            # auto-generate ligand VDW if omitted
+pdb = 'complex.pdb'
+surface_file = 'ligand.surf'
 output_surf = 'potential.surf'
-method = 'apbs'
 quantity = 'potential'         # 'potential' = interpolated φ; 'charge' = Gauss-law q
 
-# Ligand alone: HF/6-31G* RESP charges; radii from the vdw-surfgen table.
-# Optional protein field (XYZ Gasteiger or PDB via pdb2pqr):
-# protein = 'protein.xyz'
-# ligand_atoms = 'absent'
+# Residues Amber knows (protein, DNA, RNA, lipids, sugars, water, ions) get Amber
+# charges and radii. Any other residue is "unknown": state its total charge and it
+# gets RESP charges from a quantum calculation and vdw-surfgen element radii.
+unknown_charge = {'LIG': 0}
+
+# off     = ['LIG']            # charge 0, radius kept: the solvent stays out
+# removed = ['HOH']            # charge 0 and radius 0: the solvent fills the place
 
 pdie = 2.0
 sdie = 78.54
@@ -312,28 +314,34 @@ Interrupted runs resume from `logs_*/.resume_metadata.json` when parameters matc
 
 | Key | Default | Description |
 |-----|---------|-------------|
-| `molecule` | *(required)* | Ligand / molecule XYZ (`ligand` alias) |
-| `protein` | `None` | Protein XYZ or PDB for the external field |
-| `protein_format` | `'xyz'` | `'xyz'` (Gasteiger) or `'pdb'` (pdb2pqr) |
-| `ligand_atoms` | `'present'` | `'present'`, `'absent'`, or `'charged'` (PDB only) |
-| `ligand_resname` | `None` | HETATM residue name (PDB) |
-| `ligand_mol2` | `None` | Ligand MOL2 for pdb2pqr occupancy |
-| `forcefield` | `'AMBER'` | pdb2pqr force field |
-| `ph` | `7.0` | pdb2pqr protonation pH (`None` to disable) |
-| `surface_file` | `None` | Existing VDW surface; generated if omitted |
-| `output_surf` | `'potential.surf'` | Output heterogeneous `.surf` |
-| `surface_density` | `0.5` | VDW density when generating surface |
-| `method` | `'apbs'` | APBS Poisson–Boltzmann |
+| `pdb` | *(required)* | PDB of the whole system, protonated, in the frame of the `.surf` |
+| `surface_file` | *(required)* | `.surf` of points to evaluate (from `emsuite -s`) |
+| `output_surf` | `'potential.surf'` | Output heterogeneous `.surf`; also sets the names of the other outputs |
 | `quantity` | `'potential'` | `'potential'` or `'charge'` (Gauss-law) |
+| `method` | `'apbs'` | APBS Poisson–Boltzmann |
+| `forcefield` | ff14SB, OL15, OL3, lipid17, GLYCAM_06j-1, tip3p | OpenMM force-field XML files for known residues; the first listed wins when a residue fits two |
+| `add_hydrogens` | `False` | Let OpenMM add missing hydrogens on known residues at `ph` |
+| `ph` | `7.0` | pH used by `add_hydrogens` |
+| `unknown_charge` | `{}` | Total charge of each unknown residue, e.g. `{'FMN': -2}` |
+| `unknown_spin` | `{}` | Unpaired electrons of an unknown residue (0 unless stated) |
+| `unknown_method` | `'hf'` | `'hf'` or a DFT functional such as `'b3lyp'` |
+| `unknown_basis` | `'6-31g*'` | Basis set of that calculation |
+| `resp_copies` | `'each'` | `'each'`: RESP on every copy of an unknown residue; `'one'`: first copy, reused |
+| `off` | `[]` | Residues or atoms set to charge 0 with the radius kept |
+| `removed` | `[]` | Residues or atoms set to charge 0 and radius 0 |
 | `pdie`, `sdie` | `2.0`, `78.54` | APBS dielectric constants |
+| `grid_spacing` | `None` | APBS fine-grid spacing in Å; unset = 65 points per side |
 
-When `protein` is set, the APBS box spans protein **and** ligand coordinates so a
-pocket ligand is not clipped.
+`off` and `removed` entries are `'RES'`, `'RES:CHAIN:NUMBER'` or one atom
+`'RES:CHAIN:NUMBER@ATOM'`. A residue whose charges are all switched to zero needs no
+`unknown_charge` and no quantum calculation. Unknown keys stop the run. An unknown
+residue bonded to the rest of the structure is not supported yet.
 
 ### `coupled.in` — `emsuite -c`
 
-Accepts all **potential** keys (prefixed `potential_` where needed) plus all
-**tuning** keys. Notable defaults:
+Takes `molecule` (the XYZ the tuning step computes), all **potential** keys
+(`method` and `quantity` are written `potential_method` and `potential_quantity`)
+and all **tuning** keys. Notable defaults:
 
 | Key | Default | Description |
 |-----|---------|-------------|
@@ -390,7 +398,10 @@ results_{molecule}_{timestamp}/
 
 ```
 potential.surf          # heterogeneous x, y, z, value
+potential.mol2          # same points, value in the charge column (for viewers)
 potential.csv           # same data, tabular
+potential.pqr           # charge and radius of every atom, as given to APBS
+potential_sources.csv   # per residue: Amber template or RESP, atoms off/removed, net charge
 ```
 
 ### Surface (`emsuite -s`)

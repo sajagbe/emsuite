@@ -233,11 +233,13 @@ def resp_charges_from_atoms(
     spin: int = 0,
     basis: str = DEFAULT_BASIS,
     label: str = "molecule",
+    method: str = "hf",
 ) -> np.ndarray:
-    """Two-stage RESP charges from an HF/``basis`` calculation at the given geometry (Å).
+    """Two-stage RESP charges from a ``method``/``basis`` calculation at the given geometry (Å).
 
-    ``atoms`` is a list of (element, x, y, z). ``spin`` is 2S (0 = singlet). No
-    geometry optimization is done.
+    ``atoms`` is a list of (element, x, y, z). ``spin`` is 2S (0 = singlet).
+    ``method`` is 'hf' or a DFT functional name such as 'b3lyp'. No geometry
+    optimization is done.
     """
     if not atoms:
         raise ValueError(f"No atoms given for {label}")
@@ -249,16 +251,23 @@ def resp_charges_from_atoms(
         unit="Angstrom",
         verbose=0,
     )
-    mf = (scf.RHF(mol) if spin == 0 else scf.UHF(mol)).run()
+    if method.lower() == "hf":
+        mf = scf.RHF(mol) if spin == 0 else scf.UHF(mol)
+    else:
+        from pyscf import dft
+
+        mf = dft.RKS(mol) if spin == 0 else dft.UKS(mol)
+        mf.xc = method
+    mf = mf.run()
     if not mf.converged:
         mf = mf.newton().run()
     if not mf.converged:
-        raise RuntimeError(f"HF/{basis} SCF did not converge for {label}")
+        raise RuntimeError(f"{method.upper()}/{basis} SCF did not converge for {label}")
     dm = mf.make_rdm1()
-    if getattr(dm, "ndim", 2) == 3:  # UHF: alpha + beta
+    if getattr(dm, "ndim", 2) == 3:  # unrestricted: alpha + beta
         dm = dm[0] + dm[1]
     q = resp_two_stage(mol, dm)
-    print(f"Two-stage RESP charges (HF/{basis}) for {label}: sum = {q.sum():+.4f}")
+    print(f"Two-stage RESP charges ({method.upper()}/{basis}) for {label}: sum = {q.sum():+.4f}")
     return q
 
 

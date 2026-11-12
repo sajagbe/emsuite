@@ -18,12 +18,11 @@ def test_surface_input_file_matches_constructor(tmp_path: Path):
 
 def test_potential_input_file_matches_constructor(tmp_path: Path):
     cfg = tmp_path / "potential.in"
-    cfg.write_text("molecule = 'm.xyz'\nquantity = 'charge'\n")
-    from_file = PotentialInput.from_file(cfg)
-    from_ctor = PotentialInput(molecule="m.xyz", quantity="charge")
+    cfg.write_text("pdb = 'c.pdb'\nsurface_file = 'm.surf'\nquantity = 'charge'\n")
+    from_file = PotentialInput.from_file(cfg, check_files=False)
+    from_ctor = PotentialInput(pdb="c.pdb", surface_file="m.surf", quantity="charge")
     assert from_file == from_ctor
     assert from_file.method == "apbs"
-    assert from_ctor.ligand == "m.xyz"
 
 
 def test_tuning_input_file_matches_constructor(tmp_path: Path):
@@ -41,28 +40,51 @@ def test_surface_constructor_rejects_missing_required():
 
 
 def test_potential_constructor_normalizes_method_case():
-    inp = PotentialInput(molecule="m.xyz", method="APBS", quantity="CHARGE")
+    inp = PotentialInput(pdb="c.pdb", surface_file="m.surf", method="APBS", quantity="CHARGE")
     assert inp.method == "apbs"
     assert inp.quantity == "charge"
 
 
 def test_coupled_to_potential_and_tuning_input():
     from emsuite.inputs import CoupledInput
+    from emsuite.potential.spec import Selection
 
     coupled = CoupledInput(
         molecule="m.xyz",
         surface_file="m.surf",
+        pdb="c.pdb",
         potential_quantity="charge",
+        off=["FMN"],
+        unknown_charge={"FMN": -2},
+        grid_spacing=0.3,
         properties=("homo",),
         parallel=False,
         basis_set="sto-3g",
     )
     pot = coupled.to_potential_input()
-    assert pot.molecule == "m.xyz"
+    assert (pot.pdb, pot.surface_file, pot.output_surf) == ("c.pdb", "m.surf", "coupled.surf")
     assert pot.quantity == "charge"
     assert pot.method == "apbs"
+    assert pot.off == (Selection("FMN"),)
+    assert pot.unknown_charge == {"FMN": -2}
+    assert pot.grid_spacing == 0.3
     tune = coupled.to_tuning_input("out.surf")
     assert tune.surface_file == "out.surf"
     assert tune.properties == ("homo",)
     assert tune.parallel is False
     assert tune.basis_set == "sto-3g"
+
+
+def test_coupled_file_matches_constructor(tmp_path: Path):
+    from emsuite.inputs import CoupledInput
+
+    cfg = tmp_path / "coupled.in"
+    cfg.write_text(
+        "molecule = 'm.xyz'\nsurface_file = 'm.surf'\npdb = 'c.pdb'\noff = ['FMN']\n"
+        "properties = ['homo']\n"
+    )
+    from_file = CoupledInput.from_file(cfg)
+    from_ctor = CoupledInput(
+        molecule="m.xyz", surface_file="m.surf", pdb="c.pdb", off=["FMN"], properties=("homo",)
+    )
+    assert from_file == from_ctor

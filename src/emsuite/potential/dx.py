@@ -26,11 +26,12 @@ def parse_dx(path: str | Path) -> DxGrid:
     counts: list[int] | None = None
     origin: list[float] | None = None
     deltas: list[list[float]] = []
-    values: list[float] = []
-    reading = False
+    data = None
 
+    # Read the ASCII header without an iterator, leaving a seekable stream for
+    # NumPy's compiled numeric reader. Avoid one Python float per grid point.
     with Path(path).open(encoding="utf-8") as handle:
-        for raw in handle:
+        while raw := handle.readline():
             line = raw.strip()
             if line.startswith("object 1 class gridpositions counts"):
                 counts = [int(tok) for tok in line.split()[-3:]]
@@ -39,22 +40,20 @@ def parse_dx(path: str | Path) -> DxGrid:
             elif line.startswith("delta"):
                 deltas.append([float(tok) for tok in line.split()[1:4]])
             elif "data follows" in line:
-                reading = True
-            elif reading:
-                if not line or line.startswith("attribute") or line.startswith("object"):
-                    reading = False
-                    continue
-                for tok in line.split():
-                    values.append(float(tok))
+                if counts is None or any(n <= 0 for n in counts):
+                    raise ValueError(f"DX file missing valid grid counts: {path}")
+                data = np.fromfile(handle, dtype=float, count=int(np.prod(counts)), sep=" ")
+                break
 
     if counts is None or origin is None or len(deltas) != 3:
         raise ValueError(f"DX file missing grid metadata: {path}")
 
     nx, ny, nz = counts
     expected = nx * ny * nz
-    if len(values) < expected:
-        raise ValueError(f"DX file {path} has {len(values)} values, expected {expected}")
+    if data is None or data.size < expected:
+        found = 0 if data is None else data.size
+        raise ValueError(f"DX file {path} has {found} values, expected {expected}")
 
-    data = np.asarray(values[:expected], dtype=float).reshape(nx, ny, nz)
+    data = data.reshape(nx, ny, nz)
     spacing = (deltas[0][0], deltas[1][1], deltas[2][2])
     return DxGrid(data=data, origin=(origin[0], origin[1], origin[2]), spacing=spacing)

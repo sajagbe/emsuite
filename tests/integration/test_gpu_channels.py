@@ -98,18 +98,15 @@ def test_gpu_surface_pyscf_optimize(
 
 @pytest.mark.gpu
 @pytest.mark.slow
-def test_gpu_potential_apbs_potential(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, require_gpu: None
-) -> None:
+def test_gpu_potential_apbs_potential(pdb_complex: Path, require_gpu: None) -> None:
     """Potential channel: APBS electrostatic potential map (CPU math on GPU node)."""
-    monkeypatch.chdir(tmp_path)
-    surf_path, _ = _prepare_methane_surface(tmp_path)
+    tmp_path = pdb_complex
     result = PotentialInput(
-        molecule="methane.xyz",
-        surface_file=str(surf_path),
-        output_surf="methane_potential.surf",
-        method="apbs",
+        pdb="complex.pdb",
+        surface_file="acetate.surf",
+        output_surf="acetate_potential.surf",
         quantity="potential",
+        off=["ACT"],
     ).run()
     assert Path(result.path).is_file()
     assert np.all(np.isfinite(result.values))
@@ -124,18 +121,15 @@ def test_gpu_potential_apbs_potential(
 
 @pytest.mark.gpu
 @pytest.mark.slow
-def test_gpu_potential_apbs_gauss_charge(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, require_gpu: None
-) -> None:
+def test_gpu_potential_apbs_gauss_charge(pdb_complex: Path, require_gpu: None) -> None:
     """Potential channel: Gauss-law surface charges from APBS φ and dielectric maps."""
-    monkeypatch.chdir(tmp_path)
-    surf_path, _ = _prepare_methane_surface(tmp_path)
+    tmp_path = pdb_complex
     result = PotentialInput(
-        molecule="methane.xyz",
-        surface_file=str(surf_path),
-        output_surf="methane_charge.surf",
-        method="apbs",
+        pdb="complex.pdb",
+        surface_file="acetate.surf",
+        output_surf="acetate_charge.surf",
         quantity="charge",
+        off=["ACT"],
     ).run()
     assert Path(result.path).is_file()
     assert np.all(np.isfinite(result.values))
@@ -232,18 +226,18 @@ def test_gpu_tuning_combined_exe_osc_pinned(
 
 @pytest.mark.gpu
 @pytest.mark.slow
-def test_gpu_coupled_parallel(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, require_gpu: None
-) -> None:
+def test_gpu_coupled_parallel(pdb_complex: Path, require_gpu: None) -> None:
     """Coupled channel: APBS Gauss charges → parallel GPU tuning."""
-    monkeypatch.chdir(tmp_path)
-    surf_path, _ = _prepare_methane_surface(tmp_path)
+    tmp_path = pdb_complex
     result = CoupledInput(
-        molecule="methane.xyz",
-        surface_file=str(surf_path),
+        molecule="acetate.xyz",
+        pdb="complex.pdb",
+        surface_file="acetate.surf",
         output_surf="coupled_gpu.surf",
         potential_method="apbs",
         potential_quantity="charge",
+        off=["ACT"],
+        charge=-1,
         properties=_GPU_PROPS,
         basis_set=_GPU_BASIS,
         calc_type="separate",
@@ -255,7 +249,7 @@ def test_gpu_coupled_parallel(
     results_dir = Path(result.tuning.results_dir)
     assert results_dir.is_dir()
     for prop in _GPU_PROPS:
-        assert (results_dir / f"methane_{prop}.mol2").is_file()
+        assert (results_dir / f"acetate_{prop}.mol2").is_file()
     record_assertions(
         tmp_path,
         channel="coupled",

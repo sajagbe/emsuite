@@ -81,25 +81,48 @@ def test_unknown_residue_bonded_to_protein_stops():
         build_parameter_table(_spec(SEP, unknown_charge={"SEP": -1}), resp=FakeResp())
 
 
-def test_off_residue_gets_zero_and_no_hf():
+def test_off_residue_keeps_radius_and_needs_no_hf():
     resp = FakeResp()
-    table = build_parameter_table(_spec(MIX, off=["ACT"]), resp=resp)
+    table = build_parameter_table(_spec(MIX, off=["ACT", "ALA:A:2@N"]), resp=resp)
+    s = table.structure
+    act = np.array([name == "ACT" for name in s.res_names])
+    assert resp.labels == []
+    assert (table.charges[act] == 0).all()
+    assert {s.elements[i]: table.radii[i] for i in np.flatnonzero(act)} == pytest.approx(
+        {"C": 1.70, "O": 1.52, "H": 1.20}
+    )
+    n = next(i for i in range(s.n_atoms) if (s.res_names[i], s.atom_names[i]) == ("ALA", "N"))
+    assert table.charges[n] == 0 and table.radii[n] == pytest.approx(1.824, abs=1e-4)
+    assert table.off.sum() == 8 and table.removed.sum() == 0
+
+
+def test_removed_residue_gets_zero_radius_and_no_hf():
+    resp = FakeResp()
+    table = build_parameter_table(_spec(MIX, removed=["ACT"]), resp=resp)
     act = np.array([name == "ACT" for name in table.structure.res_names])
     assert resp.labels == []
     assert (table.charges[act] == 0).all() and (table.radii[act] == 0).all()
     assert (table.radii[~act] > 0).all()
-    assert table.off.sum() == 7
+    assert table.removed.sum() == 7 and table.off.sum() == 0
 
 
-def test_off_single_atom_and_known_residue():
+def test_removed_wins_over_off():
+    table = build_parameter_table(_spec(MIX, off=["ACT"], removed=["ACT"]), resp=FakeResp())
+    act = np.array([name == "ACT" for name in table.structure.res_names])
+    assert (table.radii[act] == 0).all() and table.off.sum() == 0
+
+
+def test_switches_on_single_atom_and_known_residue():
     table = build_parameter_table(
-        _spec(MIX, unknown_charge={"ACT": -1}, off=["ACT@O3", "ALA:A:2"]), resp=FakeResp()
+        _spec(MIX, unknown_charge={"ACT": -1}, removed=["ACT@O3"], off=["ALA:A:2"]),
+        resp=FakeResp(),
     )
     s = table.structure
-    off_names = {(s.res_names[i], s.atom_names[i]) for i in np.flatnonzero(table.off)}
-    assert ("ACT", "O3") in off_names and ("ACT", "O4") not in off_names
-    assert sum(1 for res, _ in off_names if res == "ALA") == 10
-    assert (table.charges[table.off] == 0).all() and (table.radii[table.off] == 0).all()
+    gone = {(s.res_names[i], s.atom_names[i]) for i in np.flatnonzero(table.removed)}
+    assert gone == {("ACT", "O3")}
+    assert table.off.sum() == 10
+    assert (table.charges[table.off | table.removed] == 0).all()
+    assert (table.radii[table.removed] == 0).all() and (table.radii[table.off] > 0).all()
 
 
 def test_off_entry_matching_nothing_stops():
@@ -146,28 +169,5 @@ def test_pqr_and_sources_files(tmp_path: Path):
     assert first[:6] == ["ATOM", "1", "CH3", "ACE", "A", "1"] and len(first) == 11
     assert float(first[-2]) == pytest.approx(-0.3662) and float(first[-1]) == pytest.approx(1.908)
     sources = table.write_sources(tmp_path / "sources.csv").read_text().splitlines()
-    assert sources[0] == (
-        "residue,chain,number,atoms,source,atoms_off,atoms_uncharged,net_charge_e"
-    )
+    assert sources[0] == ("residue,chain,number,atoms,source,atoms_off,atoms_removed,net_charge_e")
     assert len(sources) == 5
-
-
-def test_uncharged_keeps_radius_and_needs_no_hf():
-    resp = FakeResp()
-    table = build_parameter_table(_spec(MIX, uncharged=["ACT", "ALA:A:2@N"]), resp=resp)
-    s = table.structure
-    act = np.array([name == "ACT" for name in s.res_names])
-    assert resp.labels == []
-    assert (table.charges[act] == 0).all()
-    assert {s.elements[i]: table.radii[i] for i in np.flatnonzero(act)} == pytest.approx(
-        {"C": 1.70, "O": 1.52, "H": 1.20}
-    )
-    n = next(i for i in range(s.n_atoms) if (s.res_names[i], s.atom_names[i]) == ("ALA", "N"))
-    assert table.charges[n] == 0 and table.radii[n] == pytest.approx(1.824, abs=1e-4)
-    assert table.uncharged.sum() == 8 and table.off.sum() == 0
-
-
-def test_off_wins_over_uncharged():
-    table = build_parameter_table(_spec(MIX, off=["ACT"], uncharged=["ACT"]), resp=FakeResp())
-    act = np.array([name == "ACT" for name in table.structure.res_names])
-    assert (table.radii[act] == 0).all() and table.uncharged.sum() == 0

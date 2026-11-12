@@ -3,16 +3,16 @@
 from __future__ import annotations
 
 from collections.abc import Callable
-from dataclasses import MISSING, asdict, dataclass, fields
+from dataclasses import MISSING, asdict, dataclass, field, fields
 from pathlib import Path
 from typing import Any, Self
 
 from emsuite.config.schemas import (
     validate_coupled_params,
-    validate_potential_params,
     validate_surface_params,
     validate_tuning_params,
 )
+from emsuite.potential.spec import DEFAULT_FORCEFIELD, PotentialSpec
 from emsuite.results import CoupledResult, PotentialResult, SurfaceResult, TuningResult
 
 
@@ -98,47 +98,8 @@ class SurfaceInput:
         return SurfaceResult.from_surf(path)
 
 
-@dataclass(frozen=True)
-class PotentialInput:
-    molecule: str
-    surface_file: str | None = None
-    output_surf: str = "potential.surf"
-    surface_density: float = 0.5
-    surface_scale: float = 1.0
-    method: str = "apbs"
-    quantity: str = "potential"
-    pdie: float = 2.0
-    sdie: float = 78.54
-    charge: int = 0
-    spin: int = 0
-    ligand: str | None = None
-    protein: str | None = None
-    ligand_atoms: str = "present"
-    protein_format: str = "xyz"
-    ligand_resname: str | None = None
-    ligand_chain: str | None = None
-    ligand_resseq: int | None = None
-    ligand_mol2: str | None = None
-    forcefield: str = "AMBER"
-    ph: float | None = 7.0
-
-    def __post_init__(self) -> None:
-        _finalize(self, validate=validate_potential_params)
-
-    @classmethod
-    def from_file(cls, path: str | Path) -> Self:
-        from emsuite.potential.config_io import parse_potential_input
-
-        return cls(**_take(cls, parse_potential_input(str(path))))
-
-    def to_dict(self) -> dict[str, Any]:
-        return _to_dict(self)
-
-    def run(self) -> PotentialResult:
-        from emsuite.potential.runner import _run_potential
-
-        path = _run_potential(self)
-        return PotentialResult.from_surf(path, quantity=self.quantity)
+# The potential channel's input: one file names the PDB, the .surf and every setting.
+PotentialInput = PotentialSpec
 
 
 @dataclass(frozen=True)
@@ -182,13 +143,23 @@ class TuningInput:
 class CoupledInput:
     molecule: str
     surface_file: str | None = None
+    pdb: str | None = None
     output_surf: str = "coupled.surf"
-    surface_density: float = 0.5
-    surface_scale: float = 1.0
     potential_method: str = "apbs"
     potential_quantity: str = "charge"
     pdie: float = 2.0
     sdie: float = 78.54
+    grid_spacing: float | None = None
+    forcefield: tuple[str, ...] = DEFAULT_FORCEFIELD
+    add_hydrogens: bool = False
+    ph: float = 7.0
+    unknown_charge: dict[str, int] = field(default_factory=dict)
+    unknown_spin: dict[str, int] = field(default_factory=dict)
+    unknown_method: str = "hf"
+    unknown_basis: str = "6-31g*"
+    resp_copies: str = "each"
+    off: tuple[Any, ...] = ()
+    removed: tuple[Any, ...] = ()
     properties: tuple[str, ...] = ("homo", "lumo", "gap")
     basis_set: str = "6-31G*"
     method: str = "dft"
@@ -202,19 +173,13 @@ class CoupledInput:
     triplet: bool = False
     num_procs: int | None = None
     ligand: str | None = None
-    protein: str | None = None
-    ligand_atoms: str = "present"
     potential_surf: str | None = None
-    protein_format: str = "xyz"
-    ligand_resname: str | None = None
-    ligand_chain: str | None = None
-    ligand_resseq: int | None = None
-    ligand_mol2: str | None = None
-    forcefield: str = "AMBER"
-    ph: float | None = 7.0
 
     def __post_init__(self) -> None:
-        _finalize(self, validate=validate_coupled_params)
+        params = {**_channel_defaults(type(self)), **self.to_dict()}
+        validated = validate_coupled_params(params)
+        for name, value in _take(type(self), validated).items():
+            object.__setattr__(self, name, value)
 
     @classmethod
     def from_file(cls, path: str | Path) -> Self:
@@ -223,33 +188,16 @@ class CoupledInput:
         return cls(**_take(cls, parse_coupled_input(str(path))))
 
     def to_dict(self) -> dict[str, Any]:
-        return _to_dict(self)
+        data = {item.name: getattr(self, item.name) for item in fields(self)}
+        if isinstance(data.get("properties"), tuple):
+            data["properties"] = list(data["properties"])
+        return data
 
     def to_potential_input(self) -> PotentialInput:
-        """Map coupled fields onto a PotentialInput (skips when ``potential_surf`` is set)."""
-        return PotentialInput(
-            molecule=self.molecule,
-            surface_file=self.surface_file,
-            output_surf=self.output_surf,
-            surface_density=self.surface_density,
-            surface_scale=self.surface_scale,
-            method=self.potential_method,
-            quantity=self.potential_quantity,
-            pdie=self.pdie,
-            sdie=self.sdie,
-            charge=self.charge,
-            spin=self.spin,
-            ligand=self.ligand or self.molecule,
-            protein=self.protein,
-            ligand_atoms=self.ligand_atoms,
-            protein_format=self.protein_format,
-            ligand_resname=self.ligand_resname,
-            ligand_chain=self.ligand_chain,
-            ligand_resseq=self.ligand_resseq,
-            ligand_mol2=self.ligand_mol2,
-            forcefield=self.forcefield,
-            ph=self.ph,
-        )
+        """Map coupled fields onto a PotentialInput (skipped when ``potential_surf`` is set)."""
+        from emsuite.config.schemas import potential_spec_kwargs
+
+        return PotentialSpec(**potential_spec_kwargs(self.to_dict()))
 
     def to_tuning_input(self, surface_file: str) -> TuningInput:
         """Map coupled fields onto a TuningInput for the given surface path."""

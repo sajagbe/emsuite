@@ -1,11 +1,10 @@
-"""Gauss-law operator, DX parse, and potential config rules."""
+"""Gauss-law operator and DX parse."""
 
 from pathlib import Path
 
 import numpy as np
 import pytest
 
-from emsuite.config import ConfigValidationError, validate_potential_params
 from emsuite.potential.dx import DxGrid, parse_dx
 from emsuite.potential.gauss import (
     charges_at_points,
@@ -43,6 +42,25 @@ def test_parse_dx_roundtrip(tmp_path: Path):
     assert grid.origin == (1.0, 2.0, 3.0)
     assert grid.spacing == (0.5, 0.5, 0.5)
     assert np.allclose(grid.data, data)
+
+
+def test_parse_dx_multiline_data_and_footer(tmp_path: Path):
+    path = _write_dx(tmp_path / "g.dx", np.arange(8.0).reshape(2, 2, 2))
+    text = path.read_text().replace(
+        "0.000000 1.000000 2.000000 3.000000 4.000000 5.000000 6.000000 7.000000",
+        "0e0 1e0 2e0\n3e0 4e0 5e0\n6e0 7e0",
+    )
+    path.write_text(text + 'attribute "dep" string "positions"\nobject "field" class field\n')
+    np.testing.assert_array_equal(parse_dx(path).data.ravel(), np.arange(8.0))
+
+
+def test_parse_dx_rejects_truncated_data(tmp_path: Path):
+    path = _write_dx(tmp_path / "short.dx", np.zeros((2, 2, 2)))
+    lines = path.read_text().splitlines()
+    lines[-1] = "1 2 3"
+    path.write_text("\n".join(lines) + "\n")
+    with pytest.raises(ValueError, match="3 values, expected 8"):
+        parse_dx(path)
 
 
 def test_div_eps_grad_zero_for_linear_potential():
@@ -92,19 +110,3 @@ def test_potential_at_points_reads_grid_value():
     data[1, 1, 1] = 4.2
     pot = DxGrid(data, (0.0, 0.0, 0.0), (1.0, 1.0, 1.0))
     assert potential_at_points(pot, np.array([[1.0, 1.0, 1.0]]))[0] == pytest.approx(4.2)
-
-
-def test_coulomb_method_rejected():
-    with pytest.raises(ConfigValidationError, match="coulomb"):
-        validate_potential_params({"molecule": "m.xyz", "method": "coulomb"})
-
-
-def test_future_esp_method_rejected():
-    with pytest.raises(ConfigValidationError, match="not implemented yet"):
-        validate_potential_params({"molecule": "m.xyz", "method": "esp"})
-
-
-def test_defaults_apbs_potential():
-    params = validate_potential_params({"molecule": "m.xyz"})
-    assert params["method"] == "apbs"
-    assert params["quantity"] == "potential"

@@ -8,18 +8,20 @@ import pytest
 
 from emsuite import CoupledInput
 
-from .helpers import install_methane_surf, record_assertions, write_methane_xyz
+from .helpers import record_assertions
 
 COUPLED_IN = """\
-molecule = 'methane.xyz'
+molecule = 'acetate.xyz'
+pdb = 'complex.pdb'
+surface_file = 'acetate.surf'
 output_surf = 'coupled.surf'
-surface_density = 0.5
 potential_method = 'apbs'
+off = ['ACT']
 properties = ['homo', 'lumo']
 basis_set = 'sto-3g'
 method = 'dft'
 functional = 'b3lyp'
-charge = 0
+charge = -1
 spin = 0
 calc_type = 'separate'
 parallel = False
@@ -27,18 +29,16 @@ parallel = False
 
 
 @pytest.mark.slow
-def test_coupled_pipeline(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
-    monkeypatch.chdir(tmp_path)
-    write_methane_xyz(tmp_path)
-    install_methane_surf(tmp_path)
-    (tmp_path / "coupled.in").write_text(COUPLED_IN)
+def test_coupled_pipeline(pdb_complex: Path) -> None:
+    (pdb_complex / "coupled.in").write_text(COUPLED_IN)
     CoupledInput.from_file("coupled.in").run()
-    results = list(tmp_path.glob("results_methane_*"))
+    results = list(pdb_complex.glob("results_acetate_*"))
     assert results
-    assert not list(tmp_path.glob("coupled_*.in"))
+    assert not list(pdb_complex.glob("coupled_*.in"))
+    assert (pdb_complex / "coupled.surf").is_file() and (pdb_complex / "coupled.mol2").is_file()
 
     record_assertions(
-        tmp_path,
+        pdb_complex,
         coupled_results_dir=str(results[-1]),
         properties=["homo", "lumo"],
     )

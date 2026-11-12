@@ -127,11 +127,21 @@ def charges_at_points(
     diely: DxGrid,
     dielz: DxGrid,
     points: np.ndarray,
+    timings: dict[str, float] | None = None,
 ) -> np.ndarray:
     """Gauss-law voxel charge interpolated onto surface coordinates (units: e)."""
     if pot.shape != dielx.shape or pot.shape != diely.shape or pot.shape != dielz.shape:
         raise ValueError("Potential and dielectric grids must share the same shape")
+    from time import perf_counter
+
+    start = perf_counter()
     h = float(np.mean(pot.spacing))
     rho = charge_density_e_per_a3(pot.data, dielx.data, diely.data, dielz.data, h)
     voxel_charge = rho * (h**3)
-    return interpolate_scalar(voxel_charge, pot.origin, pot.spacing, points)
+    if timings is not None:
+        timings["gauss_charge_density_s"] = perf_counter() - start
+    start = perf_counter()
+    values = interpolate_scalar(voxel_charge, pot.origin, pot.spacing, points)
+    if timings is not None:
+        timings["surface_interpolation_s"] = perf_counter() - start
+    return values

@@ -10,6 +10,7 @@ Retest: SOPP3 wt Step_0 Selected_100.gro frame 51/100. Combined jobs 4327380–8
 
 ## Run
 ```bash
+emsuite -s surface.in   # once: writes ligand.surf
 cd singlet   # or triplet
 # from a GPU allocation with emsuite on PATH:
 emsuite -c coupled.in
