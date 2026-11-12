@@ -72,3 +72,7 @@ tests/integration_runs/LATEST/
 # Large APBS grids and third-party PDFs in probe folders (never commit)
 *.dx
 tests/probes/**/*.pdf
+
+# Machine-local agent state and optional tool installation artifacts
+.agents/*.local.json
+.agents/tools/

@@ -1,7 +1,9 @@
-# AsLOV LOV1: protein from Amber, flavin (CHR, charge -2) from HF/6-31G* RESP + vsg radii.
-pdb          = '../../../../examples/families/AsLOV/LOV1/complex.pdb'
-surface_file = '../../../../examples/families/AsLOV/LOV1/coupled.surf'
+# AsLOV LOV1: protein from Amber, flavin (CHR, charge -2) from B3LYP/3-21G RESP + vsg radii.
+pdb          = '../../../../../examples/families/AsLOV/LOV1/complex.pdb'
+surface_file = '../../../../../examples/families/AsLOV/LOV1/coupled.surf'
 output_surf  = 'lov1_flavin_resp.surf'
 quantity     = 'potential'
 unknown_charge = {'CHR': -2}
+unknown_method = 'b3lyp'
+unknown_basis  = '3-21g'
 grid_spacing = 0.3
