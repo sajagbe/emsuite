@@ -32,8 +32,8 @@ def test_coupled_reuses_potential_surf_across_calc_types(
     separate = CoupledInput(calc_type="separate", **common).run()
     combined = CoupledInput(calc_type="combined", **common).run()
 
-    assert separate.potential.path == str(surf_path)
-    assert combined.potential.path == str(surf_path)
+    assert Path(separate.potential.path).read_bytes() == surf_path.read_bytes()
+    assert Path(combined.potential.path).read_bytes() == surf_path.read_bytes()
     assert not list(tmp_path.glob("coupled_*.in"))
     # Potential recompute would have written its own coupled.surf/csv; confirm absence.
     assert not (tmp_path / "coupled.surf").exists()
@@ -41,8 +41,7 @@ def test_coupled_reuses_potential_surf_across_calc_types(
     for result in (separate, combined):
         assert result.tuning.results_dir
         assert Path(result.tuning.results_dir).is_dir()
-    # results_dir is a second-precision timestamp (tuning/output.py), not calc_type-qualified,
-    # so don't assert inequality here — just that both runs produced real results.
+    assert separate.run_dir != combined.run_dir
 
     record_assertions(
         tmp_path,

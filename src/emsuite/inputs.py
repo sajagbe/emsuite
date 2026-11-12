@@ -13,7 +13,7 @@ from emsuite.config.schemas import (
     validate_tuning_params,
 )
 from emsuite.potential.spec import DEFAULT_FORCEFIELD, PotentialSpec
-from emsuite.results import CoupledResult, PotentialResult, SurfaceResult, TuningResult
+from emsuite.results import CoupledResult, SurfaceResult, TuningResult
 
 
 def _channel_defaults(cls: type) -> dict[str, Any]:
@@ -143,6 +143,9 @@ class TuningInput:
 class CoupledInput:
     molecule: str
     surface_file: str | None = None
+    surface_density: float = 0.5
+    surface_scale: float = 1.0
+    output_dir: str | None = None
     pdb: str | None = None
     output_surf: str = "coupled.surf"
     potential_method: str = "apbs"
@@ -193,11 +196,13 @@ class CoupledInput:
             data["properties"] = list(data["properties"])
         return data
 
-    def to_potential_input(self) -> PotentialInput:
+    def to_potential_input(self, surface_file: str | None = None) -> PotentialInput:
         """Map coupled fields onto a PotentialInput (skipped when ``potential_surf`` is set)."""
         from emsuite.config.schemas import potential_spec_kwargs
 
-        return PotentialSpec(**potential_spec_kwargs(self.to_dict()))
+        params = potential_spec_kwargs(self.to_dict())
+        params["surface_file"] = surface_file or self.surface_file or "surface.surf"
+        return PotentialSpec(**params)
 
     def to_tuning_input(self, surface_file: str) -> TuningInput:
         """Map coupled fields onto a TuningInput for the given surface path."""
@@ -219,19 +224,6 @@ class CoupledInput:
         )
 
     def run(self) -> CoupledResult:
-        print("\n" + "=" * 60)
-        print("           Coupled Potential → Tuning Pipeline")
-        print("=" * 60 + "\n")
+        from emsuite.coupled.runner import run_coupled
 
-        if self.potential_surf:
-            potential = PotentialResult.from_surf(
-                self.potential_surf, quantity=self.potential_quantity
-            )
-        else:
-            potential = self.to_potential_input().run()
-        surface_file = potential.path or potential.to_surf(self.output_surf)
-        tuning = self.to_tuning_input(surface_file).run()
-
-        print("\nCoupled calculation complete.")
-        print("=" * 60 + "\n")
-        return CoupledResult(potential=potential, tuning=tuning)
+        return run_coupled(self)

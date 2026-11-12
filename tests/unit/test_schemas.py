@@ -31,11 +31,11 @@ def test_validate_coupled_params_skips_potential_validation_with_potential_surf(
     assert params["potential_surf"] == "precomputed.surf"
 
 
-def test_validate_coupled_params_requires_pdb_and_surface_without_potential_surf():
+def test_validate_coupled_params_requires_pdb_and_allows_automatic_surface():
     with pytest.raises(ConfigValidationError, match="pdb"):
         validate_coupled_params({"molecule": "m.xyz", "properties": ["homo"]})
-    with pytest.raises(ConfigValidationError, match="surface_file"):
-        validate_coupled_params({"molecule": "m.xyz", "properties": ["homo"], "pdb": "c.pdb"})
+    params = validate_coupled_params({"molecule": "m.xyz", "properties": ["homo"], "pdb": "c.pdb"})
+    assert params["surface_density"] == 0.5
 
 
 def test_validate_coupled_params_checks_potential_settings():

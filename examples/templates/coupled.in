@@ -2,7 +2,11 @@
 
 molecule = 'ligand.xyz'            # the molecule the tuning step computes
 pdb = 'complex.pdb'                # whole system, protonated, same frame as the .surf
-surface_file = 'ligand.surf'       # make it with: emsuite -s surface.in
+# Surface is generated automatically from molecule, without optimization or movement.
+surface_density = 0.5
+surface_scale = 1.0
+# surface_file = 'ligand.surf'     # reuse sampling coordinates instead of generating
+# output_dir = 'my_coupled_run'   # new directory; default creates a unique run folder
 output_surf = 'coupled.surf'
 potential_method = 'apbs'
 potential_quantity = 'charge'
@@ -12,7 +16,8 @@ potential_quantity = 'charge'
 # unknown_basis, resp_copies, off, removed, pdie, sdie, grid_spacing.
 off = ['LIG']                      # the tuned molecule: charge 0, radius kept
 
-# Reuse an already-produced potential .surf instead of recomputing the potential.
+# Reuse an already-produced CHARGE .surf instead of generating/recomputing.
+# Values must be charges in electrons, never potentials in kT/e.
 # When set, pdb and the potential keys above are not used.
 # potential_surf = 'precomputed.surf'
 

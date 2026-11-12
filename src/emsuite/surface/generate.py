@@ -1,6 +1,7 @@
 """Surface generation orchestration."""
 
 import os
+from time import perf_counter
 
 import numpy as np
 
@@ -126,6 +127,8 @@ def generate_surface(
         charges = np.zeros(len(coords))
 
     # Save surf file
+    start = perf_counter()
     save_surf(coords, charges, output_surf, heterogenous=(surface_type.lower() == "heterogenous"))
+    print(f"Surface writing (seconds): {perf_counter() - start:.6f}")
 
     return output_surf

@@ -197,7 +197,9 @@ Gauss-law surface charges feeding tuning.
 ```python
 molecule = 'ligand.xyz'        # the molecule the tuning step computes
 pdb = 'complex.pdb'            # whole system, protonated, same frame as the .surf
-surface_file = 'ligand.surf'   # from: emsuite -s surface.in
+surface_density = 0.5          # generate surface automatically; preserve XYZ geometry
+surface_scale = 1.0
+# surface_file = 'ligand.surf' # optional: reuse surface coordinates
 off = ['LIG']                  # the tuned molecule: charge 0, radius kept
 
 output_surf = 'coupled.surf'
@@ -226,7 +228,7 @@ emsuite -t tuning.in
 Reuse a precomputed potential surface in coupled mode (skip APBS on repeat runs):
 
 ```python
-potential_surf = 'precomputed.surf'   # skips potential channel entirely
+potential_surf = 'precomputed_charges.surf'  # charges in e; skips surface and APBS
 ```
 
 ---
@@ -348,8 +350,23 @@ and all **tuning** keys. Notable defaults:
 | `potential_method` | `'apbs'` | Potential backend |
 | `potential_quantity` | `'charge'` | Gauss-law charges for tuning |
 | `potential_surf` | `None` | Skip potential step; reuse this `.surf` |
+| `surface_file` | `None` | Reuse surface coordinates; otherwise generate from `molecule` |
+| `surface_density`, `surface_scale` | `0.5`, `1.0` | Automatic surface sampling settings |
+| `output_dir` | unique run folder | New directory containing inputs, surface, potential and tuning results |
 | `calc_type` | `'separate'` | Tuning mode |
 | `parallel` | `False` | Parallel tuning (set `True` on GPU) |
+
+Coupled mode runs surface → environment charges → tuning with one command. It preserves
+the molecular XYZ coordinates and never optimizes automatically. `potential_quantity`
+must be `charge`; potential-valued surfaces cannot be used as point charges. New potential
+outputs record their value type and units in the first `.surf` line. Legacy precomputed
+files without that metadata are assumed to contain charges, with a warning.
+
+Each run snapshots its inputs and saves `run.json` with file hashes, stage timings,
+output locations and completion/failure state. An explicit `output_dir` must not already
+exist. `output_surf` is relative to the run's `potential/` folder. The ligand may be present
+or absent in the PDB; the run does not insert or remove it automatically. Use `off` to
+keep a present ligand's radii while zeroing its charges, or `removed` to zero both.
 
 ---
 

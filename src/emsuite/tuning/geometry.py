@@ -6,7 +6,7 @@ import numpy as np
 from vdw_surfgen.cli import VDW_RADII
 
 
-def check_surface_frame(xyz_file, surface_coords, tolerance=1e-3):
+def check_surface_frame(xyz_file, surface_coords, tolerance=1e-3, *, strict=False):
     """Report scale consistency; warn and continue when geometry does not match.
 
     On a union of scaled VDW spheres, min_j(distance / radius_j) is the
@@ -17,6 +17,8 @@ def check_surface_frame(xyz_file, surface_coords, tolerance=1e-3):
     atoms = [line.split() for line in lines[2 : 2 + int(lines[0])]]
     points = np.asarray(surface_coords, dtype=float)
     if not atoms or points.size == 0:
+        if strict:
+            raise ValueError("Cannot check XYZ/surface alignment: no atoms or surface points")
         print(
             "WARNING: Cannot check XYZ/surface alignment: no atoms or surface points. Continuing."
         )
@@ -40,6 +42,11 @@ def check_surface_frame(xyz_file, surface_coords, tolerance=1e-3):
         )
     )
     if spread > tolerance:
+        if strict:
+            raise ValueError(
+                f"XYZ/surface geometry is inconsistent for {xyz_file}: "
+                f"scale range {minimum:.6f}–{maximum:.6f}; surface and molecule must share a coordinate frame"
+            )
         print(
             f"WARNING: XYZ/surface geometry is inconsistent for {xyz_file}: "
             f"median scale={median:.6f}, min={minimum:.6f}, max={maximum:.6f}; "

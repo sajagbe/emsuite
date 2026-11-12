@@ -1,8 +1,23 @@
 """Surface file I/O."""
 
 import os
+import re
 
 import numpy as np
+
+
+def _surface_arrays(coords, values):
+    coords = np.asarray(coords, dtype=float)
+    if coords.ndim != 2 or coords.shape[1] != 3 or not len(coords):
+        raise ValueError("surface coordinates must have nonempty shape (N, 3)")
+    values = np.asarray(values, dtype=float)
+    if values.ndim == 0:
+        values = np.full(len(coords), float(values))
+    if values.shape != (len(coords),):
+        raise ValueError("surface values must contain exactly one value per point")
+    if not np.isfinite(coords).all() or not np.isfinite(values).all():
+        raise ValueError("surface coordinates and values must be finite")
+    return coords, values
 
 
 def load_surf(path):
@@ -24,9 +39,7 @@ def load_surf(path):
     if not os.path.exists(path):
         raise FileNotFoundError(f"surf file not found: {path}")
 
-    data = np.loadtxt(path, skiprows=1)
-    if data.ndim == 1:
-        data = data.reshape(1, -1)
+    data = np.loadtxt(path, skiprows=1, ndmin=2)
 
     if data.shape[1] != 4:
         raise ValueError(
@@ -37,10 +50,18 @@ def load_surf(path):
     coords = data[:, :3]
     charges = data[:, 3]
 
-    return coords, charges
+    return _surface_arrays(coords, charges)
 
 
-def save_surf(coords, charges, output_path, heterogenous=False):
+def surface_quantity(path):
+    """Read optional value-type metadata; older four-column files have no type."""
+    with open(path) as handle:
+        header = handle.readline()
+    match = re.search(r"\bquantity=(\w+)", header)
+    return match.group(1) if match else None
+
+
+def save_surf(coords, charges, output_path, heterogenous=False, quantity=None):
     """
     Save surface coordinates and charges to a surf file.
 
@@ -53,18 +74,21 @@ def save_surf(coords, charges, output_path, heterogenous=False):
         output_path (str): Path to save the surf file
         heterogenous (bool): If True, adds a header comment instructing user
             to edit charges per-point. Defaults to False.
+        quantity (str or None): Optional charge/potential/geometry value type,
+            recorded with units in the first header line.
     """
+    coords, charges = _surface_arrays(coords, charges)
     n_points = coords.shape[0]
-
-    # Handle scalar charge (homogenous) vs array (heterogenous)
-    if np.isscalar(charges):
-        charges = np.full(n_points, charges)
+    if quantity not in (None, "charge", "potential", "geometry"):
+        raise ValueError("surface quantity must be charge, potential or geometry")
+    units = {"charge": "e", "potential": "kT/e", "geometry": "none"}
+    metadata = f"; quantity={quantity} units={units[quantity]}" if quantity else ""
 
     with open(output_path, "w") as f:
         if heterogenous:
-            f.write("# x          y          z          q (EDIT CHARGES BELOW)\n")
+            f.write(f"# x          y          z          q (EDIT CHARGES BELOW){metadata}\n")
         else:
-            f.write("x          y          z          q\n")
+            f.write(f"x          y          z          q{metadata}\n")
 
         for i in range(n_points):
             f.write(
@@ -85,6 +109,7 @@ def save_mol2(coords, values, output_path, name="SURF"):
         output_path (str): Path to save the mol2 file
         name (str): Substructure name written per atom. Defaults to "SURF".
     """
+    coords, values = _surface_arrays(coords, values)
     n_points = coords.shape[0]
 
     with open(output_path, "w") as f:

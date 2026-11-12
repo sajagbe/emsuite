@@ -120,7 +120,7 @@ def run_potential_spec(spec, resp=None) -> dict[str, str]:
         pqr_path=str(Path(paths["pqr"]).resolve()),
         grid_spacing=spec.grid_spacing,
     )
-    save_surf(coords, values, paths["surf"], heterogenous=True)
+    save_surf(coords, values, paths["surf"], heterogenous=True, quantity=spec.quantity)
     save_mol2(coords, values, paths["mol2"])
     header = "charge_e" if spec.quantity == "charge" else "potential"
     np.savetxt(

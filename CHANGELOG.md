@@ -5,6 +5,12 @@ All notable changes to this project are documented in this file.
 ## [Unreleased]
 
 ### Changed
+- Coupled mode generates the molecular surface automatically when none is supplied,
+  then runs APBS charge extraction and tuning in one run directory. Surface reuse
+  remains available. Input snapshots, stage timings and failure state are recorded
+  in `run.json`; potential-valued input is rejected for charge tuning.
+- Surface generation uses the active Python environment and isolated scratch files;
+  surface coordinates/values and sampling settings are validated before use.
 - Potential channel rebuilt around three files: the input, a PDB and a `.surf`.
   Known residues (protein, DNA, RNA, lipids, sugars, water, ions) get Amber charges
   and Rmin/2 radii through the OpenMM force-field XML files. Unknown residues get

@@ -19,6 +19,31 @@ def require_keys(params: dict[str, Any], required: list[str], channel: str) -> N
 
 def validate_surface_params(params: dict[str, Any]) -> dict[str, Any]:
     require_keys(params, ["input_type", "input_data"], "surface")
+    import math
+
+    for key, allowed in (
+        ("input_type", {"XYZ", "SMILES"}),
+        ("surface_type", {"homogenous", "heterogenous"}),
+    ):
+        if key not in params:
+            continue
+        value = str(params[key])
+        value = value.upper() if key == "input_type" else value.lower()
+        if value not in allowed:
+            raise ConfigValidationError(f"{key} must be one of {sorted(allowed)}")
+        params[key] = value
+    for key in ("surface_density", "surface_scale", "surface_charge"):
+        if key not in params:
+            continue
+        try:
+            value = float(params[key])
+        except (TypeError, ValueError) as exc:
+            raise ConfigValidationError(f"{key} must be a finite number") from exc
+        if not math.isfinite(value) or (key != "surface_charge" and value <= 0):
+            raise ConfigValidationError(
+                f"{key} must be finite" + (" and positive" if key != "surface_charge" else "")
+            )
+        params[key] = value
     return params
 
 
@@ -76,8 +101,6 @@ _REMOVED_COUPLED_KEYS: dict[str, str] = {
     "ligand_chain": "use off= or removed= with RES:CHAIN:NUMBER",
     "ligand_resseq": "use off= or removed= with RES:CHAIN:NUMBER",
     "ligand_mol2": "unknown residues get RESP charges; use unknown_charge=",
-    "surface_density": "make the surface in the surface channel; give surface_file=",
-    "surface_scale": "make the surface in the surface channel; give surface_file=",
 }
 
 
@@ -95,11 +118,37 @@ def validate_coupled_params(params: dict[str, Any]) -> dict[str, Any]:
     params["ligand"] = ligand
     if not params.get("properties"):
         raise ConfigValidationError("coupled input missing required parameter: properties")
+    quantity = str(params.get("potential_quantity", "charge")).lower()
+    if quantity != "charge":
+        raise ConfigValidationError(
+            "coupled potential_quantity must be 'charge': tuning requires charges in electrons, not potentials"
+        )
+    params["potential_quantity"] = quantity
+    if params.get("surface_file") and params.get("potential_surf"):
+        raise ConfigValidationError("give surface_file or potential_surf, not both")
+    from pathlib import Path
+
+    output = Path(params.get("output_surf", "coupled.surf"))
+    if output.is_absolute() or ".." in output.parts:
+        raise ConfigValidationError(
+            "output_surf must be a relative path inside the coupled output directory"
+        )
+    surface = validate_surface_params(
+        dict(
+            input_type="XYZ",
+            input_data=ligand,
+            surface_density=params.get("surface_density", 0.5),
+            surface_scale=params.get("surface_scale", 1.0),
+        )
+    )
+    params.update({name: surface[name] for name in ("surface_density", "surface_scale")})
     if not params.get("potential_surf"):
         from emsuite.potential.spec import PotentialSpec
 
-        require_keys(params, ["pdb", "surface_file"], "coupled")
-        spec = PotentialSpec(**potential_spec_kwargs(params))
+        require_keys(params, ["pdb"], "coupled")
+        kwargs = potential_spec_kwargs(params)
+        kwargs["surface_file"] = params.get("surface_file") or "surface.surf"
+        spec = PotentialSpec(**kwargs)
         for name in ("forcefield", "off", "removed", "unknown_charge", "unknown_spin"):
             params[name] = getattr(spec, name)
     properties = params.get("properties")

@@ -31,7 +31,13 @@ class _SurfGrid:
         output = str(path or self.path)
         if not output:
             raise ValueError("to_surf requires a path")
-        save_surf(self.coords, self.values, output, heterogenous=heterogenous)
+        save_surf(
+            self.coords,
+            self.values,
+            output,
+            heterogenous=heterogenous,
+            quantity=getattr(self, "quantity", None),
+        )
         return output
 
     def to_mol2(self, path: str | Path | None = None) -> str:
@@ -89,3 +95,6 @@ class TuningResult:
 class CoupledResult:
     potential: PotentialResult
     tuning: TuningResult
+    run_dir: str | None = None
+    surface: SurfaceResult | None = None
+    timings: dict[str, float] | None = None
