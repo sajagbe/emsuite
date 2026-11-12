@@ -227,17 +227,20 @@ def resp_two_stage(mol, dm, a1=5e-4, a2=1e-3, resp_b=0.1) -> np.ndarray:
     )
 
 
-def resp_charges_from_xyz(
-    xyz_path: str,
+def resp_charges_from_atoms(
+    atoms: list[tuple[str, float, float, float]],
     charge: int = 0,
     spin: int = 0,
     basis: str = DEFAULT_BASIS,
-) -> tuple[list[tuple[str, float, float, float]], np.ndarray]:
-    """HF/``basis`` RESP charges for an XYZ file; same return shape as
-    ``partial_charges_from_xyz``: (atoms, charges). ``spin`` is 2S (0 = singlet)."""
-    atoms = read_xyz(xyz_path)
+    label: str = "molecule",
+) -> np.ndarray:
+    """Two-stage RESP charges from an HF/``basis`` calculation at the given geometry (Å).
+
+    ``atoms`` is a list of (element, x, y, z). ``spin`` is 2S (0 = singlet). No
+    geometry optimization is done.
+    """
     if not atoms:
-        raise ValueError(f"No atoms found in {xyz_path}")
+        raise ValueError(f"No atoms given for {label}")
     mol = gto.M(
         atom=[(s, (x, y, z)) for s, x, y, z in atoms],
         basis=basis,
@@ -250,7 +253,24 @@ def resp_charges_from_xyz(
     if not mf.converged:
         mf = mf.newton().run()
     if not mf.converged:
-        raise RuntimeError(f"HF/{basis} SCF did not converge for {xyz_path}")
-    q = resp_two_stage(mol, mf.make_rdm1())
-    print(f"Two-stage RESP charges (HF/{basis}) for {xyz_path}: sum = {q.sum():+.4f}")
-    return atoms, q
+        raise RuntimeError(f"HF/{basis} SCF did not converge for {label}")
+    dm = mf.make_rdm1()
+    if getattr(dm, "ndim", 2) == 3:  # UHF: alpha + beta
+        dm = dm[0] + dm[1]
+    q = resp_two_stage(mol, dm)
+    print(f"Two-stage RESP charges (HF/{basis}) for {label}: sum = {q.sum():+.4f}")
+    return q
+
+
+def resp_charges_from_xyz(
+    xyz_path: str,
+    charge: int = 0,
+    spin: int = 0,
+    basis: str = DEFAULT_BASIS,
+) -> tuple[list[tuple[str, float, float, float]], np.ndarray]:
+    """HF/``basis`` RESP charges for an XYZ file; same return shape as
+    ``partial_charges_from_xyz``: (atoms, charges). ``spin`` is 2S (0 = singlet)."""
+    atoms = read_xyz(xyz_path)
+    if not atoms:
+        raise ValueError(f"No atoms found in {xyz_path}")
+    return atoms, resp_charges_from_atoms(atoms, charge, spin, basis, label=xyz_path)

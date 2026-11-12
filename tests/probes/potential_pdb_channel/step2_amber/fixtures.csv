@@ -1,0 +1,125 @@
+case,status,message,forcefield,residues,unmatched_residues,unmatched_names,compared_atoms,max_charge_diff_e,max_radius_diff_A,elements_agree,templates
+ALA,ok,,default,3,0,,22,0.0e+00,2.2e-16,True,ACE ALA NME
+AN,ok,,default,1,0,,32,0.0e+00,2.2e-16,True,AN
+ARG,ok,,default,3,0,,36,0.0e+00,2.2e-16,True,ACE ARG NME
+ASH,ok,,default,3,0,,25,0.0e+00,2.2e-16,True,ACE ASH NME
+ASN,ok,,default,3,0,,26,0.0e+00,2.2e-16,True,ACE ASN NME
+ASP,ok,,default,3,0,,24,0.0e+00,2.2e-16,True,ACE ASP NME
+CN,ok,,default,1,0,,30,0.0e+00,2.2e-16,True,CN
+CYM,ok,,default,3,0,,22,0.0e+00,2.2e-16,True,ACE CYM NME
+CYS,ok,,default,3,0,,23,0.0e+00,2.2e-16,True,ACE CYS NME
+DAN,ok,,default,1,0,,31,0.0e+00,2.2e-16,True,DAN
+DCN,ok,,default,1,0,,29,0.0e+00,2.2e-16,True,DCN
+DGN,ok,,default,1,0,,32,0.0e+00,2.2e-16,True,DGN
+DTN,ok,,default,1,0,,31,0.0e+00,2.2e-16,True,DTN
+GLH,ok,,default,3,0,,28,0.0e+00,2.2e-16,True,ACE GLH NME
+GLN,ok,,default,3,0,,29,0.0e+00,2.2e-16,True,ACE GLN NME
+GLU,ok,,default,3,0,,27,0.0e+00,2.2e-16,True,ACE GLU NME
+GLY,ok,,default,3,0,,19,0.0e+00,2.2e-16,True,ACE GLY NME
+GN,ok,,default,1,0,,33,0.0e+00,2.2e-16,True,GN
+HID,ok,,default,3,0,,29,0.0e+00,2.2e-16,True,ACE HID NME
+HIE,ok,,default,3,0,,29,0.0e+00,2.2e-16,True,ACE HIE NME
+HIP,ok,,default,3,0,,30,0.0e+00,2.2e-16,True,ACE HIP NME
+ILE,ok,,default,3,0,,31,0.0e+00,2.2e-16,True,ACE ILE NME
+LEU,ok,,default,3,0,,31,0.0e+00,2.2e-16,True,ACE LEU NME
+LYN,ok,,default,3,0,,33,0.0e+00,2.2e-16,True,ACE LYN NME
+LYS,ok,,default,3,0,,34,0.0e+00,2.2e-16,True,ACE LYS NME
+MET,ok,,default,3,0,,29,0.0e+00,2.2e-16,True,ACE MET NME
+PHE,ok,,default,3,0,,32,0.0e+00,2.2e-16,True,ACE NME PHE
+PRO,ok,,default,3,0,,26,0.0e+00,2.2e-16,True,ACE NME PRO
+SER,ok,,default,3,0,,23,0.0e+00,2.2e-16,True,ACE NME SER
+THR,ok,,default,3,0,,26,0.0e+00,2.2e-16,True,ACE NME THR
+TRP,ok,,default,3,0,,36,0.0e+00,2.2e-16,True,ACE NME TRP
+TYR,ok,,default,3,0,,33,0.0e+00,2.2e-16,True,ACE NME TYR
+UN,ok,,default,1,0,,29,0.0e+00,2.2e-16,True,UN
+VAL,ok,,default,3,0,,28,0.0e+00,2.2e-16,True,ACE NME VAL
+2hydroxypyridine,ok,,default,1,1,LIG,0,nan,nan,True,
+2pyridone,ok,,default,1,1,LIG,0,nan,nan,True,
+AAA_zwitterion,ok,,default,3,0,,33,0.0e+00,2.2e-16,True,ALA CALA NALA
+ACE_ALA_Cminus,ok,,default,2,0,,17,0.0e+00,2.2e-16,True,ACE CALA
+ADP_3minus,ok,,default,1,1,LIG,0,nan,nan,True,
+ALA_Nplus_NME,ok,,default,2,0,,18,0.0e+00,2.2e-16,True,NALA NME
+ALA_acetate_mixture,ok,,default,2,2,ACT ALA,0,nan,nan,True,
+ALA_two_acetates,ok,,default,3,3,ACT ALA,0,nan,nan,True,
+ALA_zwitterion,ok,,default,1,1,ALA,0,nan,nan,True,
+ASN_NAG_glycopeptide,ok,,default,1,1,LIG,0,nan,nan,True,
+ATP_4minus,ok,,default,1,1,LIG,0,nan,nan,True,
+CYS_hydroxyethyl_adduct,ok,,default,4,1,LIG,0,nan,nan,True,ACE CYM NME
+CYX_disulfide,ok,,default,6,0,,44,0.0e+00,2.2e-16,True,ACE CYX NME
+DMSO,ok,,default,1,1,LIG,0,nan,nan,True,
+DNA_ACGT,ok,,default,4,0,,126,0.0e+00,2.2e-16,True,DA5 DC DG DT3
+FAD_oxidized,ok,,default,1,1,LIG,0,nan,nan,True,
+FMNH2_reduced,ok,,default,1,1,LIG,0,nan,nan,True,
+FMN_oxidized,ok,,default,1,1,LIG,0,nan,nan,True,
+GLC_alpha,ok,,default,1,1,LIG,0,nan,nan,True,
+GLC_beta,ok,,default,1,1,LIG,0,nan,nan,True,
+HATP_3minus,ok,,default,1,1,LIG,0,nan,nan,True,
+HYP_capped,ok,,default,3,0,,27,3.6e-01,2.2e-16,True,ACE HYP NME
+NADH_reduced,ok,,default,1,1,LIG,0,nan,nan,True,
+NAD_oxidized,ok,,default,1,1,LIG,0,nan,nan,True,
+NAG_beta,ok,,default,1,1,LIG,0,nan,nan,True,
+PC_methylcap,ok,,default,1,1,LIG,0,nan,nan,True,
+PE_methylcap,ok,,default,1,1,LIG,0,nan,nan,True,
+PG_methylcap,ok,,default,1,1,LIG,0,nan,nan,True,
+POPC,ok,,lipid21,1,0,,134,0.0e+00,2.2e-16,True,POPC
+POPE,ok,,lipid21,1,0,,125,0.0e+00,2.2e-16,True,POPE
+POPG,ok,,lipid21,1,0,,127,0.0e+00,2.2e-16,True,POPG
+POPS,ok,,lipid21,1,0,,127,0.0e+00,2.2e-16,True,POPS
+PS_methylcap,ok,,default,1,1,LIG,0,nan,nan,True,
+RNA_ACGU,ok,,default,4,0,,127,0.0e+00,2.2e-16,True,A5 C G U3
+SEP_di,stopped,OpenMM could not assign Amber parameters after the unrecognized residues (SEP:A:2) were set aside: No template found for residue 0 (ACE).  The atoms and bonds i,,,,,,,
+SEP_mono,stopped,OpenMM could not assign Amber parameters after the unrecognized residues (SEP:A:2) were set aside: No template found for residue 0 (ACE).  The atoms and bonds i,,,,,,,
+TEMPO_radical,ok,,default,1,1,TMP,0,nan,nan,True,
+TPO_di,stopped,OpenMM could not assign Amber parameters after the unrecognized residues (TPO:A:2) were set aside: No template found for residue 0 (ACE).  The atoms and bonds i,,,,,,,
+acetamide,ok,,default,1,1,LIG,0,nan,nan,True,
+acetate,ok,,default,1,1,LIG,0,nan,nan,True,
+acetic_acid,ok,,default,1,1,LIG,0,nan,nan,True,
+acetone,ok,,default,1,1,LIG,0,nan,nan,True,
+benzene,ok,,default,1,1,LIG,0,nan,nan,True,
+calcium,ok,,default,1,0,,1,0.0e+00,0.0e+00,True,CA
+capped_ALA_acetate_mixture,ok,,default,4,1,ACT,22,0.0e+00,2.2e-16,True,ACE ALA NME
+chloride,ok,,default,1,0,,1,0.0e+00,0.0e+00,True,CL
+dAMP_2minus,ok,,default,1,1,LIG,0,nan,nan,True,
+dCMP_2minus,ok,,default,1,1,LIG,0,nan,nan,True,
+dGMP_2minus,ok,,default,1,1,LIG,0,nan,nan,True,
+dTMP_2minus,ok,,default,1,1,LIG,0,nan,nan,True,
+dimethyl_ether,ok,,default,1,1,LIG,0,nan,nan,True,
+dimethyl_sulfide,ok,,default,1,1,LIG,0,nan,nan,True,
+dimethyl_sulfone,ok,,default,1,1,LIG,0,nan,nan,True,
+dimethylphosphate_1minus,ok,,default,1,1,LIG,0,nan,nan,True,
+ethanol,ok,,default,1,1,LIG,0,nan,nan,True,
+glycopeptide_water,ok,,default,5,0,,56,0.0e+00,2.2e-16,True,0YB ACE HOH NLN NME
+guanidinium,ok,,default,1,1,LIG,0,nan,nan,True,
+hexaaqua_ironII_spin0,ok,,default,1,1,MCO,0,nan,nan,True,
+hexaaqua_ironII_spin4,ok,,default,1,1,MCO,0,nan,nan,True,
+hexaaqua_zinc,ok,,default,1,1,MCO,0,nan,nan,True,
+magnesium,ok,,default,1,0,,1,0.0e+00,0.0e+00,True,MG
+maltose_alpha14,ok,,default,1,1,LIG,0,nan,nan,True,
+methanethiol,ok,,default,1,1,LIG,0,nan,nan,True,
+methyl_Br,ok,,default,1,1,LIG,0,nan,nan,True,
+methyl_Cl,ok,,default,1,1,LIG,0,nan,nan,True,
+methyl_F,ok,,default,1,1,LIG,0,nan,nan,True,
+methyl_acetate,ok,,default,1,1,LIG,0,nan,nan,True,
+methyl_butyrate,ok,,default,1,1,LIG,0,nan,nan,True,
+methylamine,ok,,default,1,1,LIG,0,nan,nan,True,
+methylammonium,ok,,default,1,1,LIG,0,nan,nan,True,
+methylphosphate_2minus,ok,,default,1,1,LIG,0,nan,nan,True,
+methylthiolate,ok,,default,1,1,LIG,0,nan,nan,True,
+peptide_POPC,ok,,default,4,0,,167,2.6e-01,3.4e-02,True,ALA CALA NALA POPC
+phenyl_Br,ok,,default,1,1,LIG,0,nan,nan,True,
+phenyl_Cl,ok,,default,1,1,LIG,0,nan,nan,True,
+phenyl_F,ok,,default,1,1,LIG,0,nan,nan,True,
+potassium,ok,,default,1,0,,1,0.0e+00,0.0e+00,True,K
+pyridine,ok,,default,1,1,LIG,0,nan,nan,True,
+pyridinium,ok,,default,1,1,LIG,0,nan,nan,True,
+rAMP_1minus,ok,,default,1,1,LIG,0,nan,nan,True,
+rAMP_2minus,ok,,default,1,1,LIG,0,nan,nan,True,
+rCMP_2minus,ok,,default,1,1,LIG,0,nan,nan,True,
+rGMP_2minus,ok,,default,1,1,LIG,0,nan,nan,True,
+rUMP_2minus,ok,,default,1,1,LIG,0,nan,nan,True,
+retinal_LYS_adduct,stopped,"OpenMM could not assign Amber parameters after the unrecognized residues (LIG:A:2, LIG:A:4) were set aside: No template found for residue 0 (LIG).  The atoms an",,,,,,,
+retinal_PSB,ok,,default,1,1,LIG,0,nan,nan,True,
+retinal_SB,ok,,default,1,1,LIG,0,nan,nan,True,
+sodium,ok,,default,1,0,,1,0.0e+00,0.0e+00,True,NA
+water,ok,,default,1,0,,3,0.0e+00,2.2e-16,True,HOH
+zinc,ok,,default,1,0,,1,0.0e+00,2.2e-16,True,ZN

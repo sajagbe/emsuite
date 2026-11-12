@@ -1,0 +1,5 @@
+pdb = 'complex.pdb'
+surface_file = 'coupled.surf'
+output_surf = 'new.surf'
+quantity = 'potential'
+off = ['CHR']

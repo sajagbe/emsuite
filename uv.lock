@@ -411,6 +411,7 @@ dependencies = [
     { name = "geometric" },
     { name = "numpy", version = "2.3.2", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.14'" },
     { name = "numpy", version = "2.5.3", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.14'" },
+    { name = "openmm" },
     { name = "pdb2pqr" },
     { name = "pint", version = "0.25.3", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.12'" },
     { name = "pint", version = "0.26.1", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.12'" },
@@ -442,6 +443,7 @@ requires-dist = [
     { name = "gpu4pyscf-cuda12x", marker = "extra == 'gpu'", specifier = "==1.9.1" },
     { name = "gpu4pyscf-libxc-cuda12x", marker = "extra == 'gpu'", specifier = "==0.9.0" },
     { name = "numpy" },
+    { name = "openmm", specifier = ">=8.1" },
     { name = "pdb2pqr", specifier = ">=3.7.1" },
     { name = "pint", specifier = ">=0.25.3" },
     { name = "pre-commit", marker = "extra == 'dev'", specifier = ">=4.0" },
@@ -1143,6 +1145,33 @@ wheels = [
     { url = "https://files.pythonhosted.org/packages/46/0c/c75bbfb967457a0b7670b8ad267bfc4fffdf341c074e0a80db06c24ccfd4/nvidia_nvjitlink_cu12-12.9.86-py3-none-manylinux2010_x86_64.manylinux_2_12_x86_64.whl", hash = "sha256:e3f1171dbdc83c5932a45f0f4c99180a70de9bd2718c1ab77d14104f6d7147f9", size = 39748338, upload-time = "2025-06-05T20:10:25.613Z" },
     { url = "https://files.pythonhosted.org/packages/97/bc/2dcba8e70cf3115b400fef54f213bcd6715a3195eba000f8330f11e40c45/nvidia_nvjitlink_cu12-12.9.86-py3-none-manylinux2014_aarch64.manylinux_2_17_aarch64.whl", hash = "sha256:994a05ef08ef4b0b299829cde613a424382aff7efb08a7172c1fa616cc3af2ca", size = 39514880, upload-time = "2025-06-05T20:10:04.89Z" },
     { url = "https://files.pythonhosted.org/packages/dd/7e/2eecb277d8a98184d881fb98a738363fd4f14577a4d2d7f8264266e82623/nvidia_nvjitlink_cu12-12.9.86-py3-none-win_amd64.whl", hash = "sha256:cc6fcec260ca843c10e34c936921a1c426b351753587fdd638e8cff7b16bb9db", size = 35584936, upload-time = "2025-06-05T20:16:08.525Z" },
+]
+
+[[package]]
+name = "openmm"
+version = "8.6.1"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "numpy", version = "2.3.2", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.14'" },
+    { name = "numpy", version = "2.5.3", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.14'" },
+]
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/a1/e5/d06bdebf0a0a094db6d9bbc9ee0f8712bc2c7f82f22f4a71c82868c73748/openmm-8.6.1-cp311-cp311-macosx_10_12_universal2.whl", hash = "sha256:71d63f310a64b40e00795047aa89081e649cfa8977019959a283147780380f25", size = 14088330, upload-time = "2026-09-24T19:11:09.454Z" },
+    { url = "https://files.pythonhosted.org/packages/5f/b2/33a6cf1e738322d3b08a055598378582e8b01e0e4bd4f02878157280f6ca/openmm-8.6.1-cp311-cp311-manylinux_2_34_aarch64.whl", hash = "sha256:cfe4b2e8fb5d43f88de03fefb86f2668102f9609fc0162d22e2e79617d949646", size = 13916764, upload-time = "2026-09-11T21:14:18.856Z" },
+    { url = "https://files.pythonhosted.org/packages/7d/f5/89672e51ea51e07217929daec66775351032b503f52355d5eda0e3231a5b/openmm-8.6.1-cp311-cp311-manylinux_2_34_x86_64.whl", hash = "sha256:e0a6ec580be31d4afba35f290c27c069aaeea9a168b0cf959a0dac0df1d9fd5d", size = 14409788, upload-time = "2026-09-11T21:14:23.395Z" },
+    { url = "https://files.pythonhosted.org/packages/60/b5/cba53196079369964d1e0f616ba4bca232c71177f133388d24c0a9fca433/openmm-8.6.1-cp311-cp311-win_amd64.whl", hash = "sha256:176a4d1c65a43ce02087e72fdb056437636689aff9f9cab6027b9516934bc87d", size = 13163945, upload-time = "2026-09-11T21:14:28.5Z" },
+    { url = "https://files.pythonhosted.org/packages/b7/e3/6186297d001c6107d1615f3f8b9b5d06a38de991cfa2fa987467a448e848/openmm-8.6.1-cp312-cp312-macosx_10_12_universal2.whl", hash = "sha256:1ab4a634ae3d0b0784dc5731ae5efb658ec92baf0e4a139c72f6510309791d22", size = 14082674, upload-time = "2026-09-11T21:15:52.676Z" },
+    { url = "https://files.pythonhosted.org/packages/b7/1a/2ba2706a2cf22bc6142a5688ddc032d908b082aba7d74727b995536587f9/openmm-8.6.1-cp312-cp312-manylinux_2_34_aarch64.whl", hash = "sha256:cbf75e64bc1350857c07c67bad71264fb270a15ed8ee7fa59ba0bd106af32589", size = 13919342, upload-time = "2026-09-11T21:14:32.75Z" },
+    { url = "https://files.pythonhosted.org/packages/01/09/23fa5df6c710336300d3b69b2b409099612a100f97faed2c13df9adb73a2/openmm-8.6.1-cp312-cp312-manylinux_2_34_x86_64.whl", hash = "sha256:c198fa3a0cb236ab2e8c6405b59ee8acc4ffb6b1a54d001e29c4afb8419e959b", size = 14413848, upload-time = "2026-09-11T21:14:37.362Z" },
+    { url = "https://files.pythonhosted.org/packages/10/67/174355f48699620920094b94791d8e7a41fff3dcd7c5f9d8fed6d4a8fd88/openmm-8.6.1-cp312-cp312-win_amd64.whl", hash = "sha256:81d2db56d6cfc9d7ade0adc0039020cb995d3606915087fab3563499981e739a", size = 13167407, upload-time = "2026-09-11T21:14:41.858Z" },
+    { url = "https://files.pythonhosted.org/packages/09/7f/21e082fd8f9c8063393c24787b3ec6a8da936d974f5bfce60bfa01387537/openmm-8.6.1-cp313-cp313-macosx_10_12_universal2.whl", hash = "sha256:91139fb502ccf27055ce8cd7de2c240d75bc0b78fb4342b86a63412aa3380e2e", size = 14084310, upload-time = "2026-09-11T21:15:57.867Z" },
+    { url = "https://files.pythonhosted.org/packages/80/ee/7a8b96d34330235c79e7eb115dbe40bf285534cd7719b7460a139f325428/openmm-8.6.1-cp313-cp313-manylinux_2_34_aarch64.whl", hash = "sha256:683a8961635826f9746174e717f11085a6f07c3cbc53024358d3849032f02565", size = 13917229, upload-time = "2026-09-11T21:14:46.475Z" },
+    { url = "https://files.pythonhosted.org/packages/6c/1f/42399dc86b826ab451f3fe0f9c062a40e8edb1e5b71b18b519a8fdb52e4c/openmm-8.6.1-cp313-cp313-manylinux_2_34_x86_64.whl", hash = "sha256:b6295b1cfe63eac11c013cda90b9988fd74a1ec863522a1480affdaed3f20d7a", size = 14412072, upload-time = "2026-09-11T21:14:51.004Z" },
+    { url = "https://files.pythonhosted.org/packages/b4/a8/9c9d9c35874e7d2a45cf923149295ce7540a4499ffb356be7c98b30a9a0f/openmm-8.6.1-cp313-cp313-win_amd64.whl", hash = "sha256:fe4d1acfb0278c9591f1f4c247b1b7d3d236b49e7a7d6d464e1c547f406d8af9", size = 13165567, upload-time = "2026-09-11T21:14:55.432Z" },
+    { url = "https://files.pythonhosted.org/packages/a4/b2/14957cf05d42053e9e84ad3ebf15433f76437ab36644a35070c4323a1147/openmm-8.6.1-cp314-cp314-macosx_10_12_universal2.whl", hash = "sha256:b32f55a3f2c3285208c3b360b7fd3dd5dbb23a6c7fc8688bc6d6e250e1a60999", size = 14118407, upload-time = "2026-09-11T21:16:02.976Z" },
+    { url = "https://files.pythonhosted.org/packages/49/56/ccc7de3c876b6cb3276b2cf10017979cc9fb5405a0e3e7afc0177e7e4b2c/openmm-8.6.1-cp314-cp314-manylinux_2_34_aarch64.whl", hash = "sha256:1bb475c7e9c371b2d786804d0e89ba2f22dce720bd374522d2d1e7ef80845fd8", size = 13921455, upload-time = "2026-09-11T21:15:00.065Z" },
+    { url = "https://files.pythonhosted.org/packages/b8/4f/19380624c65ccc5a9f0b8baf2ef006833b8852a71fbb46a5bde5408ff3f5/openmm-8.6.1-cp314-cp314-manylinux_2_34_x86_64.whl", hash = "sha256:85fa5b75a16f57b3a6d98341653071f0fce1ae7b0864d99e4b0b6daf36aa1ae2", size = 14413401, upload-time = "2026-09-11T21:15:05.157Z" },
+    { url = "https://files.pythonhosted.org/packages/c6/87/96dc1d1af72e8de758ca7fc26d8f0d0482b580c99399a02160da5626b344/openmm-8.6.1-cp314-cp314-win_amd64.whl", hash = "sha256:291e40e9977e4c02c116d91d6dae586a8668135f3dece50a682c47b129b2cc8c", size = 13166129, upload-time = "2026-09-11T21:15:09.659Z" },
 ]
 
 [[package]]

@@ -92,6 +92,14 @@ def _dx_file(work_path: Path, stem: str) -> Path:
     return matches[0]
 
 
+def dime_for_spacing(fine_length: float, spacing: float) -> int:
+    """Smallest APBS multigrid size (32 k + 1) whose fine-grid spacing is at most ``spacing`` Å."""
+    if not spacing > 0:
+        raise ValueError("grid spacing must be positive")
+    k = max(2, int(np.ceil(fine_length / spacing / 32.0)))
+    return 32 * k + 1
+
+
 def run_apbs_grids(
     xyz_path: str | None = None,
     charges: np.ndarray | None = None,
@@ -102,6 +110,7 @@ def run_apbs_grids(
     atoms: list[tuple[str, float, float, float]] | None = None,
     box_coords: np.ndarray | None = None,
     pqr_path: str | Path | None = None,
+    grid_spacing: float | None = None,
 ) -> ApbsGrids:
     """Run APBS and return potential plus dielectric grids.
 
@@ -124,6 +133,10 @@ def run_apbs_grids(
         atom_coords = np.array([[x, y, z] for _, x, y, z in atoms], dtype=float)
         extent_coords = atom_coords if box_coords is None else np.asarray(box_coords, dtype=float)
     cglen, fglen = _box_lengths(extent_coords)
+    if grid_spacing is not None:
+        n = dime_for_spacing(fglen[0], grid_spacing)
+        dime = (n, n, n)
+        print(f"APBS grid: {n} points per side, fine spacing {fglen[0] / (n - 1):.3f} Å")
 
     if workdir is None:
         tmp = tempfile.TemporaryDirectory()
