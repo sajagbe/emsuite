@@ -5,11 +5,14 @@ from time import perf_counter
 
 import numpy as np
 
+from emsuite.banner import with_banner
+
 from .io import save_surf
 from .optimize import optimize_with_pyscf, smiles_to_xyz
 from .vdw import get_vdw_surface_coordinates
 
 
+@with_banner
 def generate_surface(
     input_type,
     input_data,

@@ -12,6 +12,7 @@ from dataclasses import dataclass, field, fields
 from pathlib import Path
 from typing import Any, Self
 
+from emsuite.banner import with_banner
 from emsuite.config.parser import parse_assignments
 from emsuite.config.schemas import ConfigValidationError
 
@@ -23,6 +24,8 @@ DEFAULT_FORCEFIELD: tuple[str, ...] = (
     "amber14/GLYCAM_06j-1.xml",
     "amber14/tip3p.xml",
 )
+
+DEFAULT_GRID_SPACING = 0.125  # Angstrom; fixed by the user after LOV1 refinement.
 
 _QUANTITIES = frozenset({"potential", "charge"})
 _RESP_COPIES = frozenset({"each", "one"})
@@ -166,7 +169,7 @@ class PotentialSpec:
     removed: tuple[Selection, ...] = ()  # charge 0 and radius 0
     pdie: float = 2.0
     sdie: float = 78.54
-    grid_spacing: float | None = None
+    grid_spacing: float | None = DEFAULT_GRID_SPACING
 
     def __post_init__(self) -> None:
         def put(name: str, value: Any) -> None:
@@ -251,7 +254,7 @@ class PotentialSpec:
             spacing = _positive_float(self.grid_spacing, "grid_spacing")
             if spacing < 0.1:
                 raise ConfigValidationError(
-                    "grid_spacing below 0.1 Å needs too much memory; use 0.2 to 0.5"
+                    "grid_spacing below 0.1 Å needs too much memory; use 0.125 or coarser"
                 )
             put("grid_spacing", spacing)
 
@@ -291,6 +294,7 @@ class PotentialSpec:
     def to_dict(self) -> dict[str, Any]:
         return {item.name: getattr(self, item.name) for item in fields(self)}
 
+    @with_banner
     def run(self):
         """Run the potential channel; returns a PotentialResult for the written .surf."""
         from emsuite.results import PotentialResult

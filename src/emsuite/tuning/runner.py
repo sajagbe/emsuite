@@ -15,6 +15,7 @@ import numpy as np
 import ray
 
 from emsuite import core
+from emsuite.banner import with_banner
 from emsuite.surface import load_surf
 
 if TYPE_CHECKING:
@@ -631,23 +632,13 @@ def apply_solvation(molecules, solvent, state_of_interest, triplet, required_cal
 
 
 ##########################################################
-def startup_message():
-    print("=" * 60)
-    print("                  Electrostatic Tuning Maps")
-    print("             Built on efforts by the Gozem Lab")
-    print("   See: https://pubs.acs.org/doi/10.1021/acs.jpcb.9b00489")
-    print("=" * 60)
-    print("\n")
-
-
-##########################################################
+@with_banner
 def _run_tuning(inp: TuningInput):
     #######################################
     #           Preliminary Setup         #
     #######################################
     """Execute tuning for a validated TuningInput. Returns results_dir path."""
-    # Print startup message
-    startup_message()
+    print("\nElectrostatic Tuning Maps\n")
 
     tuning_params = inp.to_dict()
 

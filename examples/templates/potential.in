@@ -30,4 +30,5 @@ resp_copies    = 'each'            # 'each': RESP on every copy; 'one': first co
 
 pdie = 2.0
 sdie = 78.54
-# grid_spacing = 0.3               # APBS fine-grid spacing in Å; unset = 65 points per side
+grid_spacing = 0.125              # default maximum APBS fine-grid spacing in Å
+# grid_spacing = None             # legacy 65-point grid, for controlled comparisons

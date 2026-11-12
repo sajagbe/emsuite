@@ -13,6 +13,7 @@ from time import perf_counter
 
 import numpy as np
 
+from emsuite.banner import with_banner
 from emsuite.config import parse_assignments, parse_config_file
 from emsuite.config.schemas import reject_removed_coupled_keys, validate_coupled_params
 
@@ -31,6 +32,7 @@ def parse_coupled_input(input_file: str) -> dict:
     return validate_coupled_params(params)
 
 
+@with_banner
 def run_coupled(spec):
     from emsuite.geometry import Geometry
     from emsuite.inputs import SurfaceInput

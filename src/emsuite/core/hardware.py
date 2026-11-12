@@ -59,11 +59,9 @@ def print_startup_message():
     Print the startup banner message for the Electrostatic Map Suite.
 
     """
-    print("\n")
-    print("=" * 60)
-    print("                   Electrostatic Map Suite")
-    print("                    By Stephen O. Ajagbe")
-    print("=" * 60)
+    from emsuite.banner import print_startup_message as shared_startup_message
+
+    shared_startup_message()
 
 
 def print_office_quote() -> None:

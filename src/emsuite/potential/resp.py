@@ -1,17 +1,24 @@
 """RESP partial charges (HF/6-31G*) for ligand PQR files.
 
-CPU (NumPy + PySCF) port of ``gpu4pyscf.pop.esp`` (gpu4pyscf 1.4.3), which is
+NumPy/PySCF and CuPy/GPU4PySCF implementations derived from
+``gpu4pyscf.pop.esp`` (gpu4pyscf 1.4.3), which is
 Copyright 2021-2024 The PySCF Developers, Apache License 2.0; reference cited
 there: https://doi.org/10.1002/qua.26035. Validated against the GPU module in
 tests/probes/resp_cpu/ (same density: charges agree to 1e-11 e).
 
 Method: electrostatic potential sampled on Merz-Kollman shells at 1.4, 1.6, 1.8
 and 2.0 x the atomic radii, least-squares fit of atom charges with the total
-charge fixed, then a single-stage hyperbolic RESP restraint toward zero on
-heavy atoms (a = 5e-4, b = 0.1; hydrogens free).
+charge fixed, then two-stage RESP with graph equivalence and stage-2 fixed atoms.
+Automatic execution prefers one usable GPU; unavailable CUDA or GPU4PySCF falls
+back to CPU before the calculation. Numerical failures are reported, not retried
+silently on another backend.
 """
 
 from __future__ import annotations
+
+import os
+from contextlib import contextmanager
+from time import perf_counter
 
 import numpy as np
 from pyscf import gto, scf
@@ -100,7 +107,18 @@ def _normal_equations(mol, points, v_esp) -> tuple[np.ndarray, np.ndarray]:
 
 
 def _constrained_fit(
-    G, g, total, restrained, resp_a, resp_b=0.1, equal=(), fixed=None, maxit=25, tol=1e-5
+    G,
+    g,
+    total,
+    restrained,
+    resp_a,
+    resp_b=0.1,
+    equal=(),
+    fixed=None,
+    maxit=25,
+    tol=1e-5,
+    *,
+    xp=np,
 ) -> np.ndarray:
     """Minimise |V - Rq|^2 + resp_a * sum_restrained (sqrt(q^2 + b^2) - b) subject to
     sum(q) = total, q_i = q_j for (i, j) in ``equal``, and q_i = v for i, v in ``fixed``.
@@ -118,20 +136,21 @@ def _constrained_fit(
         r[i] = 1.0
         rows.append(r)
         rhs.append(float(v))
-    C = np.array(rows)
-    K0 = np.zeros((n + len(rows), n + len(rows)))
+    C = xp.asarray(np.array(rows))
+    K0 = xp.zeros((n + len(rows), n + len(rows)))
     K0[:n, :n] = G
     K0[:n, n:] = C.T
     K0[n:, :n] = C
-    b = np.concatenate([g, rhs])
+    b = xp.concatenate([g, xp.asarray(rhs)])
     mask = np.asarray(restrained, dtype=bool).copy()
     mask[list(fixed)] = False
-    q = np.linalg.lstsq(K0, b, rcond=None)[0][:n]
+    mask = xp.asarray(mask)
+    q = xp.linalg.lstsq(K0, b, rcond=None)[0][:n]
     for _ in range(maxit):
         K = K0.copy()
-        K[np.arange(n), np.arange(n)] += mask * resp_a / np.sqrt(q**2 + resp_b**2)
-        q_new = np.linalg.lstsq(K, b, rcond=None)[0][:n]
-        if np.linalg.norm(q_new - q) < tol:
+        K[xp.arange(n), xp.arange(n)] += mask * resp_a / xp.sqrt(q**2 + resp_b**2)
+        q_new = xp.linalg.lstsq(K, b, rcond=None)[0][:n]
+        if float(xp.linalg.norm(q_new - q)) < tol:
             return q_new
         q = q_new
     return q
@@ -212,19 +231,100 @@ def _pairs(groups):
     return [(g[0], j) for g in groups for j in g[1:]]
 
 
-def resp_two_stage(mol, dm, a1=5e-4, a2=1e-3, resp_b=0.1) -> np.ndarray:
+def resp_two_stage(mol, dm, a1=5e-4, a2=1e-3, resp_b=0.1, *, xp=np, timings=None):
     """Standard two-stage RESP (Bayly et al., J. Phys. Chem. 1993, 97, 10269),
     set up as Amber respgen does: stage 1 a = 0.0005, stage 2 a = 0.001, hydrogens
     unrestrained in both."""
-    G, g = _normal_equations(mol, *esp_data(mol, dm))
+    start = perf_counter()
+    if xp is np:
+        G, g = _normal_equations(mol, *esp_data(mol, dm))
+    else:
+        from gpu4pyscf.gto.int3c1e import int1e_grids
+
+        points = fitting_points(mol)
+        coords, points_gpu = xp.asarray(mol.atom_coords()), xp.asarray(points)
+        rinv = 1 / xp.linalg.norm(coords[:, None] - points_gpu[None], axis=2)
+        density = xp.asarray(dm)
+        if density.ndim == 3:
+            density = density[0] + density[1]
+        potential = xp.asarray(mol.atom_charges()) @ rinv - int1e_grids(
+            mol, points, dm=density, direct_scf_tol=1e-14
+        )
+        G, g = rinv @ rinv.T, rinv @ potential
+        xp.cuda.Stream.null.synchronize()
+    if timings is not None:
+        timings["esp_and_normal_equations_s"] = perf_counter() - start
+    start = perf_counter()
     stage1, stage2, refit = equivalence_groups(mol)
-    q1 = _constrained_fit(G, g, mol.charge, _heavy(mol), a1, resp_b, equal=_pairs(stage1))
+    q1 = _constrained_fit(G, g, mol.charge, _heavy(mol), a1, resp_b, equal=_pairs(stage1), xp=xp)
     if not refit:  # no CH3/CH2 groups: stage 1 is final
-        return q1
-    fixed = {i: q1[i] for i in range(mol.natm) if i not in set(refit)}
-    return _constrained_fit(
-        G, g, mol.charge, _heavy(mol), a2, resp_b, equal=_pairs(stage2), fixed=fixed
-    )
+        q = q1
+    else:
+        fixed = {i: float(q1[i]) for i in range(mol.natm) if i not in set(refit)}
+        q = _constrained_fit(
+            G, g, mol.charge, _heavy(mol), a2, resp_b, equal=_pairs(stage2), fixed=fixed, xp=xp
+        )
+    if xp is not np:
+        xp.cuda.Stream.null.synchronize()
+    if timings is not None:
+        timings["two_stage_fit_s"] = perf_counter() - start
+    return q
+
+
+def _gpu_backend():
+    """Probe availability only; callers must pin visibility before invoking this."""
+    from emsuite.core import _gpu
+
+    if not _gpu.CUPY_AVAILABLE:
+        return None, "CuPy is not installed"
+    try:
+        cp = _gpu.cp
+        if cp.cuda.runtime.getDeviceCount() != 1:
+            return None, "exactly one usable visible GPU is required"
+        with cp.cuda.Device(0):
+            cp.zeros(1)
+            cp.cuda.Stream.null.synchronize()
+        from gpu4pyscf import dft as gpu_dft
+        from gpu4pyscf import scf as gpu_scf
+        from gpu4pyscf.gto.int3c1e import int1e_grids  # noqa: F401
+
+        return (cp, gpu_scf, gpu_dft), None
+    except Exception as exc:
+        # This boundary probes CUDA/imports only, never SCF or fitting failures.
+        return None, f"GPU backend unavailable: {type(exc).__name__}: {exc}"
+
+
+@contextmanager
+def _backend(backend):
+    from pyscf import dft
+
+    if backend not in {"auto", "cpu", "gpu"}:
+        raise ValueError("RESP backend must be auto, cpu or gpu")
+    previous = os.environ.get("CUDA_VISIBLE_DEVICES")
+    try:
+        if backend == "cpu":
+            selected, reason = None, "CPU explicitly requested"
+        elif previous in {"", "-1"}:
+            selected, reason = None, "CUDA devices disabled by CUDA_VISIBLE_DEVICES"
+        else:
+            # Restore the complete allocation afterward for subsequent tuning workers.
+            os.environ["CUDA_VISIBLE_DEVICES"] = (previous or "0").split(",")[0].strip()
+            selected, reason = _gpu_backend()
+        if selected is None:
+            if backend == "gpu":
+                raise RuntimeError(f"GPU RESP requested but unavailable: {reason}")
+            print(f"RESP backend: CPU ({reason})")
+            yield np, scf, dft
+        else:
+            print("RESP backend: GPU (GPU4PySCF/CuPy, one visible device)")
+            cp, gpu_scf, gpu_dft = selected
+            with cp.cuda.Device(0):
+                yield cp, gpu_scf, gpu_dft
+    finally:
+        if previous is None:
+            os.environ.pop("CUDA_VISIBLE_DEVICES", None)
+        else:
+            os.environ["CUDA_VISIBLE_DEVICES"] = previous
 
 
 def resp_charges_from_atoms(
@@ -234,6 +334,8 @@ def resp_charges_from_atoms(
     basis: str = DEFAULT_BASIS,
     label: str = "molecule",
     method: str = "hf",
+    backend: str = "auto",
+    diagnostics: dict | None = None,
 ) -> np.ndarray:
     """Two-stage RESP charges from a ``method``/``basis`` calculation at the given geometry (Å).
 
@@ -251,23 +353,41 @@ def resp_charges_from_atoms(
         unit="Angstrom",
         verbose=0,
     )
-    if method.lower() == "hf":
-        mf = scf.RHF(mol) if spin == 0 else scf.UHF(mol)
-    else:
-        from pyscf import dft
-
-        mf = dft.RKS(mol) if spin == 0 else dft.UKS(mol)
-        mf.xc = method
-    mf = mf.run()
-    if not mf.converged:
-        mf = mf.newton().run()
-    if not mf.converged:
-        raise RuntimeError(f"{method.upper()}/{basis} SCF did not converge for {label}")
-    dm = mf.make_rdm1()
-    if getattr(dm, "ndim", 2) == 3:  # unrestricted: alpha + beta
-        dm = dm[0] + dm[1]
-    q = resp_two_stage(mol, dm)
+    timings = {}
+    started = perf_counter()
+    with _backend(backend) as (xp, scf_module, dft_module):
+        selected = "cpu" if xp is np else "gpu"
+        if method.lower() == "hf":
+            mf = scf_module.RHF(mol) if spin == 0 else scf_module.UHF(mol)
+        else:
+            mf = dft_module.RKS(mol) if spin == 0 else dft_module.UKS(mol)
+            mf.xc = method
+        start = perf_counter()
+        mf = mf.run()
+        if not mf.converged:
+            mf = mf.newton().run()
+        if not mf.converged:
+            raise RuntimeError(f"{method.upper()}/{basis} SCF did not converge for {label}")
+        if xp is not np:
+            xp.cuda.Stream.null.synchronize()
+        timings["scf_s"] = perf_counter() - start
+        q = resp_two_stage(mol, mf.make_rdm1(), xp=xp, timings=timings)
+        if xp is not np:
+            q = q.get()
+        energy = float(mf.e_tot)
+    timings["total_s"] = perf_counter() - started
+    if diagnostics is not None:
+        diagnostics.update(
+            backend=selected,
+            method=method,
+            basis=basis,
+            charge=charge,
+            spin=spin,
+            energy_hartree=energy,
+            timings_seconds=timings,
+        )
     print(f"Two-stage RESP charges ({method.upper()}/{basis}) for {label}: sum = {q.sum():+.4f}")
+    print("RESP timings (seconds): " + ", ".join(f"{k}={v:.6f}" for k, v in timings.items()))
     return q
 
 

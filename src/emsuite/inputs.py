@@ -7,12 +7,13 @@ from dataclasses import MISSING, asdict, dataclass, field, fields
 from pathlib import Path
 from typing import Any, Self
 
+from emsuite.banner import with_banner
 from emsuite.config.schemas import (
     validate_coupled_params,
     validate_surface_params,
     validate_tuning_params,
 )
-from emsuite.potential.spec import DEFAULT_FORCEFIELD, PotentialSpec
+from emsuite.potential.spec import DEFAULT_FORCEFIELD, DEFAULT_GRID_SPACING, PotentialSpec
 from emsuite.results import CoupledResult, SurfaceResult, TuningResult
 
 
@@ -91,6 +92,7 @@ class SurfaceInput:
     def to_dict(self) -> dict[str, Any]:
         return _to_dict(self)
 
+    @with_banner
     def run(self) -> SurfaceResult:
         from emsuite.surface.runner import _run_surface
 
@@ -132,6 +134,7 @@ class TuningInput:
     def to_dict(self) -> dict[str, Any]:
         return _to_dict(self)
 
+    @with_banner
     def run(self) -> TuningResult:
         from emsuite.tuning.runner import _run_tuning
 
@@ -152,7 +155,7 @@ class CoupledInput:
     potential_quantity: str = "charge"
     pdie: float = 2.0
     sdie: float = 78.54
-    grid_spacing: float | None = None
+    grid_spacing: float | None = DEFAULT_GRID_SPACING
     forcefield: tuple[str, ...] = DEFAULT_FORCEFIELD
     add_hydrogens: bool = False
     ph: float = 7.0
@@ -223,6 +226,7 @@ class CoupledInput:
             triplet=self.triplet,
         )
 
+    @with_banner
     def run(self) -> CoupledResult:
         from emsuite.coupled.runner import run_coupled
 

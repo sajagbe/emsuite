@@ -5,6 +5,7 @@ from __future__ import annotations
 from pathlib import Path
 from typing import TYPE_CHECKING
 
+from emsuite.banner import with_banner
 from emsuite.config import parse_assignments, parse_config_file
 from emsuite.config.schemas import validate_surface_params
 
@@ -35,6 +36,7 @@ def parse_surface_input(input_file):
     return validate_surface_params(params)
 
 
+@with_banner
 def _run_surface(inp: SurfaceInput) -> str:
     """Execute surface generation for a validated SurfaceInput. Returns .surf path."""
     print("\n" + "=" * 60)

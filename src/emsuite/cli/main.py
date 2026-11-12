@@ -7,13 +7,12 @@ import sys
 from pathlib import Path
 from typing import Any
 
-from emsuite.core import print_startup_message
+from emsuite.banner import with_banner
 from emsuite.inputs import CoupledInput, PotentialInput, SurfaceInput, TuningInput
 
 
+@with_banner
 def main(argv: list[str] | None = None) -> None:
-    print_startup_message()
-
     parser = argparse.ArgumentParser(
         prog="emsuite", description="EMSuite - Electrostatic Map Suite"
     )

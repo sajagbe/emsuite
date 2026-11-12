@@ -13,6 +13,7 @@ import argparse
 import sys
 from pathlib import Path
 
+from emsuite.banner import with_banner
 from emsuite.results import SurfaceResult
 
 
@@ -27,6 +28,7 @@ def _convert(surf_path: Path, out_path: Path | None = None) -> Path:
     return Path(dest)
 
 
+@with_banner
 def main(argv: list[str] | None = None) -> None:
     parser = argparse.ArgumentParser(
         prog="surf2mol2",

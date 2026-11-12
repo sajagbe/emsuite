@@ -1,7 +1,14 @@
 # EMSuite - Electrostatic Map Suite
 
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="assets/emsuite-logo-dark.svg">
+  <source media="(prefers-color-scheme: light)" srcset="assets/emsuite-logo-light.svg">
+  <img src="assets/emsuite-logo-light.svg" alt="EMSuite logo" width="300">
+</picture>
+
 A Python package for electrostatic tuning maps, APBS potential surfaces, and coupled
 potential→tuning workflows on molecular systems.
+
 
 
 ![Water molecule tuning example](examples/water-gpu/water-test.gif)
@@ -332,7 +339,13 @@ Interrupted runs resume from `logs_*/.resume_metadata.json` when parameters matc
 | `off` | `[]` | Residues or atoms set to charge 0 with the radius kept |
 | `removed` | `[]` | Residues or atoms set to charge 0 and radius 0 |
 | `pdie`, `sdie` | `2.0`, `78.54` | APBS dielectric constants |
-| `grid_spacing` | `None` | APBS fine-grid spacing in Å; unset = 65 points per side |
+| `grid_spacing` | `0.125` | Maximum APBS fine-grid spacing in Å; explicit `None` selects the legacy 65-point grid |
+
+Unknown-residue RESP automatically uses GPU4PySCF/CuPy on one usable GPU. If CuPy,
+CUDA or GPU4PySCF is unavailable, it logs the reason and uses CPU PySCF/NumPy.
+SCF, ESP/normal-equation and fitting times are logged separately. Numerical GPU
+failures remain errors. [Benchmark settings and measurements](tests/benchmarks/potential_backends/README.md)
+record the evidence for these defaults and the limits of the comparisons.
 
 `off` and `removed` entries are `'RES'`, `'RES:CHAIN:NUMBER'` or one atom
 `'RES:CHAIN:NUMBER@ATOM'`. A residue whose charges are all switched to zero needs no

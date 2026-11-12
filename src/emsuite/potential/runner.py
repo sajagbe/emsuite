@@ -6,6 +6,7 @@ from pathlib import Path
 
 import numpy as np
 
+from emsuite.banner import with_banner
 from emsuite.surface import load_surf, save_surf
 
 from .apbs import run_apbs_grids
@@ -76,6 +77,7 @@ def _check_surface_frame(points: np.ndarray, atoms: np.ndarray, limit: float = 8
         )
 
 
+@with_banner
 def run_potential_spec(spec, resp=None) -> dict[str, str]:
     """PDB + .surf + input settings -> one heterogeneous .surf (and .mol2) of the chosen quantity.
 

@@ -185,7 +185,11 @@ _SHARED_POTENTIAL_KEYS = (
 
 def potential_spec_kwargs(params: dict[str, Any]) -> dict[str, Any]:
     """Coupled-input fields mapped onto the potential channel's input."""
-    kwargs = {key: params[key] for key in _SHARED_POTENTIAL_KEYS if params.get(key) is not None}
+    kwargs = {
+        key: params[key]
+        for key in _SHARED_POTENTIAL_KEYS
+        if params.get(key) is not None or (key == "grid_spacing" and key in params)
+    }
     for coupled_key, key in (("potential_method", "method"), ("potential_quantity", "quantity")):
         if params.get(coupled_key) is not None:
             kwargs[key] = params[coupled_key]

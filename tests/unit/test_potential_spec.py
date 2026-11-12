@@ -183,7 +183,11 @@ def test_removed_and_grid_spacing():
     assert spec.removed == (Selection("FMN"),)
     assert spec.is_removed("FMN", "A", 1, "P") and not spec.is_off("FMN", "A", 1, "P")
     assert spec.grid_spacing == 0.3
-    assert PotentialSpec(pdb="complex.pdb", surface_file="ligand.surf").grid_spacing is None
+    assert PotentialSpec(pdb="complex.pdb", surface_file="ligand.surf").grid_spacing == 0.125
+    assert (
+        PotentialSpec(pdb="complex.pdb", surface_file="ligand.surf", grid_spacing=None).grid_spacing
+        is None
+    )
     with pytest.raises(ConfigValidationError, match="removed entry"):
         PotentialSpec(pdb="complex.pdb", surface_file="ligand.surf", removed=["FMN@"])
     with pytest.raises(ConfigValidationError, match="grid_spacing"):

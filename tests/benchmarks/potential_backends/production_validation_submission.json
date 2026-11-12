@@ -1,0 +1,23 @@
+{
+  "job_id": 4961029,
+  "status": "completed",
+  "git_base": "658f517fac8343b491935b4b1bc2ae6b10cd825e",
+  "working_tree_changes": true,
+  "source_sha256": {
+    "src/emsuite/potential/resp.py": "f2fb84334911885605879a26250dd0c9268f283f297330d3ff129cf299f80a42",
+    "src/emsuite/potential/spec.py": "ebd90ea6ef7ca158f66c39bc2d4038254510033c58b5d0d5f7d1a3a4793db8f0",
+    "src/emsuite/inputs.py": "5b1c78900dcbd190a730c04480113dc99240578a54cdb9debcbd30b4bbe7c97f",
+    "src/emsuite/config/schemas.py": "e3edab27ab04418212a81242f45b001ca92dbcf7378f2cb18fddb9c80516d77a",
+    "tests/benchmarks/potential_backends/validate_gpu.py": "94993e42ef25f0ab2437795f530c1d6f1c8cd76bfbeb27b54338583cac9bdf59"
+  },
+  "resources": {
+    "partition": "qGPU24",
+    "gpus": 1,
+    "cpus": 4,
+    "memory": "32G",
+    "time_limit": "00:20:00"
+  },
+  "output": "runs/job-4961029",
+  "automatic_gpu_required": true,
+  "all_cases_passed": true
+}

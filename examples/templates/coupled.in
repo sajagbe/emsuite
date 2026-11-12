@@ -10,6 +10,7 @@ surface_scale = 1.0
 output_surf = 'coupled.surf'
 potential_method = 'apbs'
 potential_quantity = 'charge'
+grid_spacing = 0.125              # default maximum APBS fine-grid spacing in Å
 
 # The potential step takes the same keys as potential.in (see that template):
 # forcefield, add_hydrogens, ph, unknown_charge, unknown_spin, unknown_method,

@@ -5,6 +5,15 @@ All notable changes to this project are documented in this file.
 ## [Unreleased]
 
 ### Changed
+- All calculation channels share one colored ASCII logo and startup introduction per
+  job, including nested coupled stages. Plain logs retain ASCII; terminal color uses
+  only foreground RGB. README logo variants have transparent backgrounds.
+- RESP automatically uses one usable GPU for SCF, ESP integrals and two-stage
+  CuPy fitting; unavailable CuPy/CUDA/GPU4PySCF falls back to CPU before calculation.
+  Backend choice and SCF/ESP/fit timings are logged. Numerical calculation failures
+  remain errors rather than silently triggering a backend switch.
+- Default APBS spacing is 0.125 Å in potential and coupled channels, following the
+  LOV1 refinement benchmark. Explicit `grid_spacing = None` retains the legacy grid.
 - Coupled mode generates the molecular surface automatically when none is supplied,
   then runs APBS charge extraction and tuning in one run directory. Surface reuse
   remains available. Input snapshots, stage timings and failure state are recorded
